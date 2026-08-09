@@ -28,21 +28,36 @@ No painel do Supabase, vá em **SQL Editor → New query**:
 
 Se aparecer algum erro, confira se colou o arquivo inteiro (algumas instruções dependem de outras rodarem antes).
 
-## 4. Criar seu usuário de login
+## 4. Criar seus usuários de login
 
-Ainda não existe tela de "criar conta" no NexLab (por segurança — só quem já tem acesso ao painel Supabase cria novos usuários):
+O NexLab usa **login por código de 6 dígitos enviado por e-mail — sem senha** (mais simples para quem nunca usou um sistema). Não existe tela de "criar conta" (por segurança — só quem já tem acesso ao painel Supabase cria novos usuários):
 
 1. No painel Supabase, vá em **Authentication → Users → Add user → Create new user**.
-2. Preencha seu e-mail e uma senha. Marque a opção de já confirmar o e-mail automaticamente (**Auto Confirm User**), para não depender de configurar envio de e-mail agora.
+2. Preencha o e-mail da pessoa. **Não precisa de senha** — marque **Auto Confirm User** para o e-mail já entrar confirmado.
 3. Copie o **UUID** do usuário criado (aparece na lista de usuários).
 4. Volte no **SQL Editor** e rode (trocando os valores):
    ```sql
    insert into profiles (id, nome, role)
-   values ('COLE-O-UUID-AQUI', 'Seu nome', 'admin');
+   values ('COLE-O-UUID-AQUI', 'Nome da pessoa', 'admin');
    ```
-   Use `'admin'` para o primeiro usuário (dono do laboratório) — ele poderá editar preços/comissões depois. Para outros usuários do dia a dia, use `'operador'`.
+   Use `'admin'` para quem pode editar preços/comissões e fechar o financeiro (ex.: dono/gestor do laboratório). Para o uso do dia a dia (demandas, cadastros), use `'operador'`.
 
-Pronto — esse e-mail/senha já funcionam para logar no NexLab.
+Repita para cada pessoa que vai usar o sistema. Pronto — esses e-mails já conseguem pedir o código de acesso no NexLab.
+
+## 4.1 Configurar o e-mail do código de acesso (obrigatório)
+
+Por padrão, o Supabase manda um **link clicável**, não um código de 6 dígitos. Para o NexLab funcionar como projetado, ajuste o template do e-mail:
+
+1. No painel Supabase, vá em **Authentication → Email Templates → Magic Link**.
+2. No corpo do e-mail, troque a parte que usa `{{ .ConfirmationURL }}` para mostrar `{{ .Token }}` em destaque (é o código de 6 dígitos). Exemplo simples de corpo:
+   ```html
+   <h2>Seu código de acesso ao NexLab</h2>
+   <p>Use o código abaixo para entrar (válido por alguns minutos):</p>
+   <h1 style="letter-spacing: 4px;">{{ .Token }}</h1>
+   ```
+3. Salve.
+
+> ⚠️ **Limite de envio no plano Free**: o e-mail padrão do Supabase manda só **2 a 4 e-mails por hora** por projeto — dá para testar e usar com 1-2 pessoas no começo, mas fica curto se o laboratório inteiro for logar todo dia (cada login pede um código novo por e-mail). Quando isso acontecer, configure um SMTP próprio (ainda gratuito) em **Authentication → Settings → SMTP Settings** usando o [Resend](https://resend.com) (3.000 e-mails/mês grátis) — requer verificar um domínio próprio do GRS Lab. Não é urgente para começar a usar o sistema, mas vale planejar antes do uso em produção com toda a equipe.
 
 ## 5. Configurar as variáveis de ambiente
 

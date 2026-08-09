@@ -2,7 +2,6 @@ import { HashRouter, Routes, Route } from 'react-router-dom'
 import { AppShell } from '@/app/layout/AppShell'
 import { ProtectedRoute } from '@/app/layout/ProtectedRoute'
 import { LoginPage } from '@/features/auth/components/LoginPage'
-import { ForgotPasswordPage } from '@/features/auth/components/ForgotPasswordPage'
 import { DashboardPage } from '@/features/dashboard/DashboardPage'
 import { EmConstrucao } from '@/components/shared/EmConstrucao'
 
@@ -11,7 +10,6 @@ export function AppRoutes() {
     <HashRouter>
       <Routes>
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/esqueci-senha" element={<ForgotPasswordPage />} />
 
         <Route element={<ProtectedRoute />}>
           <Route element={<AppShell />}>

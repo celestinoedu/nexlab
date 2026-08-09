@@ -21,6 +21,9 @@ docs/assets/relatorios-exemplo/
 Supabase Credentials/
 *credentials*.txt
 
+# Scripts temporários de setup (podem conter a service_role key inline) — nunca versionar.
+.tmp-*
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
