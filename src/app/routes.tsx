@@ -3,7 +3,7 @@ import { AppShell } from '@/app/layout/AppShell'
 import { ProtectedRoute } from '@/app/layout/ProtectedRoute'
 import { LoginPage } from '@/features/auth/components/LoginPage'
 import { ForgotPasswordPage } from '@/features/auth/components/ForgotPasswordPage'
-import { DashboardPage } from '@/features/dashboard/DashboardPage'
+import { DemandasPage } from '@/features/demandas/DemandasPage'
 import { EmConstrucao } from '@/components/shared/EmConstrucao'
 
 export function AppRoutes() {
@@ -15,16 +15,8 @@ export function AppRoutes() {
 
         <Route element={<ProtectedRoute />}>
           <Route element={<AppShell />}>
-            <Route path="/" element={<DashboardPage />} />
-            <Route
-              path="/demandas"
-              element={
-                <EmConstrucao
-                  titulo="Demandas"
-                  descricao="O quadro Kanban e a Lista de demandas chegam na próxima etapa do projeto."
-                />
-              }
-            />
+            {/* Demandas é a tela inicial — módulo prioritário do sistema. */}
+            <Route path="/" element={<DemandasPage />} />
             <Route
               path="/clientes-parceiros"
               element={<EmConstrucao titulo="Clientes e Parceiros" />}

@@ -2,6 +2,19 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), versionamento [SemVer](https://semver.org/lang/pt-BR/).
 
+## [0.4.0] - 2026-08-09 — Módulo Demandas (Kanban + Lista) como tela inicial
+
+### Adicionado
+- Módulo completo de Demandas: criação/edição em modal único (`DemandaFormDialog`), com combobox pesquisável de Cliente/Parceiro e Serviço que auto-preenche preço/comissão a partir de `tabela_precos` (com aviso quando cai no preço padrão do catálogo ou quando falta comissão cadastrada para um parceiro).
+- Visão **Kanban** com drag-and-drop (`@dnd-kit`) entre as colunas Recebido/Em Produção/Pronto para Entrega/Entregue, atualização otimista de status, badge de prazo (verde/amarelo/vermelho) e confirmação de data ao mover para "Entregue" (`EntregaConfirmDialog`).
+- Visão **Lista** com busca (nº OS, cliente final, entidade, serviço), filtro por status (chips) e por mês, mesma barra de filtros compartilhada com o Kanban.
+- Novos componentes de UI: `dialog.tsx`, `popover.tsx`, `command.tsx`, `textarea.tsx`, e `Combobox` reutilizável (`src/components/shared/Combobox.tsx`).
+- `src/types/domain.ts`: tipos TypeScript de domínio espelhando o schema do banco.
+- Dados de exemplo inseridos no banco (6 entidades, preços/comissões, 19 demandas) para testar o módulo.
+
+### Alterado
+- **Demandas é agora a tela inicial (`/`)** do sistema, substituindo o Dashboard placeholder (que fica reservado para a Fase 4, com indicadores reais). Item "Início" removido da navegação — "Demandas" passa a ser o primeiro item, apontando para `/`.
+
 ## [0.3.0] - 2026-08-09 — Volta para login e-mail + senha
 
 ### Alterado

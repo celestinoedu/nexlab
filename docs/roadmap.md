@@ -15,17 +15,20 @@ Atualizar este arquivo ao final de cada sessão de trabalho relevante, marcando 
 - [x] CI/CD: `.github/workflows/deploy.yml` (build + deploy automático no GitHub Pages a cada push em `main`).
 - [x] `SETUP.md` com o passo a passo manual (criar projeto Supabase, rodar migration, configurar secrets do GitHub, habilitar Pages).
 
-**Pendente de ação do usuário** (fora do que uma sessão de código resolve sozinha): criar o projeto Supabase, rodar a migration, preencher os secrets do GitHub e habilitar GitHub Pages nas configurações do repositório — passo a passo em `SETUP.md`.
+**Atualização**: projeto Supabase criado, migration `0001_init.sql` e `seed.sql` rodados com sucesso em 2026-08-09. Ainda falta confirmar se os secrets do GitHub e o GitHub Pages foram habilitados (`SETUP.md` § 5-6) — necessário para o deploy automático funcionar de ponta a ponta.
 
-## Fase 2 — Módulo Demandas completo (próxima)
+## Fase 2 — Módulo Demandas completo ✅ concluída em 2026-08-09 (v0.4.0)
 
-- [ ] CRUD de demandas (`DemandaForm` único para criar/editar, ver `docs/ux-flows.md`).
-- [ ] Visão Kanban com drag-and-drop (`@dnd-kit`), atualização otimista de status.
-- [ ] Visão Lista com busca e filtros (status, mês).
-- [ ] Alertas visuais de prazo (badge verde/amarelo/vermelho).
-- [ ] Confirmação rápida de entrega + atalho para gerar Nota de Serviço.
+- [x] CRUD de demandas (`DemandaFormDialog` único para criar/editar, ver `docs/ux-flows.md`).
+- [x] Visão Kanban com drag-and-drop (`@dnd-kit`), atualização otimista de status.
+- [x] Visão Lista com busca e filtros (status, mês).
+- [x] Alertas visuais de prazo (badge verde/amarelo/vermelho) no card do Kanban.
+- [x] Confirmação rápida de entrega (`EntregaConfirmDialog`) ao mover para "Entregue".
+- [x] Demandas virou a tela inicial do sistema (`/`), substituindo o Dashboard placeholder.
+- [x] Dados de exemplo inseridos no banco (6 entidades, preços/comissões, 19 demandas) para testar o módulo ponta a ponta.
+- [ ] Atalho "gerar Nota de Serviço" ao confirmar entrega — adiado para a Fase 4 (PDF ainda não existe).
 
-## Fase 3 — Clientes/Parceiros + Tabela de Preços
+## Fase 3 — Clientes/Parceiros + Tabela de Preços (próxima)
 
 - [ ] Cadastro de Clientes e Parceiros (abas, formulário simples).
 - [ ] CRUD do Catálogo de Serviços.

@@ -1,6 +1,5 @@
 import { NavLink } from 'react-router-dom'
 import {
-  LayoutDashboard,
   ClipboardList,
   Users,
   Package,
@@ -12,8 +11,7 @@ import { cn } from '@/lib/utils'
 import { Logo } from '@/components/shared/Logo'
 
 const NAV_ITEMS = [
-  { to: '/', label: 'Início', icon: LayoutDashboard, end: true },
-  { to: '/demandas', label: 'Demandas', icon: ClipboardList },
+  { to: '/', label: 'Demandas', icon: ClipboardList, end: true },
   { to: '/clientes-parceiros', label: 'Clientes e Parceiros', icon: Users },
   { to: '/servicos', label: 'Catálogo de Serviços', icon: Package },
   { to: '/financeiro', label: 'Contas a Receber', icon: Wallet },
@@ -48,7 +46,7 @@ export function Sidebar() {
         ))}
       </nav>
       <div className="border-t border-slate-100 px-6 py-4 text-xs text-slate-400">
-        GRS Lab · NexLab v0.3.0
+        GRS Lab · NexLab v0.4.0
       </div>
     </aside>
   )
