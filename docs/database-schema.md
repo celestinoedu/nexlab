@@ -105,7 +105,7 @@ Núcleo do sistema: as ordens de serviço, base do Kanban e da Lista.
 | `valor_servico` | numeric(10,2) | snapshot do preço no momento da criação (copiado de `tabela_precos`/`preco_padrao`), editável manualmente |
 | `valor_comissao` | numeric(10,2) | preenchido só quando `entidades.tipo = 'parceiro'` |
 | `desconto` | numeric(10,2) | default 0 — existe nos relatórios reais (coluna "Desc") |
-| `mes_referencia` | date, **gerada** | `date_trunc('month', coalesce(data_entrega, data_entrada))` — fechamento sempre mês cheio (dia 1 ao último dia) |
+| `mes_referencia` | date, **gerada** | `date_trunc('month', coalesce(data_entrega, data_entrada)::timestamp)::date` — fechamento sempre mês cheio (dia 1 ao último dia). O cast para `timestamp` é obrigatório: sem ele o Postgres resolve para a variante `timestamptz` de `date_trunc` (STABLE) e rejeita a coluna gerada com o erro `42P17`. |
 | `observacoes` | text | |
 | `created_by` | uuid FK → `profiles` | |
 | `created_at`, `updated_at` | timestamptz | |

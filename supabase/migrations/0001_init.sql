@@ -134,7 +134,12 @@ create table demandas (
   valor_comissao numeric(10, 2), -- preenchido só quando entidade.tipo = 'parceiro'
   desconto numeric(10, 2) not null default 0,
   mes_referencia date generated always as (
-    date_trunc('month', coalesce(data_entrega, data_entrada))::date
+    -- cast explícito para "timestamp" (sem timezone) força o Postgres a usar a
+    -- variante IMMUTABLE de date_trunc; sem o cast, ele resolve para a variante
+    -- de "timestamptz" (STABLE, depende do timezone da sessão), que o Postgres
+    -- rejeita em coluna gerada com o erro 42P17 "generation expression is not
+    -- immutable".
+    date_trunc('month', coalesce(data_entrega, data_entrada)::timestamp)::date
   ) stored, -- fechamento sempre mês cheio (dia 1 ao último dia)
   observacoes text,
   created_by uuid references profiles (id) on delete set null,
