@@ -48,7 +48,7 @@ export function Sidebar() {
         ))}
       </nav>
       <div className="border-t border-slate-100 px-6 py-4 text-xs text-slate-400">
-        GRS Lab · NexLab v0.2.0
+        GRS Lab · NexLab v0.3.0
       </div>
     </aside>
   )

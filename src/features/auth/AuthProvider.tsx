@@ -7,11 +7,9 @@ interface AuthContextValue {
   user: User | null
   /** true enquanto ainda não sabemos se há sessão salva (evita "piscar" tela de login) */
   loading: boolean
-  /** Envia o código de 6 dígitos para o e-mail (só funciona para e-mails já cadastrados, ver SETUP.md). */
-  requestLoginCode: (email: string) => Promise<{ error: string | null }>
-  /** Confirma o código recebido por e-mail e efetiva o login. */
-  verifyLoginCode: (email: string, code: string) => Promise<{ error: string | null }>
+  signInWithPassword: (email: string, password: string) => Promise<{ error: string | null }>
   signOut: () => Promise<void>
+  requestPasswordReset: (email: string) => Promise<{ error: string | null }>
 }
 
 const AuthContext = React.createContext<AuthContextValue | undefined>(undefined)
@@ -34,23 +32,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => subscription.subscription.unsubscribe()
   }, [])
 
-  const requestLoginCode = React.useCallback(async (email: string) => {
-    // shouldCreateUser: false — não existe cadastro público, só usuários já
-    // criados no painel Supabase (ver SETUP.md) podem pedir código.
-    const { error } = await supabase.auth.signInWithOtp({
-      email,
-      options: { shouldCreateUser: false },
-    })
+  const signInWithPassword = React.useCallback(async (email: string, password: string) => {
+    const { error } = await supabase.auth.signInWithPassword({ email, password })
     if (error) {
-      return { error: traduzErroOtp(error.message) }
-    }
-    return { error: null }
-  }, [])
-
-  const verifyLoginCode = React.useCallback(async (email: string, code: string) => {
-    const { error } = await supabase.auth.verifyOtp({ email, token: code, type: 'email' })
-    if (error) {
-      return { error: traduzErroOtp(error.message) }
+      return { error: traduzErroLogin(error.message) }
     }
     return { error: null }
   }, [])
@@ -59,16 +44,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await supabase.auth.signOut()
   }, [])
 
+  const requestPasswordReset = React.useCallback(async (email: string) => {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}${window.location.pathname}#/redefinir-senha`,
+    })
+    if (error) {
+      return { error: 'Não foi possível enviar o e-mail agora. Tente novamente em instantes.' }
+    }
+    return { error: null }
+  }, [])
+
   const value = React.useMemo<AuthContextValue>(
     () => ({
       session,
       user: session?.user ?? null,
       loading,
-      requestLoginCode,
-      verifyLoginCode,
+      signInWithPassword,
       signOut,
+      requestPasswordReset,
     }),
-    [session, loading, requestLoginCode, verifyLoginCode, signOut],
+    [session, loading, signInWithPassword, signOut, requestPasswordReset],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
@@ -81,19 +76,12 @@ export function useAuth() {
 }
 
 /** Mensagens de erro do Supabase traduzidas para uma linguagem simples e direta. */
-function traduzErroOtp(message: string): string {
-  const msg = message.toLowerCase()
-  if (msg.includes('signups not allowed') || msg.includes('user not found')) {
-    return 'Não encontramos esse e-mail cadastrado. Confira se digitou certo ou fale com o administrador do sistema.'
+function traduzErroLogin(message: string): string {
+  if (message.toLowerCase().includes('invalid login credentials')) {
+    return 'E-mail ou senha incorretos. Confira os dados e tente novamente.'
   }
-  if (msg.includes('token has expired') || msg.includes('expired')) {
-    return 'Esse código expirou. Peça um novo código e tente de novo.'
+  if (message.toLowerCase().includes('email not confirmed')) {
+    return 'Este e-mail ainda não foi confirmado. Verifique sua caixa de entrada.'
   }
-  if (msg.includes('invalid') || msg.includes('token')) {
-    return 'Código incorreto. Confira os 6 dígitos e tente novamente.'
-  }
-  if (msg.includes('rate limit') || msg.includes('too many')) {
-    return 'Muitas tentativas em pouco tempo. Aguarde alguns minutos e tente de novo.'
-  }
-  return 'Não foi possível continuar agora. Tente novamente em instantes.'
+  return 'Não foi possível entrar agora. Tente novamente em instantes.'
 }
