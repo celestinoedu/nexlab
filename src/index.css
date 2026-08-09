@@ -1,0 +1,78 @@
+@import "tailwindcss";
+
+/*
+ * Inter Variable, auto-hospedada (subsets latin + latin-ext, cobre PT-BR).
+ * Arquivos copiados de node_modules/@fontsource-variable/inter/files para
+ * src/assets/fonts — referenciados como módulo (não via public/) para o
+ * bundler resolver o caminho corretamente em qualquer subpath de deploy
+ * (base relativa "./", ver vite.config.ts).
+ */
+@font-face {
+  font-family: "Inter Variable";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url("./assets/fonts/inter-latin-wght-normal.woff2") format("woff2-variations");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304,
+    U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Inter Variable";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url("./assets/fonts/inter-latin-ext-wght-normal.woff2") format("woff2-variations");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308,
+    U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113,
+    U+2C60-2C7F, U+A720-A7FF;
+}
+
+/*
+ * Tokens de identidade visual do NexLab.
+ * Fonte da verdade em prosa: docs/design-system.md — qualquer mudança de cor
+ * deve ser refletida nos dois lugares.
+ */
+@theme {
+  --font-sans: "Inter Variable", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+
+  /* Primária — brand (teal profissional) */
+  --color-brand-50: #eefbfa;
+  --color-brand-100: #d3f3f1;
+  --color-brand-200: #a7e7e3;
+  --color-brand-300: #71d3ce;
+  --color-brand-400: #3fb8b3;
+  --color-brand-500: #189a96;
+  --color-brand-600: #0e7c79;
+  --color-brand-700: #0b6360;
+  --color-brand-800: #0a4f4d;
+  --color-brand-900: #0a403f;
+
+  /* Acento — amber (calor humano / ação principal) */
+  --color-amber-50: #fff7eb;
+  --color-amber-100: #ffebc7;
+  --color-amber-400: #f5a93f;
+  --color-amber-500: #ee9524;
+  --color-amber-600: #d97d0d;
+
+  /* Semânticas de status */
+  --color-success-100: #dcf5e9;
+  --color-success-500: #1e9e6b;
+  --color-success-700: #146b49;
+
+  --color-warning-100: #fcf0ce;
+  --color-warning-500: #e0a317;
+  --color-warning-700: #8a6710;
+
+  --color-danger-100: #fbe1e1;
+  --color-danger-500: #d64545;
+  --color-danger-700: #9c2f2f;
+
+  --color-info-100: #dceaf7;
+  --color-info-500: #3b82c4;
+  --color-info-700: #285e8f;
+}
+
+body {
+  @apply bg-slate-50 text-slate-800 antialiased;
+  font-variant-numeric: tabular-nums;
+}

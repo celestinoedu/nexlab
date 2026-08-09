@@ -1,0 +1,123 @@
+import * as React from 'react'
+import { Link, Navigate, useLocation } from 'react-router-dom'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
+import { toast } from 'sonner'
+import { Eye, EyeOff, Loader2 } from 'lucide-react'
+import { useAuth } from '@/features/auth/AuthProvider'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { Logo } from '@/components/shared/Logo'
+
+const schema = z.object({
+  email: z.string().min(1, 'Informe seu e-mail').email('Digite um e-mail válido'),
+  password: z.string().min(1, 'Informe sua senha'),
+})
+
+type FormValues = z.infer<typeof schema>
+
+export function LoginPage() {
+  const { session, loading, signInWithPassword } = useAuth()
+  const location = useLocation()
+  const [showPassword, setShowPassword] = React.useState(false)
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<FormValues>({ resolver: zodResolver(schema) })
+
+  if (!loading && session) {
+    const from = (location.state as { from?: string } | null)?.from ?? '#/'
+    return <Navigate to={from} replace />
+  }
+
+  const onSubmit = async (values: FormValues) => {
+    const { error } = await signInWithPassword(values.email, values.password)
+    if (error) {
+      toast.error(error)
+    }
+  }
+
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
+      <div className="w-full max-w-sm">
+        <div className="mb-8 flex justify-center">
+          <Logo className="scale-125" />
+        </div>
+
+        <Card>
+          <CardHeader>
+            <h1 className="text-xl font-semibold text-slate-900">Entrar</h1>
+            <p className="text-sm text-slate-500">
+              Acesse o sistema do GRS Lab com seu e-mail e senha.
+            </p>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4" noValidate>
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="email">E-mail</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  autoComplete="email"
+                  autoFocus
+                  placeholder="voce@exemplo.com"
+                  {...register('email')}
+                />
+                {errors.email && (
+                  <p className="text-sm text-danger-500">{errors.email.message}</p>
+                )}
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="password">Senha</Label>
+                  <Link
+                    to="/esqueci-senha"
+                    className="text-sm font-medium text-brand-600 hover:text-brand-700"
+                  >
+                    Esqueci minha senha
+                  </Link>
+                </div>
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    autoComplete="current-password"
+                    placeholder="Sua senha"
+                    className="pr-10"
+                    {...register('password')}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((v) => !v)}
+                    className="absolute inset-y-0 right-0 flex w-10 items-center justify-center text-slate-400 hover:text-slate-600"
+                    aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+                  >
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+                {errors.password && (
+                  <p className="text-sm text-danger-500">{errors.password.message}</p>
+                )}
+              </div>
+
+              <Button type="submit" disabled={isSubmitting} className="mt-2 w-full">
+                {isSubmitting && <Loader2 className="animate-spin" size={16} />}
+                Entrar
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+
+        <p className="mt-6 text-center text-xs text-slate-400">
+          NexLab · Sistema de gestão do GRS Lab
+        </p>
+      </div>
+    </div>
+  )
+}
