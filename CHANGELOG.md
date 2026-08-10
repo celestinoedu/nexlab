@@ -2,6 +2,15 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), versionamento [SemVer](https://semver.org/lang/pt-BR/).
 
+## [0.7.3] - 2026-08-10 — Catálogo expandido + comissões completas do Spartan
+
+### Adicionado
+- Catálogo de serviços (`supabase/seed.sql` e banco) expandido de 43 para 98 serviços ativos, a partir da lista de comissões 2026 do parceiro Laboratório Spartan: famílias "SN1,2,3", "Contenção Fixa 3x3" e "Ativador Klammt" — genéricas demais pra ter uma comissão só — foram desmembradas em variantes específicas (SN1/SN2/SN3/SN4/SN7/SN11, 5 variantes de Contenção 3x3, Klammt CL I/II/III), e ~40 aparelhos que o Spartan cobra e não existiam no catálogo foram adicionados (APM, Frankel I/II/III, Sanders, Ativador de Rossi, várias contenções removíveis, etc.). As 3 entradas genéricas antigas foram desativadas (não apagadas — preserva o histórico de OS que já usam elas).
+- Comissão do parceiro **Laboratório Spartan** preenchida para todos os 73 itens da lista fornecida (15 usando serviços já existentes, 58 usando as novas entradas do catálogo).
+
+### Observação
+- Os novos serviços entraram com `preco_padrao = R$ 0,00` — a lista usada como fonte é só a comissão do Spartan (parceiro), não o preço de venda direta da GRS Lab (Cliente) pra esses itens. Precisa ser revisado no Catálogo de Serviços quando esse preço for definido.
+
 ## [0.7.2] - 2026-08-10 — Comissão de Parceiro por %
 
 ### Adicionado
