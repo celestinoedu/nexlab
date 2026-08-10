@@ -2,6 +2,12 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), versionamento [SemVer](https://semver.org/lang/pt-BR/).
 
+## [0.7.5] - 2026-08-10 — Corrige tela em branco após login (cache do GitHub Pages)
+
+### Corrigido
+- **Tela em branco após o login**, mais frequente no celular mas também no PC: o GitHub Pages guarda `index.html` em cache por 10 minutos (`Cache-Control: max-age=600`, sem forma de configurar). Cada deploy gera nomes novos de arquivo `.js`/`.css` — quem abria o app com um `index.html` em cache tentava carregar um arquivo que já não existia mais, e o carregamento falhava silenciosamente (nenhum erro visível, só tela em branco). Ver `docs/architecture.md` § "Cache do index.html no GitHub Pages" pra detalhe técnico.
+- Mitigado com um script inline em `index.html` que detecta essa falha de carregamento e recarrega a página automaticamente com uma URL nova (nunca em cache) — no máximo uma vez por sessão de aba, pra não entrar em loop.
+
 ## [0.7.4] - 2026-08-10 — Pagamento em massa + popup financeiro na OS
 
 ### Adicionado

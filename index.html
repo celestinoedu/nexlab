@@ -6,6 +6,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="NexLab — sistema de gestão de demandas e financeiro do GRS Lab" />
     <title>NexLab · GRS Lab</title>
+    <script>
+      // GitHub Pages guarda o index.html em cache por 10 min (Cache-Control:
+      // max-age=600). A cada novo deploy, os nomes dos arquivos .js/.css
+      // mudam — quem abrir o app com um index.html em cache tenta carregar
+      // um arquivo que não existe mais e a tela fica em branco (sem esse
+      // script, silenciosamente). Isso captura essa falha e recarrega a
+      // página com uma URL nova (nunca em cache), uma única vez por sessão.
+      (function () {
+        var CHAVE = 'nexlab-recarregou-apos-falha'
+        window.addEventListener(
+          'error',
+          function (evento) {
+            var alvo = evento.target
+            if (alvo && alvo.tagName === 'SCRIPT' && !sessionStorage.getItem(CHAVE)) {
+              sessionStorage.setItem(CHAVE, '1')
+              var semParametros = location.href.split('#')[0].split('?')[0]
+              location.replace(semParametros + '?v=' + Date.now() + location.hash)
+            }
+          },
+          true,
+        )
+      })()
+    </script>
   </head>
   <body>
     <div id="root"></div>

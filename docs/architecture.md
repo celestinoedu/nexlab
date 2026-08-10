@@ -38,6 +38,12 @@ GitHub Pages serve arquivos estáticos e **não faz rewrite de URL** (ex.: acess
 
 `vite.config.ts` usa `base: './'` (caminho relativo) em vez de `/nome-do-repo/`: isso faz os assets (JS/CSS/fontes) resolverem corretamente **independente do nome do repositório ou de estar num subpath** (`usuario.github.io/nexlab/`) ou domínio próprio no futuro — sem precisar reconfigurar nada no build.
 
+### Cache do `index.html` no GitHub Pages — tela em branco após deploy
+
+O GitHub Pages serve `index.html` com `Cache-Control: max-age=600` (10 min), sem forma de configurar isso (não há suporte a `_headers` como Netlify/Vercel). Cada build gera nomes de arquivo novos pro JS/CSS (hash de conteúdo) — se alguém abrir o app com um `index.html` antigo ainda em cache (comum logo depois de um deploy, e mais ainda no celular, onde o navegador/operadora costuma cachear mais agressivamente), o `<script>` vai apontar pra um arquivo que já não existe mais → falha silenciosa de carregamento → **tela em branco depois do login, sem erro visível** (foi um bug real, ver `CHANGELOG.md` v0.7.5).
+
+Mitigado com um script inline em `index.html` (antes da tag do módulo, preservado pelo Vite no build): ele escuta falha de carregamento de `<script>` e recarrega a página com uma query string nova (`?v=<timestamp>`), que nunca está em cache — nunca mais que uma vez por sessão de aba (guard via `sessionStorage`, limpo em `main.tsx` assim que o app monta com sucesso). Não elimina o cache de 10 min do GitHub Pages, mas faz o app se recuperar sozinho em vez de precisar o usuário saber que tem que dar Ctrl+Shift+R.
+
 ## Por que Supabase client direto do frontend (sem proxy)
 
 A `anon key` do Supabase é **pública por design** (é enviada ao navegador de qualquer forma) — a segurança real está nas policies de RLS no Postgres, não em esconder a key. Isso é o modelo recomendado pelo próprio Supabase para SPAs sem backend. Ver `docs/database-schema.md` § RLS para as regras aplicadas.
