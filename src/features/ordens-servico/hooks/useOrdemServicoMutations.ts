@@ -23,6 +23,7 @@ export interface OrdemServicoFormInput {
   observacoes: string | null
   status_pagamento: StatusPagamentoOS
   forma_pagamento: string | null
+  data_pagamento: string | null
   itens: OrdemServicoItemInput[]
 }
 

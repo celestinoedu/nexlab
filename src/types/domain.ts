@@ -70,6 +70,7 @@ export interface OrdemServico {
   observacoes: string | null
   status_pagamento: StatusPagamentoOS
   forma_pagamento: string | null
+  data_pagamento: string | null
   created_by: string | null
   created_at: string
   updated_at: string

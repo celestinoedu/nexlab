@@ -1,6 +1,6 @@
 # NexLab — Schema do banco de dados
 
-> Espelha `supabase/migrations/0001_init.sql` + `0002_ordens_servico.sql` + `0003_financeiro.sql`. Se o schema mudar, atualize os três — nunca deixe este documento desatualizado em relação às migrations reais.
+> Espelha `supabase/migrations/0001_init.sql` a `0005_financeiro_ajustes.sql`. Se o schema mudar, atualize a migration nova + este arquivo no mesmo commit — nunca deixe este documento desatualizado em relação às migrations reais.
 
 ## Diagrama de relacionamento (visão simplificada)
 
@@ -116,8 +116,9 @@ Núcleo do sistema: o **cabeçalho** de cada Ordem de Serviço, base do Kanban e
 | `desconto` | numeric(10,2) | default 0, aplicado sobre o total da OS |
 | `mes_referencia` | date, **gerada** | `date_trunc('month', coalesce(data_entrega, data_recebimento)::timestamp)::date` — fechamento sempre mês cheio (dia 1 ao último dia). O cast para `timestamp` é obrigatório (ver nota em `0001_init.sql`/`0002_ordens_servico.sql`). |
 | `observacoes` | text | |
-| `status_pagamento` | `status_pagamento_os` | default `pendente` — editável no formulário (migration `0003`); a "verdade" operacional de cobrança passa a ser a linha correspondente em `contas_receber` assim que a OS é entregue |
+| `status_pagamento` | `status_pagamento_os` | default `pendente` — editada no popup "Informações financeiras" do formulário (migration `0003`); a "verdade" operacional de cobrança passa a ser a linha correspondente em `contas_receber` assim que a OS é entregue |
 | `forma_pagamento` | text | opcional, livre (ex.: "Pix", "Boleto") |
+| `data_pagamento` | date | preenchida no popup financeiro quando `status_pagamento = pago` (migration `0005`) — copiada pra `contas_receber.data_pagamento` na criação da linha, evita que uma OS já entregue paga fique sem data de recebimento (bug corrigido na `0005`) |
 | `created_by` | uuid FK → `profiles` | |
 | `created_at`, `updated_at` | timestamptz | |
 

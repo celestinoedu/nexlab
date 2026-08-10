@@ -11,7 +11,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { toast } from 'sonner'
 import { addDays, format, parseISO } from 'date-fns'
-import { Loader2, Trash2, AlertTriangle, PlusCircle } from 'lucide-react'
+import { Loader2, Trash2, AlertTriangle, PlusCircle, Wallet } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
@@ -36,6 +36,7 @@ import {
 } from '@/features/ordens-servico/hooks/useOrdemServicoMutations'
 import { STATUS_OS_LABEL, type OrdemServicoComRelacoes, type StatusOS } from '@/types/domain'
 import { cn } from '@/lib/utils'
+import { InfoFinanceiraDialog } from './InfoFinanceiraDialog'
 
 const itemSchema = z.object({
   servico_id: z.string().min(1, 'Escolha um serviço'),
@@ -59,6 +60,7 @@ const schema = z
     observacoes: z.string().optional(),
     status_pagamento: z.enum(['pendente', 'pago']),
     forma_pagamento: z.string().optional(),
+    data_pagamento: z.string().optional(),
     itens: z.array(itemSchema).min(1, 'Adicione pelo menos um serviço'),
   })
   .refine((data) => data.status !== 'entregue' || Boolean(data.data_entrega), {
@@ -110,6 +112,9 @@ export function OrdemServicoFormDialog({ open, onOpenChange, ordem }: OrdemServi
   const desconto = useWatch({ control, name: 'desconto' })
   const status = useWatch({ control, name: 'status' })
   const statusPagamento = useWatch({ control, name: 'status_pagamento' })
+  const formaPagamento = useWatch({ control, name: 'forma_pagamento' })
+  const dataPagamento = useWatch({ control, name: 'data_pagamento' })
+  const [infoFinanceiraAberta, setInfoFinanceiraAberta] = React.useState(false)
 
   const { data: precos } = useTabelaPrecos(entidadeId || null)
   const entidadeSelecionada = entidades?.find((e) => e.id === entidadeId)
@@ -134,6 +139,7 @@ export function OrdemServicoFormDialog({ open, onOpenChange, ordem }: OrdemServi
         observacoes: ordem.observacoes ?? '',
         status_pagamento: ordem.status_pagamento,
         forma_pagamento: ordem.forma_pagamento ?? '',
+        data_pagamento: ordem.data_pagamento ?? '',
         itens: ordem.itens.map((item) => ({
           servico_id: item.servico_id,
           cor: item.cor ?? '',
@@ -156,6 +162,7 @@ export function OrdemServicoFormDialog({ open, onOpenChange, ordem }: OrdemServi
         observacoes: '',
         status_pagamento: 'pendente',
         forma_pagamento: '',
+        data_pagamento: '',
         itens: [ITEM_VAZIO],
       })
       supabase
@@ -235,6 +242,7 @@ export function OrdemServicoFormDialog({ open, onOpenChange, ordem }: OrdemServi
       observacoes: values.observacoes?.trim() || null,
       status_pagamento: values.status_pagamento,
       forma_pagamento: values.forma_pagamento?.trim() || null,
+      data_pagamento: values.status_pagamento === 'pago' ? values.data_pagamento || null : null,
       itens: values.itens.map((item) => ({
         servico_id: item.servico_id,
         cor: item.cor?.trim() || null,
@@ -354,32 +362,18 @@ export function OrdemServicoFormDialog({ open, onOpenChange, ordem }: OrdemServi
             )}
           </div>
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div className="flex flex-col gap-1.5">
-              <Label>Status financeiro</Label>
-              <div className="grid grid-cols-2 gap-2">
-                {(['pendente', 'pago'] as const).map((opcao) => (
-                  <button
-                    key={opcao}
-                    type="button"
-                    onClick={() => setValue('status_pagamento', opcao)}
-                    className={cn(
-                      'flex h-10 items-center justify-center rounded-xl border text-sm font-medium transition-colors',
-                      statusPagamento === opcao
-                        ? 'border-brand-600 bg-brand-50 text-brand-800'
-                        : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50',
-                    )}
-                  >
-                    {opcao === 'pendente' ? 'Pendente' : 'Pago'}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="forma_pagamento">Forma de pagamento (opcional)</Label>
-              <Input id="forma_pagamento" placeholder="Ex.: Pix, Boleto, Transferência" {...register('forma_pagamento')} />
-            </div>
-          </div>
+          <Button
+            type="button"
+            variant="secondary"
+            className="self-start"
+            onClick={() => setInfoFinanceiraAberta(true)}
+          >
+            <Wallet size={16} />
+            Informações financeiras
+            <Badge variant={statusPagamento === 'pago' ? 'success' : 'warning'}>
+              {statusPagamento === 'pago' ? 'Pago' : 'Pendente'}
+            </Badge>
+          </Button>
 
           <div className="flex flex-col gap-2">
             <Label>Serviços da OS</Label>
@@ -454,6 +448,19 @@ export function OrdemServicoFormDialog({ open, onOpenChange, ordem }: OrdemServi
           </DialogFooter>
         </form>
       </DialogContent>
+
+      <InfoFinanceiraDialog
+        open={infoFinanceiraAberta}
+        onOpenChange={setInfoFinanceiraAberta}
+        statusPagamento={statusPagamento}
+        formaPagamento={formaPagamento ?? ''}
+        dataPagamento={dataPagamento ?? ''}
+        onSalvar={(dados) => {
+          setValue('status_pagamento', dados.status_pagamento)
+          setValue('forma_pagamento', dados.forma_pagamento)
+          setValue('data_pagamento', dados.data_pagamento)
+        }}
+      />
     </Dialog>
   )
 }

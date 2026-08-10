@@ -1,15 +1,18 @@
 import * as React from 'react'
 import { format, parseISO } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
-import { Search, Loader2, CircleCheck, CircleDollarSign, Ban } from 'lucide-react'
+import { Search, Loader2, CircleCheck, CircleDollarSign, Ban, Landmark } from 'lucide-react'
 import { toast } from 'sonner'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Combobox, type ComboboxOption } from '@/components/shared/Combobox'
 import { cn } from '@/lib/utils'
 import { useProfile } from '@/hooks/useProfile'
 import { useContasReceber } from './hooks/useContasReceber'
 import { useContaReceberMutations } from './hooks/useContaReceberMutations'
 import { MarcarPagoDialog } from './components/MarcarPagoDialog'
+import { MarcarVariasPagoDialog } from './components/MarcarVariasPagoDialog'
 import { CancelarContaDialog } from './components/CancelarContaDialog'
 import { STATUS_CONTA_RECEBER_LABEL, type ContaReceberComRelacoes, type StatusContaReceber } from '@/types/domain'
 
@@ -24,15 +27,18 @@ const STATUS_BADGE_VARIANT: Record<StatusContaReceber, 'success' | 'warning' | '
 export function ContasReceberPage() {
   const { data: contas, isLoading } = useContasReceber()
   const { data: profile } = useProfile()
-  const { marcarComoPago, marcarComoPendente, cancelar } = useContaReceberMutations()
+  const { marcarComoPago, marcarComoPendente, marcarVariasComoPago, cancelar } = useContaReceberMutations()
   const podeAdmin = profile?.role === 'admin'
 
   const [busca, setBusca] = React.useState('')
   const [statusFiltro, setStatusFiltro] = React.useState<FiltroStatus>('todos')
   const [mesFiltro, setMesFiltro] = React.useState('todos')
+  const [entidadeFiltro, setEntidadeFiltro] = React.useState<string | null>(null)
   const [mostrarCancelados, setMostrarCancelados] = React.useState(false)
   const [contaPagar, setContaPagar] = React.useState<ContaReceberComRelacoes | null>(null)
   const [contaCancelar, setContaCancelar] = React.useState<ContaReceberComRelacoes | null>(null)
+  const [selecionadas, setSelecionadas] = React.useState<Set<string>>(new Set())
+  const [pagarEmMassaAberto, setPagarEmMassaAberto] = React.useState(false)
 
   const meses = React.useMemo(() => {
     const set = new Set<string>()
@@ -42,12 +48,31 @@ export function ContasReceberPage() {
       .map((mes) => ({ value: mes, label: format(parseISO(mes), "MMMM 'de' yyyy", { locale: ptBR }) }))
   }, [contas])
 
+  const entidadeOptions: ComboboxOption[] = React.useMemo(() => {
+    const porId = new Map<string, ComboboxOption>()
+    for (const c of contas ?? []) {
+      if (!porId.has(c.entidade_id)) {
+        porId.set(c.entidade_id, {
+          value: c.entidade_id,
+          label: c.entidade.nome,
+          hint: (
+            <Badge variant={c.entidade.tipo === 'parceiro' ? 'brand' : 'neutral'} className="ml-2 shrink-0">
+              {c.entidade.tipo === 'parceiro' ? 'Parceiro' : 'Cliente'}
+            </Badge>
+          ),
+        })
+      }
+    }
+    return Array.from(porId.values()).sort((a, b) => a.label.localeCompare(b.label, 'pt-BR'))
+  }, [contas])
+
   const filtradas = React.useMemo(() => {
     const buscaLower = busca.trim().toLowerCase()
     return (contas ?? []).filter((c) => {
       if (!mostrarCancelados && c.status === 'cancelado') return false
       if (statusFiltro !== 'todos' && c.status !== statusFiltro) return false
       if (mesFiltro !== 'todos' && c.mes_referencia !== mesFiltro) return false
+      if (entidadeFiltro && c.entidade_id !== entidadeFiltro) return false
       if (!buscaLower) return true
       return (
         c.entidade.nome.toLowerCase().includes(buscaLower) ||
@@ -55,11 +80,28 @@ export function ContasReceberPage() {
         String(c.ordem.numero_os).includes(buscaLower)
       )
     })
-  }, [contas, busca, statusFiltro, mesFiltro, mostrarCancelados])
+  }, [contas, busca, statusFiltro, mesFiltro, entidadeFiltro, mostrarCancelados])
 
   const totalFiltrado = filtradas
     .filter((c) => c.status !== 'cancelado')
     .reduce((acc, c) => acc + c.valor, 0)
+
+  const abertasFiltradas = filtradas.filter((c) => c.status === 'aberto')
+  const todasAbertasSelecionadas =
+    abertasFiltradas.length > 0 && abertasFiltradas.every((c) => selecionadas.has(c.id))
+
+  function alternarSelecao(id: string) {
+    setSelecionadas((prev) => {
+      const proximo = new Set(prev)
+      if (proximo.has(id)) proximo.delete(id)
+      else proximo.add(id)
+      return proximo
+    })
+  }
+
+  function alternarSelecionarTodas() {
+    setSelecionadas(todasAbertasSelecionadas ? new Set() : new Set(abertasFiltradas.map((c) => c.id)))
+  }
 
   async function confirmarPagamento(dataPagamento: string, formaPagamento: string | null) {
     if (!contaPagar) return
@@ -80,6 +122,17 @@ export function ContasReceberPage() {
       setContaCancelar(null)
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Não foi possível cancelar agora.')
+    }
+  }
+
+  async function confirmarPagamentoEmMassa(dataPagamento: string, formaPagamento: string | null) {
+    try {
+      await marcarVariasComoPago.mutateAsync({ ids: Array.from(selecionadas), dataPagamento, formaPagamento })
+      toast.success(`${selecionadas.size} conta(s) marcada(s) como paga.`)
+      setSelecionadas(new Set())
+      setPagarEmMassaAberto(false)
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Não foi possível salvar agora.')
     }
   }
 
@@ -108,11 +161,31 @@ export function ContasReceberPage() {
         <div className="relative w-full sm:w-64">
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
           <Input
-            placeholder="Buscar por entidade, cliente final, nº OS..."
+            placeholder="Buscar por cliente final, nº OS..."
             value={busca}
             onChange={(e) => setBusca(e.target.value)}
             className="pl-9"
           />
+        </div>
+
+        <div className="flex w-full items-center gap-1.5 sm:w-64">
+          <Combobox
+            options={entidadeOptions}
+            value={entidadeFiltro}
+            onChange={setEntidadeFiltro}
+            placeholder="Todos os clientes/parceiros"
+            searchPlaceholder="Buscar por nome..."
+            emptyMessage="Nenhum encontrado."
+          />
+          {entidadeFiltro && (
+            <button
+              type="button"
+              onClick={() => setEntidadeFiltro(null)}
+              className="shrink-0 text-xs font-medium text-slate-400 hover:text-slate-600"
+            >
+              Limpar
+            </button>
+          )}
         </div>
 
         <select
@@ -169,6 +242,28 @@ export function ContasReceberPage() {
         )}
       </div>
 
+      {selecionadas.size > 0 && (
+        <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-brand-50 px-4 py-2.5">
+          <span className="text-sm text-brand-800">
+            {selecionadas.size} conta{selecionadas.size === 1 ? '' : 's'} selecionada
+            {selecionadas.size === 1 ? '' : 's'}
+          </span>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setSelecionadas(new Set())}
+              className="text-xs font-medium text-brand-700 hover:text-brand-900"
+            >
+              Limpar seleção
+            </button>
+            <Button size="sm" onClick={() => setPagarEmMassaAberto(true)}>
+              <Landmark size={15} />
+              Marcar como pago
+            </Button>
+          </div>
+        </div>
+      )}
+
       {isLoading ? (
         <div className="flex justify-center py-16">
           <Loader2 className="animate-spin text-brand-600" size={28} />
@@ -182,6 +277,17 @@ export function ContasReceberPage() {
           <table className="w-full text-left text-sm">
             <thead className="border-b border-slate-100 text-xs font-medium text-slate-400">
               <tr>
+                <th className="w-10 px-4 py-3">
+                  {abertasFiltradas.length > 0 && (
+                    <input
+                      type="checkbox"
+                      className="size-4 rounded border-slate-300"
+                      checked={todasAbertasSelecionadas}
+                      onChange={alternarSelecionarTodas}
+                      aria-label="Selecionar todas as abertas"
+                    />
+                  )}
+                </th>
                 <th className="px-4 py-3">Entidade</th>
                 <th className="px-4 py-3">OS / Cliente final</th>
                 <th className="px-4 py-3">Forma de pagamento</th>
@@ -193,6 +299,17 @@ export function ContasReceberPage() {
             <tbody>
               {filtradas.map((conta) => (
                 <tr key={conta.id} className="border-b border-slate-50 last:border-0 hover:bg-slate-50">
+                  <td className="px-4 py-3">
+                    {conta.status === 'aberto' && (
+                      <input
+                        type="checkbox"
+                        className="size-4 rounded border-slate-300"
+                        checked={selecionadas.has(conta.id)}
+                        onChange={() => alternarSelecao(conta.id)}
+                        aria-label={`Selecionar OS #${conta.ordem.numero_os}`}
+                      />
+                    )}
+                  </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-1.5">
                       <span className="font-medium text-slate-800">{conta.entidade.nome}</span>
@@ -268,6 +385,12 @@ export function ContasReceberPage() {
         onOpenChange={(open) => !open && setContaCancelar(null)}
         conta={contaCancelar}
         onConfirm={confirmarCancelamento}
+      />
+      <MarcarVariasPagoDialog
+        open={pagarEmMassaAberto}
+        onOpenChange={setPagarEmMassaAberto}
+        quantidade={selecionadas.size}
+        onConfirm={confirmarPagamentoEmMassa}
       />
     </div>
   )

@@ -2,6 +2,20 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), versionamento [SemVer](https://semver.org/lang/pt-BR/).
 
+## [0.7.4] - 2026-08-10 — Pagamento em massa + popup financeiro na OS
+
+### Adicionado
+- **Marcar como pago em massa** em Contas a Receber: checkbox por linha (+ "selecionar todas as abertas"), barra de ação com o total selecionado, e um modal (`MarcarVariasPagoDialog`) que aplica a mesma data/forma de pagamento a todas de uma vez — pensado pra Cliente/Parceiro que paga tudo de um período junto.
+- **Filtro dedicado por Cliente/Parceiro** (combobox) em Contas a Receber, ao lado do filtro de mês — essencial pro fluxo acima.
+- **Popup "Informações financeiras"** no formulário de OS (`InfoFinanceiraDialog`): Status financeiro, Forma de pagamento e Data de pagamento saem do corpo principal do formulário e viram um botão secundário com badge de status, que abre um popup à parte — menos poluição visual na maioria das OS (que ficam Pendente).
+- OS ganhou sua própria **Data de pagamento** (`ordens_servico.data_pagamento`, migration `0005`), preenchida no popup financeiro.
+
+### Corrigido
+- `supabase/migrations/0005_financeiro_ajustes.sql`: a trigger que cria a conta a receber gravava `status = 'pago'` mas nunca preenchia `data_pagamento` quando a OS já nascia entregue + paga — o Fechamento Financeiro soma "recebido no mês" por essa data, então essas contas nunca eram contadas. Corrigido (a trigger agora usa a `data_pagamento` da própria OS) e as linhas já afetadas foram corrigidas retroativamente na mesma migration.
+
+### Alterado
+- Base de Clientes/Parceiros e Ordens de Serviço zerada a pedido do usuário, mantendo só o parceiro Laboratório Spartan (com as 73 comissões já cadastradas) — Catálogo de Serviços, Despesas e Fechamentos não foram afetados.
+
 ## [0.7.3] - 2026-08-10 — Catálogo expandido + comissões completas do Spartan
 
 ### Adicionado

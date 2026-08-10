@@ -44,6 +44,28 @@ export function useContaReceberMutations() {
     },
   })
 
+  /** Marca várias contas de uma vez como pagas — mesma data/forma pra todas. */
+  const marcarVariasComoPago = useMutation({
+    mutationFn: async ({
+      ids,
+      dataPagamento,
+      formaPagamento,
+    }: {
+      ids: string[]
+      dataPagamento: string
+      formaPagamento: string | null
+    }) => {
+      const { error } = await supabase
+        .from('contas_receber')
+        .update({ status: 'pago', data_pagamento: dataPagamento, forma_pagamento: formaPagamento })
+        .in('id', ids)
+      if (error) throw new Error(traduzErro(error.message))
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['contas_receber'] })
+    },
+  })
+
   /** "Exclusão" é sempre soft-delete com justificativa — só admin (ver RLS). */
   const cancelar = useMutation({
     mutationFn: async ({ id, justificativa }: { id: string; justificativa: string }) => {
@@ -58,5 +80,5 @@ export function useContaReceberMutations() {
     },
   })
 
-  return { marcarComoPago, marcarComoPendente, cancelar }
+  return { marcarComoPago, marcarComoPendente, marcarVariasComoPago, cancelar }
 }
