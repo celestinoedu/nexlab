@@ -4,6 +4,8 @@ import {
   Users,
   Package,
   Wallet,
+  Receipt,
+  Landmark,
   FileText,
   Settings,
 } from 'lucide-react'
@@ -15,6 +17,8 @@ const NAV_ITEMS = [
   { to: '/clientes-parceiros', label: 'Clientes e Parceiros', icon: Users },
   { to: '/servicos', label: 'Catálogo de Serviços', icon: Package },
   { to: '/financeiro', label: 'Contas a Receber', icon: Wallet },
+  { to: '/despesas', label: 'Despesas', icon: Receipt },
+  { to: '/fechamento', label: 'Fechamento', icon: Landmark },
   { to: '/relatorios', label: 'Relatórios', icon: FileText },
   { to: '/configuracoes', label: 'Configurações', icon: Settings },
 ]
@@ -46,7 +50,7 @@ export function Sidebar() {
         ))}
       </nav>
       <div className="border-t border-slate-100 px-6 py-4 text-xs text-slate-400">
-        GRS Lab · NexLab v0.6.0
+        GRS Lab · NexLab v0.7.0
       </div>
     </aside>
   )

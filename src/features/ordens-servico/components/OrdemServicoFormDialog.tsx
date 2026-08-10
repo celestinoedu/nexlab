@@ -34,7 +34,8 @@ import {
   useOrdemServicoMutations,
   type OrdemServicoFormInput,
 } from '@/features/ordens-servico/hooks/useOrdemServicoMutations'
-import type { OrdemServicoComRelacoes } from '@/types/domain'
+import { STATUS_OS_LABEL, type OrdemServicoComRelacoes, type StatusOS } from '@/types/domain'
+import { cn } from '@/lib/utils'
 
 const itemSchema = z.object({
   servico_id: z.string().min(1, 'Escolha um serviço'),
@@ -45,16 +46,25 @@ const itemSchema = z.object({
   valor_comissao: z.number().min(0).nullable().optional(),
 })
 
-const schema = z.object({
-  numero_os: z.number().int().positive().nullable().optional(),
-  entidade_id: z.string().min(1, 'Escolha um cliente ou parceiro antes de salvar'),
-  cliente_final: z.string().optional(),
-  data_recebimento: z.string().min(1, 'Informe a data de recebimento'),
-  data_prevista: z.string().optional(),
-  desconto: z.number().min(0).optional(),
-  observacoes: z.string().optional(),
-  itens: z.array(itemSchema).min(1, 'Adicione pelo menos um serviço'),
-})
+const schema = z
+  .object({
+    numero_os: z.number().int().positive().nullable().optional(),
+    entidade_id: z.string().min(1, 'Escolha um cliente ou parceiro antes de salvar'),
+    cliente_final: z.string().optional(),
+    status: z.enum(['recebido', 'em_producao', 'pronto_entrega', 'entregue', 'cancelado']),
+    data_recebimento: z.string().min(1, 'Informe a data de recebimento'),
+    data_prevista: z.string().optional(),
+    data_entrega: z.string().optional(),
+    desconto: z.number().min(0).optional(),
+    observacoes: z.string().optional(),
+    status_pagamento: z.enum(['pendente', 'pago']),
+    forma_pagamento: z.string().optional(),
+    itens: z.array(itemSchema).min(1, 'Adicione pelo menos um serviço'),
+  })
+  .refine((data) => data.status !== 'entregue' || Boolean(data.data_entrega), {
+    message: 'Informe a data de entrega para marcar a OS como entregue',
+    path: ['data_entrega'],
+  })
 
 type FormValues = z.infer<typeof schema>
 
@@ -89,7 +99,7 @@ export function OrdemServicoFormDialog({ open, onOpenChange, ordem }: OrdemServi
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { itens: [ITEM_VAZIO] },
+    defaultValues: { status: 'recebido', status_pagamento: 'pendente', itens: [ITEM_VAZIO] },
   })
 
   const { fields, append, remove } = useFieldArray({ control, name: 'itens' })
@@ -98,6 +108,8 @@ export function OrdemServicoFormDialog({ open, onOpenChange, ordem }: OrdemServi
   const dataRecebimento = useWatch({ control, name: 'data_recebimento' })
   const itensAtuais = useWatch({ control, name: 'itens' })
   const desconto = useWatch({ control, name: 'desconto' })
+  const status = useWatch({ control, name: 'status' })
+  const statusPagamento = useWatch({ control, name: 'status_pagamento' })
 
   const { data: precos } = useTabelaPrecos(entidadeId || null)
   const entidadeSelecionada = entidades?.find((e) => e.id === entidadeId)
@@ -114,10 +126,14 @@ export function OrdemServicoFormDialog({ open, onOpenChange, ordem }: OrdemServi
         numero_os: ordem.numero_os,
         entidade_id: ordem.entidade_id,
         cliente_final: ordem.cliente_final ?? '',
+        status: ordem.status,
         data_recebimento: ordem.data_recebimento,
         data_prevista: ordem.data_prevista ?? '',
+        data_entrega: ordem.data_entrega ?? '',
         desconto: ordem.desconto,
         observacoes: ordem.observacoes ?? '',
+        status_pagamento: ordem.status_pagamento,
+        forma_pagamento: ordem.forma_pagamento ?? '',
         itens: ordem.itens.map((item) => ({
           servico_id: item.servico_id,
           cor: item.cor ?? '',
@@ -132,10 +148,14 @@ export function OrdemServicoFormDialog({ open, onOpenChange, ordem }: OrdemServi
         numero_os: null,
         entidade_id: '',
         cliente_final: '',
+        status: 'recebido',
         data_recebimento: format(new Date(), 'yyyy-MM-dd'),
         data_prevista: '',
+        data_entrega: '',
         desconto: 0,
         observacoes: '',
+        status_pagamento: 'pendente',
+        forma_pagamento: '',
         itens: [ITEM_VAZIO],
       })
       supabase
@@ -207,10 +227,14 @@ export function OrdemServicoFormDialog({ open, onOpenChange, ordem }: OrdemServi
       numero_os: values.numero_os ?? null,
       entidade_id: values.entidade_id,
       cliente_final: values.cliente_final?.trim() || null,
+      status: values.status,
       data_recebimento: values.data_recebimento,
       data_prevista: values.data_prevista || null,
+      data_entrega: values.status === 'entregue' ? values.data_entrega || null : null,
       desconto: values.desconto || 0,
       observacoes: values.observacoes?.trim() || null,
+      status_pagamento: values.status_pagamento,
+      forma_pagamento: values.forma_pagamento?.trim() || null,
       itens: values.itens.map((item) => ({
         servico_id: item.servico_id,
         cor: item.cor?.trim() || null,
@@ -301,6 +325,59 @@ export function OrdemServicoFormDialog({ open, onOpenChange, ordem }: OrdemServi
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="data_prevista">Data de entrega (prevista)</Label>
               <Input id="data_prevista" type="date" {...register('data_prevista')} />
+            </div>
+          </div>
+
+          <div className={cn('grid grid-cols-1 gap-4', status === 'entregue' && 'sm:grid-cols-2')}>
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="status">Status</Label>
+              <select
+                id="status"
+                className="h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40"
+                {...register('status')}
+              >
+                {(Object.keys(STATUS_OS_LABEL) as StatusOS[]).map((opcao) => (
+                  <option key={opcao} value={opcao}>
+                    {STATUS_OS_LABEL[opcao]}
+                  </option>
+                ))}
+              </select>
+            </div>
+            {status === 'entregue' && (
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="data_entrega">Data de entrega</Label>
+                <Input id="data_entrega" type="date" {...register('data_entrega')} />
+                {errors.data_entrega && (
+                  <p className="text-sm text-danger-500">{errors.data_entrega.message}</p>
+                )}
+              </div>
+            )}
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="flex flex-col gap-1.5">
+              <Label>Status financeiro</Label>
+              <div className="grid grid-cols-2 gap-2">
+                {(['pendente', 'pago'] as const).map((opcao) => (
+                  <button
+                    key={opcao}
+                    type="button"
+                    onClick={() => setValue('status_pagamento', opcao)}
+                    className={cn(
+                      'flex h-10 items-center justify-center rounded-xl border text-sm font-medium transition-colors',
+                      statusPagamento === opcao
+                        ? 'border-brand-600 bg-brand-50 text-brand-800'
+                        : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50',
+                    )}
+                  >
+                    {opcao === 'pendente' ? 'Pendente' : 'Pago'}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="forma_pagamento">Forma de pagamento (opcional)</Label>
+              <Input id="forma_pagamento" placeholder="Ex.: Pix, Boleto, Transferência" {...register('forma_pagamento')} />
             </div>
           </div>
 

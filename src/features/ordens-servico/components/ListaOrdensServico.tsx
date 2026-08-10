@@ -70,7 +70,12 @@ export function ListaOrdensServico({ ordens, onEditOrdem, onImprimirOrdem }: Lis
               </td>
               <td className="px-4 py-3 text-slate-500">{ordem.cliente_final || '—'}</td>
               <td className="px-4 py-3">
-                <Badge variant={STATUS_BADGE_VARIANT[ordem.status]}>{STATUS_OS_LABEL[ordem.status]}</Badge>
+                <div className="flex flex-wrap items-center gap-1">
+                  <Badge variant={STATUS_BADGE_VARIANT[ordem.status]}>{STATUS_OS_LABEL[ordem.status]}</Badge>
+                  <Badge variant={ordem.status_pagamento === 'pago' ? 'success' : 'warning'}>
+                    {ordem.status_pagamento === 'pago' ? 'Pago' : 'Pendente'}
+                  </Badge>
+                </div>
               </td>
               <td className="px-4 py-3 text-slate-500">
                 {format(parseISO(ordem.data_recebimento), 'dd/MM/yyyy')}

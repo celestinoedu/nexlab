@@ -2,6 +2,19 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), versionamento [SemVer](https://semver.org/lang/pt-BR/).
 
+## [0.7.0] - 2026-08-10 — Gestão financeira: Contas a Receber, Despesas, Fechamento, extrato por entidade
+
+### Adicionado
+- **Contas a Receber real por OS** (`contas_receber`, migration `0003_financeiro.sql`): toda OS marcada como "Entregue" gera automaticamente uma linha a receber (trigger no banco, `security definer`). Nova tela `ContasReceberPage` (`/financeiro`): marcar como pago/pendente, e "excluir" uma linha — sempre soft-delete, exige justificativa, restrito a admin, a linha some da lista padrão mas continua no banco como `cancelado` e só reaparece se o usuário marcar "Mostrar cancelados".
+- **Status financeiro na Ordem de Serviço**: novo campo **Status** editável direto no formulário (antes só mudava pelo Kanban), mais **Status financeiro** (Pendente/Pago) e **Forma de pagamento**. Badge de status financeiro na Lista e no Kanban.
+- **Extrato de OS por Cliente/Parceiro** (`EntidadeExtratoPage`, `/clientes-parceiros/:id`): resumo das OS de uma entidade num período, com total e botão para baixar um **Relatório de Fechamento em PDF** (sempre download real) — pronto para enviar ao próprio Cliente/Parceiro. Clicar numa linha em Clientes e Parceiros agora abre esse extrato em vez do cadastro direto; "Editar cadastro" e "Tabela de preços" viram botões dentro da tela (a lista também ganhou um ícone de edição rápida).
+- **Despesas** (`despesas`, `DespesasPage`, `/despesas`): cadastro simples — categoria (livre), descrição, valor, data, observações. Novo item na Sidebar.
+- **Fechamento Financeiro** (`fechamentos_financeiros`, `FechamentoFinanceiroPage`, `/fechamento`): resultado do laboratório por mês (recebido − despesas), calculado ao vivo até ser fechado; botão "Fechar o mês" (só admin) trava um snapshot. Novo item na Sidebar.
+- `useProfile` passa a ser usado também nas novas telas financeiras para restringir ações sensíveis (cancelar conta a receber, fechar o mês) a `admin`.
+
+### Alterado
+- `supabase/migrations/0003_financeiro.sql`: novas tabelas `contas_receber`, `despesas`, `fechamentos_financeiros`; novos enums `status_pagamento_os`, `status_conta_receber`, `status_fechamento_periodo`; `ordens_servico` ganha `status_pagamento`/`forma_pagamento`; remove a view `vw_contas_receber` (obsoleta — `contas_receber` agora é tabela real).
+
 ## [0.6.0] - 2026-08-10 — Clientes/Parceiros + Catálogo de Serviços
 
 ### Adicionado

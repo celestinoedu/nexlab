@@ -50,12 +50,18 @@ Correções pedidas após o primeiro teste do módulo (era "Demandas"):
 - [x] Tela de Tabela de Preços por entidade (`TabelaPrecosDialog`), acessada a partir da lista de Clientes/Parceiros: um campo por serviço (preço para Cliente, comissão para Parceiro), em branco = usa o preço padrão do catálogo. Escrita restrita a `admin` (`useProfile`), operador só visualiza.
 - [x] "Exclusão" implementada como desativação (`ativo = false`) — preserva o histórico de OS já vinculado, consistente com o filtro que os comboboxes de OS já aplicavam.
 
-## Fase 4 — Contas a Receber + Relatórios + Nota de Serviço
+## Fase 4 — Gestão financeira ✅ concluída em 2026-08-10 (v0.7.0)
 
-- [ ] Tela de Contas a Receber (`vw_contas_receber`), ação "Fechar mês" / "Marcar como pago".
-- [ ] Geração de PDF do Relatório de Fechamento (`@react-pdf/renderer`, layout baseado nos relatórios reais).
-- [ ] Geração de PDF da Nota de Serviço (cupom, numeração automática).
-- [ ] Dashboard com indicadores reais (substituir placeholders da Fase 1).
+Pedido do usuário após testar o módulo de Clientes/Parceiros: gestão mínima mas real das finanças do laboratório, além do que estava previsto originalmente para a Fase 4.
+
+- [x] **Contas a Receber real por OS** (`contas_receber`, migration `0003`): toda OS que vira "Entregue" gera automaticamente uma linha a receber (trigger `security definer`). Tela `ContasReceberPage` com marcar como pago/pendente e "excluir" (soft-delete com justificativa obrigatória, só `admin`, linha some da visão padrão a menos que filtrada).
+- [x] **Status financeiro na OS**: campos de Status (editável no formulário, não só no Kanban), Status financeiro (Pendente/Pago) e Forma de pagamento.
+- [x] **Extrato de OS por Cliente/Parceiro** (`EntidadeExtratoPage`, `/clientes-parceiros/:id`): resumo por período + **Relatório de Fechamento em PDF** (sempre download) para enviar ao próprio Cliente/Parceiro. Clicar numa linha de Clientes e Parceiros agora abre esse extrato; "Editar cadastro" virou um botão à parte.
+- [x] **Despesas** (`despesas`, `DespesasPage`, `/despesas`): cadastro simples (categoria, descrição, valor, data, observações), novo item de Sidebar.
+- [x] **Fechamento Financeiro** (`fechamentos_financeiros`, `FechamentoFinanceiroPage`, `/fechamento`): resultado do laboratório por mês (recebido − despesas), ação "Fechar o mês" (só admin), novo item de Sidebar.
+- [ ] Geração de PDF da Nota de Serviço (cupom, numeração automática) — adiado, fora do pedido desta rodada.
+- [ ] Dashboard com indicadores reais (substituir placeholders da Fase 1) — adiado.
+- [ ] Tela própria para `fechamentos` (fechamento por entidade, existente desde a v0.1.0) — segue sem UI, não foi pedida nesta rodada.
 
 ## Fase 5 — Deploy final e polish
 

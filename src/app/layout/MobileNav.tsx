@@ -4,6 +4,8 @@ import {
   Users,
   Package,
   Wallet,
+  Receipt,
+  Landmark,
   FileText,
   Settings,
 } from 'lucide-react'
@@ -13,7 +15,9 @@ const NAV_ITEMS = [
   { to: '/', label: 'OS', icon: ClipboardList, end: true },
   { to: '/clientes-parceiros', label: 'Clientes', icon: Users },
   { to: '/servicos', label: 'Serviços', icon: Package },
-  { to: '/financeiro', label: 'Financeiro', icon: Wallet },
+  { to: '/financeiro', label: 'Receber', icon: Wallet },
+  { to: '/despesas', label: 'Despesas', icon: Receipt },
+  { to: '/fechamento', label: 'Fechamento', icon: Landmark },
   { to: '/relatorios', label: 'Relatórios', icon: FileText },
   { to: '/configuracoes', label: 'Ajustes', icon: Settings },
 ]

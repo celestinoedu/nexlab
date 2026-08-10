@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
-import type { OrdemServico, OrdemServicoComRelacoes, StatusOS } from '@/types/domain'
+import type { OrdemServico, OrdemServicoComRelacoes, StatusOS, StatusPagamentoOS } from '@/types/domain'
 
 export interface OrdemServicoItemInput {
   servico_id: string
@@ -15,10 +15,14 @@ export interface OrdemServicoFormInput {
   numero_os: number | null
   entidade_id: string
   cliente_final: string | null
+  status: StatusOS
   data_recebimento: string
   data_prevista: string | null
+  data_entrega: string | null
   desconto: number
   observacoes: string | null
+  status_pagamento: StatusPagamentoOS
+  forma_pagamento: string | null
   itens: OrdemServicoItemInput[]
 }
 

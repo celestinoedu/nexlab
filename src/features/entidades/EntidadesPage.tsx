@@ -1,5 +1,6 @@
 import * as React from 'react'
-import { Plus, Search, Loader2, Wallet } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { Plus, Search, Loader2, Wallet, Pencil } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -12,6 +13,7 @@ import type { Entidade, TipoEntidade } from '@/types/domain'
 type FiltroTipo = 'todos' | TipoEntidade
 
 export function EntidadesPage() {
+  const navigate = useNavigate()
   const { data: entidades, isLoading } = useEntidades(undefined, true)
   const [busca, setBusca] = React.useState('')
   const [tipoFiltro, setTipoFiltro] = React.useState<FiltroTipo>('todos')
@@ -39,7 +41,8 @@ export function EntidadesPage() {
     setDialogAberto(true)
   }
 
-  function abrirEdicao(entidade: Entidade) {
+  function abrirEdicao(e: React.MouseEvent, entidade: Entidade) {
+    e.stopPropagation()
     setEntidadeSelecionada(entidade)
     setDialogAberto(true)
   }
@@ -124,7 +127,7 @@ export function EntidadesPage() {
               {filtradas.map((entidade) => (
                 <tr
                   key={entidade.id}
-                  onClick={() => abrirEdicao(entidade)}
+                  onClick={() => navigate(`/clientes-parceiros/${entidade.id}`)}
                   className="cursor-pointer border-b border-slate-50 transition-colors last:border-0 hover:bg-slate-50"
                 >
                   <td className="px-4 py-3 font-medium text-slate-800">{entidade.nome}</td>
@@ -143,15 +146,26 @@ export function EntidadesPage() {
                     </Badge>
                   </td>
                   <td className="px-4 py-3">
-                    <button
-                      type="button"
-                      onClick={(e) => abrirPrecos(e, entidade)}
-                      className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700"
-                      aria-label="Tabela de preços"
-                      title="Tabela de preços"
-                    >
-                      <Wallet size={16} />
-                    </button>
+                    <div className="flex items-center justify-end gap-1">
+                      <button
+                        type="button"
+                        onClick={(e) => abrirEdicao(e, entidade)}
+                        className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+                        aria-label="Editar cadastro"
+                        title="Editar cadastro"
+                      >
+                        <Pencil size={16} />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(e) => abrirPrecos(e, entidade)}
+                        className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+                        aria-label="Tabela de preços"
+                        title="Tabela de preços"
+                      >
+                        <Wallet size={16} />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}

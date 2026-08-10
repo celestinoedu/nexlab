@@ -43,9 +43,19 @@ Todo fechamento financeiro considera o mês **completo**: do dia 1 ao último di
 
 ## Contas a Receber
 
-- Reflete o que falta receber de cada **Parceiro** (comissões) e de cada **Cliente** (venda direta), agrupado por mês cheio, somando os itens de cada OS entregue.
-- "Fechar o mês" (ação em `fechamentos`) tira uma foto do valor total daquele momento — se uma OS antiga daquele mês for editada depois, o valor já fechado **não muda sozinho** (evita divergência com o que já foi cobrado/comunicado ao Parceiro/Cliente).
-- Um fechamento pode estar `aberto` (mês corrente, ainda somando) → `fechado` (valor travado, aguardando pagamento) → `pago` (recebido, com data de pagamento).
+- **Cada OS entregue vira automaticamente uma linha de Contas a Receber** (`contas_receber`) — não é preciso lançar nada manualmente. A linha nasce com o valor calculado no momento da entrega (mesma lógica de "valor efetivo" descrita acima) e **não muda sozinha** se a OS for editada depois (mesma filosofia de "travar o valor" do fechamento mensal).
+- Uma conta a receber tem três estados: `aberto` (default, aguardando) → `pago` (com data e forma de pagamento) ou `cancelado`.
+- **"Excluir" uma conta a receber é sempre um cancelamento com justificativa**, nunca uma exclusão de verdade: exige que o usuário explique o motivo, a linha some da visão padrão da tela mas continua no banco com `status = cancelado` e só reaparece se o usuário marcar "Mostrar cancelados". Ação restrita a `admin`.
+- O formulário da própria OS tem um **status financeiro** (Pendente/Pago) e **forma de pagamento** — é a mesma informação usada para popular a conta a receber no momento em que a OS é marcada como entregue; depois disso, quem gerencia o pagamento é a tela de Contas a Receber.
+- "Fechar o mês" (ação em `fechamentos`, por entidade) tira uma foto do valor total daquele momento — recurso existente desde a v0.1.0, ainda sem tela própria.
+
+## Fechamento Financeiro (resultado do laboratório)
+
+Distinto do fechamento por entidade acima: mostra o **resultado do laboratório inteiro** num mês — tudo que foi efetivamente recebido (Contas a Receber com `status = pago`, pelo mês do pagamento) menos as Despesas lançadas naquele mês. Antes de fechar, os totais são recalculados ao vivo toda vez que a tela é aberta; a ação "Fechar o mês" (só `admin`) trava um snapshot em `fechamentos_financeiros` — se novas contas/despesas entrarem depois, o valor fechado não muda até alguém fechar o mês de novo.
+
+## Despesas
+
+Cadastro simples de saídas de caixa do laboratório (categoria livre, descrição, valor, data, observações) — sem vínculo com OS ou entidade. Alimenta o Fechamento Financeiro.
 
 ## Emissão de documentos
 
@@ -55,5 +65,5 @@ Todo fechamento financeiro considera o mês **completo**: do dia 1 ao último di
 
 ## Perfis de usuário
 
-- `admin`: acesso completo, incluindo editar preços/comissões (`tabela_precos`), configuração da empresa e fechar/marcar pagamento em Contas a Receber.
-- `operador`: opera o dia a dia (criar/editar Ordens de Serviço, cadastrar Clientes/Parceiros, baixar PDF de OS) mas não altera preços nem fecha o financeiro — reduz risco de erro por parte de quem só usa o sistema para o fluxo operacional.
+- `admin`: acesso completo, incluindo editar preços/comissões (`tabela_precos`), configuração da empresa, cancelar uma conta a receber (com justificativa) e fechar o mês (por entidade em `fechamentos`, ou o resultado do laboratório em `fechamentos_financeiros`).
+- `operador`: opera o dia a dia (criar/editar Ordens de Serviço, cadastrar Clientes/Parceiros, lançar Despesas, marcar uma conta a receber como paga/pendente, baixar PDF de OS e do Relatório de Fechamento) mas não altera preços nem fecha o financeiro — reduz risco de erro por parte de quem só usa o sistema para o fluxo operacional.

@@ -46,6 +46,9 @@ export function OrdemServicoCard({ ordem, onClick, onImprimir, overlay }: OrdemS
       <div className="flex items-start justify-between gap-2">
         <span className="text-xs font-medium text-slate-400">#{ordem.numero_os}</span>
         <div className="flex shrink-0 items-center gap-1.5">
+          <Badge variant={ordem.status_pagamento === 'pago' ? 'success' : 'warning'}>
+            {ordem.status_pagamento === 'pago' ? 'Pago' : 'Pendente'}
+          </Badge>
           {prazo && <Badge variant={prazo.variant}>{prazo.label}</Badge>}
           {onImprimir && (
             <button
