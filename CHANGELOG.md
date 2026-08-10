@@ -2,6 +2,11 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), versionamento [SemVer](https://semver.org/lang/pt-BR/).
 
+## [0.7.1] - 2026-08-10 — Corrige erro ao entregar OS
+
+### Corrigido
+- `supabase/migrations/0004_fix_trigger_conta_receber.sql`: a trigger que cria a linha de Contas a Receber (`trg_fn_criar_conta_receber`, adicionada na `0003`) falhava com `column "status" is of type status_conta_receber but expression is of type text` sempre que uma OS era movida para "Entregue" — o `CASE` que decide o status inicial (`aberto`/`pago`) devolvia texto puro, e o Postgres não faz esse cast automático dentro de um `CASE` usado num `INSERT`. Corrigido com um cast explícito (`::status_conta_receber`).
+
 ## [0.7.0] - 2026-08-10 — Gestão financeira: Contas a Receber, Despesas, Fechamento, extrato por entidade
 
 ### Adicionado
