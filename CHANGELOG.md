@@ -2,6 +2,21 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), versionamento [SemVer](https://semver.org/lang/pt-BR/).
 
+## [0.5.0] - 2026-08-09 — Ordens de Serviço multi-item + correções de UX
+
+### Alterado
+- **Renomeado "Demanda" → "Ordem de Serviço (OS)"** em todo o sistema: banco (`demandas`→`ordens_servico`, `status_demanda`→`status_os`), pastas (`src/features/demandas`→`src/features/ordens-servico`), componentes, hooks, textos e documentação.
+- **Uma OS agora pode ter vários serviços**: nova tabela `ordem_servico_itens` (cor, arco Superior/Inferior, quantidade, valor/comissão por item). O catálogo de serviços continua só com o "serviço pai" — cor e arco são escolhidos por item dentro da OS, não no catálogo.
+- `OrdemServicoFormDialog` reescrito: lista dinâmica de itens (`useFieldArray`), total calculado em tempo real, campo **Número da OS** visível/editável (sugestão automática), **Data de Recebimento** exposta ao lado da **Data de entrega (prevista)** — esta última sugerida a partir do novo `servicos.tempo_medio_dias`.
+- **Lista voltou a ser a visão padrão** do módulo (Kanban continua disponível pelo toggle).
+- Catálogo de serviços (`supabase/seed.sql`) substituído pela **tabela de preços real da GRS Lab** (fornecida pelo cliente), com prazo padrão de 7 dias úteis.
+- Bundle: `@react-pdf/renderer` isolada em chunk separado via `import()` dinâmico — só carrega quando alguém baixa um PDF, não pesa no login.
+
+### Adicionado
+- **Download do PDF da Ordem de Serviço** (`OrdemServicoPdf.tsx`) — disponível quando o status é Entregue, no Kanban (ícone no card) e na Lista (ação da linha). Sempre baixa o arquivo (`OS-<número>.pdf`), nunca só abre para visualizar.
+- `supabase/migrations/0002_ordens_servico.sql`: substitui `demandas` por `ordens_servico` + `ordem_servico_itens`, adiciona `tempo_medio_dias` em `servicos`, recalcula `vw_contas_receber`/`vw_relatorio_fechamento_itens` por item.
+- Ajustes de responsividade mobile no formulário de OS (grids e itens de serviço empilham em telas pequenas).
+
 ## [0.4.0] - 2026-08-09 — Módulo Demandas (Kanban + Lista) como tela inicial
 
 ### Adicionado

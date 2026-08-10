@@ -1,17 +1,19 @@
 /**
- * Tipos de domínio espelhando supabase/migrations/0001_init.sql.
+ * Tipos de domínio espelhando supabase/migrations/0001_init.sql + 0002_ordens_servico.sql.
  * Mantido manualmente enquanto src/types/supabase.ts é um stub (`any`) — ver
  * SETUP.md § "Regenerar os tipos TypeScript" para trocar por tipos gerados.
  */
 
 export type TipoEntidade = 'cliente' | 'parceiro'
 
-export type StatusDemanda =
+export type StatusOS =
   | 'recebido'
   | 'em_producao'
   | 'pronto_entrega'
   | 'entregue'
   | 'cancelado'
+
+export type TipoArco = 'superior' | 'inferior'
 
 export type RoleUsuario = 'admin' | 'operador'
 
@@ -34,6 +36,7 @@ export interface Servico {
   nome: string
   categoria: string | null
   preco_padrao: number
+  tempo_medio_dias: number | null
   ativo: boolean
   created_at: string
 }
@@ -46,19 +49,16 @@ export interface TabelaPreco {
   updated_at: string
 }
 
-export interface Demanda {
+/** Cabeçalho de uma Ordem de Serviço (OS) — os serviços ficam em OrdemServicoItem. */
+export interface OrdemServico {
   id: string
   numero_os: number
   entidade_id: string
-  servico_id: string
   cliente_final: string | null
-  quantidade: number
-  status: StatusDemanda
-  data_entrada: string
+  status: StatusOS
+  data_recebimento: string
   data_prevista: string | null
   data_entrega: string | null
-  valor_servico: number
-  valor_comissao: number | null
   desconto: number
   mes_referencia: string
   observacoes: string | null
@@ -67,13 +67,26 @@ export interface Demanda {
   updated_at: string
 }
 
-/** Demanda com os dados de entidade/serviço já unidos (join), usada nas telas de listagem. */
-export interface DemandaComRelacoes extends Demanda {
-  entidade: Pick<Entidade, 'id' | 'nome' | 'tipo'>
-  servico: Pick<Servico, 'id' | 'nome'>
+/** Um serviço dentro de uma Ordem de Serviço — cor/arco são atributos do item, não do catálogo. */
+export interface OrdemServicoItem {
+  id: string
+  ordem_id: string
+  servico_id: string
+  cor: string | null
+  arco: TipoArco | null
+  quantidade: number
+  valor_unitario: number
+  valor_comissao: number | null
+  created_at: string
 }
 
-export const STATUS_DEMANDA_LABEL: Record<StatusDemanda, string> = {
+/** OS com entidade e itens (com serviço) já unidos — usada nas telas de listagem/edição. */
+export interface OrdemServicoComRelacoes extends OrdemServico {
+  entidade: Pick<Entidade, 'id' | 'nome' | 'tipo'>
+  itens: (OrdemServicoItem & { servico: Pick<Servico, 'id' | 'nome'> })[]
+}
+
+export const STATUS_OS_LABEL: Record<StatusOS, string> = {
   recebido: 'Recebido',
   em_producao: 'Em Produção',
   pronto_entrega: 'Pronto para Entrega',
@@ -81,10 +94,27 @@ export const STATUS_DEMANDA_LABEL: Record<StatusDemanda, string> = {
   cancelado: 'Cancelado',
 }
 
+export const ARCO_LABEL: Record<TipoArco, string> = {
+  superior: 'Superior',
+  inferior: 'Inferior',
+}
+
 /** Ordem das colunas do Kanban — "cancelado" fica fora do quadro de propósito. */
-export const STATUS_KANBAN_ORDEM: StatusDemanda[] = [
+export const STATUS_KANBAN_ORDEM: StatusOS[] = [
   'recebido',
   'em_producao',
   'pronto_entrega',
   'entregue',
 ]
+
+/** Valor efetivo de um item para quem recebe (comissão se parceiro, valor cheio se cliente). */
+export function valorEfetivoItem(item: OrdemServicoItem, tipoEntidade: TipoEntidade): number {
+  const unitario = tipoEntidade === 'parceiro' ? (item.valor_comissao ?? 0) : item.valor_unitario
+  return unitario * item.quantidade
+}
+
+/** Soma de todos os itens de uma OS, já descontado o desconto da ordem. */
+export function valorTotalOrdem(ordem: OrdemServicoComRelacoes): number {
+  const subtotal = ordem.itens.reduce((acc, item) => acc + valorEfetivoItem(item, ordem.entidade.tipo), 0)
+  return subtotal - ordem.desconto
+}

@@ -28,6 +28,21 @@ Atualizar este arquivo ao final de cada sessão de trabalho relevante, marcando 
 - [x] Dados de exemplo inseridos no banco (6 entidades, preços/comissões, 19 demandas) para testar o módulo ponta a ponta.
 - [ ] Atalho "gerar Nota de Serviço" ao confirmar entrega — adiado para a Fase 4 (PDF ainda não existe).
 
+## Fase 2.1 — Ordens de Serviço multi-item + correções ✅ concluída em 2026-08-09 (v0.5.0)
+
+Correções pedidas após o primeiro teste do módulo (era "Demandas"):
+
+- [x] **Renomeado "Demanda" → "Ordem de Serviço (OS)"** em todo o sistema (código, telas, banco, docs).
+- [x] **Uma OS pode ter vários serviços** (`ordem_servico_itens`), cada um com Cor e Arco (Superior/Inferior) próprios — catálogo continua só com o "serviço pai".
+- [x] Catálogo de serviços ganhou `tempo_medio_dias`, usado para sugerir a data de entrega prevista.
+- [x] Campo **Número da OS** visível e editável na criação (sugestão automática, mas pode ser sobrescrito).
+- [x] Campos **Data de Recebimento** e **Data de entrega (prevista)** expostos no formulário.
+- [x] **Lista voltou a ser a visão padrão** (Kanban continua disponível pelo toggle).
+- [x] **Download do PDF da OS** (sempre baixa arquivo, nunca só abre pra visualizar) — disponível quando o status é Entregue, no Kanban e na Lista.
+- [x] Catálogo de serviços trocado pela **tabela de preços real da GRS Lab** (fornecida pelo cliente), com prazo padrão de 7 dias úteis.
+- [x] Ajustes de responsividade mobile no formulário (grids e itens empilham em telas pequenas).
+- [x] Nova migration `0002_ordens_servico.sql` (substitui `demandas` por `ordens_servico` + `ordem_servico_itens`).
+
 ## Fase 3 — Clientes/Parceiros + Tabela de Preços (próxima)
 
 - [ ] Cadastro de Clientes e Parceiros (abas, formulário simples).

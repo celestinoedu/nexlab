@@ -39,7 +39,7 @@ export function EntregaConfirmDialog({
         <DialogHeader>
           <DialogTitle>Marcar como entregue</DialogTitle>
           <DialogDescription>
-            {numeroOs ? `Demanda #${numeroOs} — c` : 'C'}onfirme a data de entrega.
+            {numeroOs ? `OS #${numeroOs} — c` : 'C'}onfirme a data de entrega.
           </DialogDescription>
         </DialogHeader>
 

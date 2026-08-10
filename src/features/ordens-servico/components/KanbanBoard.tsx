@@ -10,36 +10,42 @@ import {
   type DragStartEvent,
 } from '@dnd-kit/core'
 import { cn } from '@/lib/utils'
-import { DemandaCard } from './DemandaCard'
+import { OrdemServicoCard } from './OrdemServicoCard'
 import { EntregaConfirmDialog } from './EntregaConfirmDialog'
-import { useDemandaMutations } from '@/features/demandas/hooks/useDemandaMutations'
-import { STATUS_DEMANDA_LABEL, STATUS_KANBAN_ORDEM, type DemandaComRelacoes, type StatusDemanda } from '@/types/domain'
+import { useOrdemServicoMutations } from '@/features/ordens-servico/hooks/useOrdemServicoMutations'
+import {
+  STATUS_OS_LABEL,
+  STATUS_KANBAN_ORDEM,
+  type OrdemServicoComRelacoes,
+  type StatusOS,
+} from '@/types/domain'
 
 interface KanbanBoardProps {
-  demandas: DemandaComRelacoes[]
-  onEditDemanda: (demanda: DemandaComRelacoes) => void
+  ordens: OrdemServicoComRelacoes[]
+  onEditOrdem: (ordem: OrdemServicoComRelacoes) => void
+  onImprimirOrdem: (ordem: OrdemServicoComRelacoes) => void
 }
 
-export function KanbanBoard({ demandas, onEditDemanda }: KanbanBoardProps) {
-  const { updateStatus } = useDemandaMutations()
+export function KanbanBoard({ ordens, onEditOrdem, onImprimirOrdem }: KanbanBoardProps) {
+  const { updateStatus } = useOrdemServicoMutations()
   const [activeId, setActiveId] = React.useState<string | null>(null)
-  const [pendingEntrega, setPendingEntrega] = React.useState<DemandaComRelacoes | null>(null)
+  const [pendingEntrega, setPendingEntrega] = React.useState<OrdemServicoComRelacoes | null>(null)
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
   )
 
   const porColuna = React.useMemo(() => {
-    const map = new Map<StatusDemanda, DemandaComRelacoes[]>()
+    const map = new Map<StatusOS, OrdemServicoComRelacoes[]>()
     for (const status of STATUS_KANBAN_ORDEM) map.set(status, [])
-    for (const d of demandas) {
-      if (d.status === 'cancelado') continue
-      map.get(d.status)?.push(d)
+    for (const o of ordens) {
+      if (o.status === 'cancelado') continue
+      map.get(o.status)?.push(o)
     }
     return map
-  }, [demandas])
+  }, [ordens])
 
-  const activeDemanda = activeId ? demandas.find((d) => d.id === activeId) ?? null : null
+  const activeOrdem = activeId ? ordens.find((o) => o.id === activeId) ?? null : null
 
   function handleDragStart(event: DragStartEvent) {
     setActiveId(String(event.active.id))
@@ -50,16 +56,16 @@ export function KanbanBoard({ demandas, onEditDemanda }: KanbanBoardProps) {
     const { active, over } = event
     if (!over) return
 
-    const novoStatus = over.id as StatusDemanda
-    const demanda = demandas.find((d) => d.id === active.id)
-    if (!demanda || demanda.status === novoStatus) return
+    const novoStatus = over.id as StatusOS
+    const ordem = ordens.find((o) => o.id === active.id)
+    if (!ordem || ordem.status === novoStatus) return
 
     if (novoStatus === 'entregue') {
-      setPendingEntrega(demanda)
+      setPendingEntrega(ordem)
       return
     }
 
-    updateStatus.mutate({ id: demanda.id, status: novoStatus })
+    updateStatus.mutate({ id: ordem.id, status: novoStatus })
   }
 
   return (
@@ -70,15 +76,16 @@ export function KanbanBoard({ demandas, onEditDemanda }: KanbanBoardProps) {
             <KanbanColumn
               key={status}
               status={status}
-              demandas={porColuna.get(status) ?? []}
-              onEditDemanda={onEditDemanda}
+              ordens={porColuna.get(status) ?? []}
+              onEditOrdem={onEditOrdem}
+              onImprimirOrdem={onImprimirOrdem}
             />
           ))}
         </div>
 
         <DragOverlay>
-          {activeDemanda && (
-            <DemandaCard demanda={activeDemanda} onClick={() => {}} overlay />
+          {activeOrdem && (
+            <OrdemServicoCard ordem={activeOrdem} onClick={() => {}} overlay />
           )}
         </DragOverlay>
       </DndContext>
@@ -100,12 +107,14 @@ export function KanbanBoard({ demandas, onEditDemanda }: KanbanBoardProps) {
 
 function KanbanColumn({
   status,
-  demandas,
-  onEditDemanda,
+  ordens,
+  onEditOrdem,
+  onImprimirOrdem,
 }: {
-  status: StatusDemanda
-  demandas: DemandaComRelacoes[]
-  onEditDemanda: (demanda: DemandaComRelacoes) => void
+  status: StatusOS
+  ordens: OrdemServicoComRelacoes[]
+  onEditOrdem: (ordem: OrdemServicoComRelacoes) => void
+  onImprimirOrdem: (ordem: OrdemServicoComRelacoes) => void
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: status })
 
@@ -118,18 +127,23 @@ function KanbanColumn({
       )}
     >
       <div className="flex items-center justify-between px-1">
-        <h3 className="text-sm font-semibold text-slate-700">{STATUS_DEMANDA_LABEL[status]}</h3>
-        <span className="text-xs font-medium text-slate-400">{demandas.length}</span>
+        <h3 className="text-sm font-semibold text-slate-700">{STATUS_OS_LABEL[status]}</h3>
+        <span className="text-xs font-medium text-slate-400">{ordens.length}</span>
       </div>
 
       <div className="flex min-h-16 flex-col gap-2">
-        {demandas.length === 0 && (
+        {ordens.length === 0 && (
           <p className="rounded-xl border border-dashed border-slate-200 p-4 text-center text-xs text-slate-400">
-            Nenhuma demanda aqui
+            Nenhuma OS aqui
           </p>
         )}
-        {demandas.map((demanda) => (
-          <DemandaCard key={demanda.id} demanda={demanda} onClick={() => onEditDemanda(demanda)} />
+        {ordens.map((ordem) => (
+          <OrdemServicoCard
+            key={ordem.id}
+            ordem={ordem}
+            onClick={() => onEditOrdem(ordem)}
+            onImprimir={ordem.status === 'entregue' ? () => onImprimirOrdem(ordem) : undefined}
+          />
         ))}
       </div>
     </div>

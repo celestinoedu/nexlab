@@ -2,17 +2,19 @@ import * as React from 'react'
 import { format, parseISO } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { LayoutGrid, List, Plus, Search, Loader2 } from 'lucide-react'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/utils'
-import { useDemandas } from './hooks/useDemandas'
+import { useEmpresaConfig } from '@/hooks/useEmpresaConfig'
+import { useOrdensServico } from './hooks/useOrdensServico'
 import { KanbanBoard } from './components/KanbanBoard'
-import { ListaDemandas } from './components/ListaDemandas'
-import { DemandaFormDialog } from './components/DemandaFormDialog'
-import { STATUS_DEMANDA_LABEL, type DemandaComRelacoes, type StatusDemanda } from '@/types/domain'
+import { ListaOrdensServico } from './components/ListaOrdensServico'
+import { OrdemServicoFormDialog } from './components/OrdemServicoFormDialog'
+import { STATUS_OS_LABEL, type OrdemServicoComRelacoes, type StatusOS } from '@/types/domain'
 
 type Visao = 'kanban' | 'lista'
-type FiltroStatus = 'todos' | StatusDemanda
+type FiltroStatus = 'todos' | StatusOS
 
 const STATUS_FILTROS: FiltroStatus[] = [
   'todos',
@@ -23,59 +25,72 @@ const STATUS_FILTROS: FiltroStatus[] = [
   'cancelado',
 ]
 
-export function DemandasPage() {
-  const { data: demandas, isLoading } = useDemandas()
-  const [visao, setVisao] = React.useState<Visao>('kanban')
+export function OrdensServicoPage() {
+  const { data: ordens, isLoading } = useOrdensServico()
+  const { data: empresaConfig } = useEmpresaConfig()
+  // Lista é a visão padrão — Kanban continua disponível pelo toggle.
+  const [visao, setVisao] = React.useState<Visao>('lista')
   const [busca, setBusca] = React.useState('')
   const [statusFiltro, setStatusFiltro] = React.useState<FiltroStatus>('todos')
   const [mesFiltro, setMesFiltro] = React.useState('todos')
   const [dialogAberto, setDialogAberto] = React.useState(false)
-  const [demandaEditando, setDemandaEditando] = React.useState<DemandaComRelacoes | null>(null)
+  const [ordemEditando, setOrdemEditando] = React.useState<OrdemServicoComRelacoes | null>(null)
 
   const meses = React.useMemo(() => {
     const set = new Set<string>()
-    for (const d of demandas ?? []) set.add(d.mes_referencia)
+    for (const o of ordens ?? []) set.add(o.mes_referencia)
     return Array.from(set)
       .sort((a, b) => b.localeCompare(a))
       .map((mes) => ({ value: mes, label: format(parseISO(mes), "MMMM 'de' yyyy", { locale: ptBR }) }))
-  }, [demandas])
+  }, [ordens])
 
   const filtradosBase = React.useMemo(() => {
     const buscaLower = busca.trim().toLowerCase()
-    return (demandas ?? []).filter((d) => {
-      if (mesFiltro !== 'todos' && d.mes_referencia !== mesFiltro) return false
+    return (ordens ?? []).filter((o) => {
+      if (mesFiltro !== 'todos' && o.mes_referencia !== mesFiltro) return false
       if (!buscaLower) return true
       return (
-        String(d.numero_os).includes(buscaLower) ||
-        (d.cliente_final ?? '').toLowerCase().includes(buscaLower) ||
-        d.entidade.nome.toLowerCase().includes(buscaLower) ||
-        d.servico.nome.toLowerCase().includes(buscaLower)
+        String(o.numero_os).includes(buscaLower) ||
+        (o.cliente_final ?? '').toLowerCase().includes(buscaLower) ||
+        o.entidade.nome.toLowerCase().includes(buscaLower) ||
+        o.itens.some((item) => item.servico.nome.toLowerCase().includes(buscaLower))
       )
     })
-  }, [demandas, busca, mesFiltro])
+  }, [ordens, busca, mesFiltro])
 
   const filtradosLista = React.useMemo(
-    () => filtradosBase.filter((d) => statusFiltro === 'todos' || d.status === statusFiltro),
+    () => filtradosBase.filter((o) => statusFiltro === 'todos' || o.status === statusFiltro),
     [filtradosBase, statusFiltro],
   )
 
-  function abrirNovaDemanda() {
-    setDemandaEditando(null)
+  function abrirNovaOrdem() {
+    setOrdemEditando(null)
     setDialogAberto(true)
   }
 
-  function abrirEdicao(demanda: DemandaComRelacoes) {
-    setDemandaEditando(demanda)
+  function abrirEdicao(ordem: OrdemServicoComRelacoes) {
+    setOrdemEditando(ordem)
     setDialogAberto(true)
+  }
+
+  async function baixarPdf(ordem: OrdemServicoComRelacoes) {
+    try {
+      // Import dinâmico: @react-pdf/renderer é pesada e só é necessária
+      // quando alguém realmente baixa um PDF — mantém fora do bundle inicial.
+      const { baixarPdfOrdemServico } = await import('./components/OrdemServicoPdf')
+      await baixarPdfOrdemServico(ordem, empresaConfig)
+    } catch {
+      toast.error('Não foi possível gerar o PDF agora. Tente novamente.')
+    }
   }
 
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-semibold text-slate-900">Demandas</h1>
-        <Button variant="accent" onClick={abrirNovaDemanda}>
+        <h1 className="text-2xl font-semibold text-slate-900">Ordens de Serviço</h1>
+        <Button variant="accent" onClick={abrirNovaOrdem}>
           <Plus size={18} />
-          Nova Demanda
+          Nova OS
         </Button>
       </div>
 
@@ -104,8 +119,8 @@ export function DemandasPage() {
         </select>
 
         <div className="ml-auto flex items-center gap-1 rounded-xl border border-slate-200 bg-white p-1">
-          <ToggleButton active={visao === 'kanban'} onClick={() => setVisao('kanban')} icon={LayoutGrid} label="Kanban" />
           <ToggleButton active={visao === 'lista'} onClick={() => setVisao('lista')} icon={List} label="Lista" />
+          <ToggleButton active={visao === 'kanban'} onClick={() => setVisao('kanban')} icon={LayoutGrid} label="Kanban" />
         </div>
       </div>
 
@@ -122,7 +137,7 @@ export function DemandasPage() {
                   : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50',
               )}
             >
-              {status === 'todos' ? 'Todos' : STATUS_DEMANDA_LABEL[status]}
+              {status === 'todos' ? 'Todos' : STATUS_OS_LABEL[status]}
             </button>
           ))}
         </div>
@@ -133,12 +148,12 @@ export function DemandasPage() {
           <Loader2 className="animate-spin text-brand-600" size={28} />
         </div>
       ) : visao === 'kanban' ? (
-        <KanbanBoard demandas={filtradosBase} onEditDemanda={abrirEdicao} />
+        <KanbanBoard ordens={filtradosBase} onEditOrdem={abrirEdicao} onImprimirOrdem={baixarPdf} />
       ) : (
-        <ListaDemandas demandas={filtradosLista} onEditDemanda={abrirEdicao} />
+        <ListaOrdensServico ordens={filtradosLista} onEditOrdem={abrirEdicao} onImprimirOrdem={baixarPdf} />
       )}
 
-      <DemandaFormDialog open={dialogAberto} onOpenChange={setDialogAberto} demanda={demandaEditando} />
+      <OrdemServicoFormDialog open={dialogAberto} onOpenChange={setDialogAberto} ordem={ordemEditando} />
     </div>
   )
 }

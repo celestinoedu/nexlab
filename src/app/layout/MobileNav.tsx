@@ -10,7 +10,7 @@ import {
 import { cn } from '@/lib/utils'
 
 const NAV_ITEMS = [
-  { to: '/', label: 'Demandas', icon: ClipboardList, end: true },
+  { to: '/', label: 'OS', icon: ClipboardList, end: true },
   { to: '/clientes-parceiros', label: 'Clientes', icon: Users },
   { to: '/servicos', label: 'Serviços', icon: Package },
   { to: '/financeiro', label: 'Financeiro', icon: Wallet },

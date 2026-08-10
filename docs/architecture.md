@@ -34,7 +34,7 @@ Um backend Node/API própria exigiria hospedagem própria (a maioria dos hosts g
 
 ## Por que GitHub Pages + `HashRouter` + `base: './'`
 
-GitHub Pages serve arquivos estáticos e **não faz rewrite de URL** (ex.: acessar `/demandas` diretamente devolveria 404, pois não existe esse arquivo). Duas formas de contornar isso: um `404.html` que redireciona para `index.html`, ou rotear com `HashRouter` (URLs como `/#/demandas`, que o navegador nunca envia ao servidor — sempre pede só `index.html`). Optamos por `HashRouter`: mais simples, sem hacks de redirecionamento, sem risco de piscar a tela em cada navegação.
+GitHub Pages serve arquivos estáticos e **não faz rewrite de URL** (ex.: acessar `/financeiro` diretamente devolveria 404, pois não existe esse arquivo). Duas formas de contornar isso: um `404.html` que redireciona para `index.html`, ou rotear com `HashRouter` (URLs como `/#/financeiro`, que o navegador nunca envia ao servidor — sempre pede só `index.html`). Optamos por `HashRouter`: mais simples, sem hacks de redirecionamento, sem risco de piscar a tela em cada navegação.
 
 `vite.config.ts` usa `base: './'` (caminho relativo) em vez de `/nome-do-repo/`: isso faz os assets (JS/CSS/fontes) resolverem corretamente **independente do nome do repositório ou de estar num subpath** (`usuario.github.io/nexlab/`) ou domínio próprio no futuro — sem precisar reconfigurar nada no build.
 
@@ -56,5 +56,5 @@ O usuário pediu uma identidade visual **criada do zero**, não um tema genéric
 
 ## Débitos técnicos conhecidos (não bloqueiam a Fase 1)
 
-- Bundle JS inicial ~214 KB gzip — aceitável para uma ferramenta interna, mas quando os módulos de Demandas/Financeiro/Relatórios (que trazem `@dnd-kit` e `@react-pdf/renderer`) forem implementados, considerar `React.lazy` por rota para não crescer o carregamento inicial da tela de login.
+- Bundle JS inicial ~257 KB gzip. `@react-pdf/renderer` (a lib mais pesada do projeto, ~471 KB gzip) já está isolada num chunk separado via `import()` dinâmico dentro de `OrdensServicoPage.tsx` — só carrega quando alguém realmente baixa um PDF, não pesa no login/carregamento inicial. Mesmo padrão vale para futuros PDFs da Fase 4 (Relatório de Fechamento, Nota de Serviço). Quando Financeiro/Relatórios forem implementados, considerar `React.lazy` por rota também para o restante do bundle.
 - Sem modo escuro — não é requisito do usuário; os tokens de cor em `src/index.css` já estão isolados o suficiente para adicionar depois sem retrabalho, se pedido.

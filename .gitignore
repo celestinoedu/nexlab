@@ -16,6 +16,11 @@ dist-ssr
 # Repositório é público — mantidos só localmente como referência, nunca versionados.
 docs/assets/relatorios-exemplo/
 
+# PDF original da lista de preços (asset binário) — os dados já estão em
+# supabase/seed.sql (versionado, com aprovação do cliente); o PDF em si fica
+# só localmente por higiene de repositório (asset binário de referência).
+docs/assets/lista-preco/
+
 # NUNCA versionar: senha do banco, service_role key, anon key etc.
 # Repositório é público — isso teria que ser rotacionado imediatamente se vazasse.
 Supabase Credentials/

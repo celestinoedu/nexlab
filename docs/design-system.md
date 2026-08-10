@@ -32,7 +32,7 @@ Usada em: navegação ativa, links, ícones de destaque, gráficos primários do
 
 ### 2.2 Acento — `amber` (calor humano / ação)
 
-Usado **só** para a ação mais importante da tela (ex.: botão "+ Nova Demanda", destaque de valor pendente em Contas a Receber). Nunca em navegação ou textos longos.
+Usado **só** para a ação mais importante da tela (ex.: botão "+ Nova OS", destaque de valor pendente em Contas a Receber). Nunca em navegação ou textos longos.
 
 | Token | Hex | Uso |
 |---|---|---|
@@ -76,7 +76,7 @@ Uma família só, variando peso — evita inconsistência visual e é mais previ
 
 | Estilo | Tamanho | Peso | Uso |
 |---|---|---|---|
-| Display | 30px / `text-3xl` | 700 | Título de página (ex.: "Demandas") |
+| Display | 30px / `text-3xl` | 700 | Título de página (ex.: "Ordens de Serviço") |
 | H1 | 24px / `text-2xl` | 600 | Título de seção/card grande |
 | H2 | 20px / `text-xl` | 600 | Título de card/modal |
 | H3 | 16px / `text-base` | 600 | Subtítulo, label de grupo |
@@ -96,7 +96,7 @@ Números monetários sempre com `font-variant-numeric: tabular-nums` (alinhament
 ## 5. Componentes (convenções)
 
 - Base de componentes: primitivas [Radix UI](https://www.radix-ui.com/) sem estilo, estilizadas manualmente no padrão **shadcn/ui** (componentes vivem em `src/components/ui/`, código copiado no repo — não é dependência de runtime, dá controle total da identidade visual).
-- **Botões**: `primary` (fundo `brand-600`, texto branco) para ação principal da tela; `accent` (fundo `amber-500`, texto `slate-900`) só para a ação mais importante de todas (ex.: "+ Nova Demanda"); `secondary` (borda `slate-200`, fundo branco) para ações alternativas; `ghost` (sem fundo) para ações terciárias; `destructive` (`danger-500`) para excluir/cancelar. Altura mínima de alvo de toque: 40px (`h-10`).
+- **Botões**: `primary` (fundo `brand-600`, texto branco) para ação principal da tela; `accent` (fundo `amber-500`, texto `slate-900`) só para a ação mais importante de todas (ex.: "+ Nova OS"); `secondary` (borda `slate-200`, fundo branco) para ações alternativas; `ghost` (sem fundo) para ações terciárias; `destructive` (`danger-500`) para excluir/cancelar. Altura mínima de alvo de toque: 40px (`h-10`).
 - **Badges de status** (Kanban/Contas a Receber): pílula (`rounded-full`) com fundo `-100` e texto `-700` da cor semântica correspondente (nunca cor sólida forte de fundo — mais legível, menos "gritante").
 - **Cards**: fundo branco, borda `slate-200`, `rounded-xl`, `shadow-sm`, padding `p-4` ou `p-6`.
 - **Inputs**: altura 40px, borda `slate-200`, foco com anel `brand-500` (`ring-2 ring-brand-500/40`), label sempre visível acima do campo (nunca só placeholder — usuário leigo perde o contexto quando o placeholder some ao digitar).
@@ -105,10 +105,10 @@ Números monetários sempre com `font-variant-numeric: tabular-nums` (alinhament
 ## 6. Tom de voz da interface
 
 - Idioma: português do Brasil, direto, sem jargão técnico ("Salvar" e não "Submit"; "Não encontramos nada com esse nome" e não "Nenhum resultado").
-- Botões com verbo de ação claro: "Criar Demanda", "Marcar como Entregue", "Gerar Relatório" — nunca só "OK" ou "Enviar".
+- Botões com verbo de ação claro: "Criar OS", "Marcar como Entregue", "Gerar Relatório" — nunca só "OK" ou "Enviar".
 - Mensagens de erro sempre explicam o que fazer a seguir (ex.: "Escolha um cliente ou parceiro antes de salvar" em vez de "Campo obrigatório").
-- Estados vazios (nenhuma demanda ainda, nenhum cliente cadastrado) sempre com uma frase amigável + botão de ação, nunca uma tela em branco.
-- Confirmações de ações destrutivas (excluir cliente, cancelar demanda) sempre em modal explícito, nunca ação de um clique só.
+- Estados vazios (nenhuma OS ainda, nenhum cliente cadastrado) sempre com uma frase amigável + botão de ação, nunca uma tela em branco.
+- Confirmações de ações destrutivas (excluir cliente, cancelar OS) sempre em modal explícito, nunca ação de um clique só.
 
 ## 7. Logo / wordmark (v1)
 

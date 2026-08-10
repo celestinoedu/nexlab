@@ -4,7 +4,7 @@ Este arquivo orienta qualquer sessão futura (IA ou humana) trabalhando neste re
 
 ## O que é o NexLab
 
-ERP simples para o **GRS Lab**, laboratório de próteses dentárias. Dois módulos centrais: **Demandas** (Kanban/Lista das ordens de serviço) e **Financeiro** (Contas a Receber, fechamento mensal, comissões de Parceiros). Usuário final é leigo em tecnologia — **prioridade #1 é sempre simplicidade de uso**, não sofisticação técnica.
+ERP simples para o **GRS Lab**, laboratório de próteses dentárias. Dois módulos centrais: **Ordens de Serviço (OS)** (Kanban/Lista, uma OS pode ter vários serviços/itens) e **Financeiro** (Contas a Receber, fechamento mensal, comissões de Parceiros). Usuário final é leigo em tecnologia — **prioridade #1 é sempre simplicidade de uso**, não sofisticação técnica.
 
 ## Restrições inegociáveis (não reabrir sem o usuário pedir)
 
@@ -13,7 +13,8 @@ ERP simples para o **GRS Lab**, laboratório de próteses dentárias. Dois módu
 3. **Hospedagem: GitHub Pages.** `vite.config.ts` usa `base: './'` (caminho relativo) de propósito — não trocar para caminho absoluto sem necessidade, e roteamento é `HashRouter` (não `BrowserRouter`) porque GitHub Pages não faz rewrite de rotas SPA.
 4. **Autenticação: e-mail + senha via Supabase Auth**, sessão persistente no navegador. Sem cadastro público — usuários são criados via convite/painel Supabase (perfil interno em `profiles`).
 5. **Preços/comissão por entidade × serviço** (tabela `tabela_precos`), nunca uma regra de % genérica automática — cada Cliente/Parceiro tem sua própria tabela negociada (ver `docs/business-rules.md`).
-6. **Fechamento financeiro = mês cheio**, sempre dia 1 ao último dia do mês (coluna `mes_referencia` calculada em `demandas`).
+6. **Fechamento financeiro = mês cheio**, sempre dia 1 ao último dia do mês (coluna `mes_referencia` calculada em `ordens_servico`).
+7. **Terminologia: "Ordem de Serviço" (OS), nunca "demanda"** — em código, telas e docs. Uma OS pode ter vários serviços (itens), cada um com cor/arco/valor próprios (ver `docs/business-rules.md`).
 
 ## Stack
 
@@ -26,11 +27,11 @@ Detalhes e justificativas em `docs/architecture.md`.
 ```
 src/
 ├── app/            # bootstrap: rotas, providers, layout (Sidebar/Topbar/ProtectedRoute)
-├── features/       # um módulo de negócio por pasta (auth, demandas, entidades, servicos, financeiro, relatorios)
+├── features/       # um módulo de negócio por pasta (auth, ordens-servico, entidades, servicos, financeiro, relatorios)
 ├── components/ui/  # primitivas visuais reutilizáveis (padrão shadcn/ui)
 ├── components/shared/  # componentes compostos reutilizáveis entre features (Logo, EmConstrucao...)
 ├── lib/            # supabase.ts, utils.ts, pdf/
-├── hooks/          # hooks de dados por entidade (useDemandas, useEntidades...)
+├── hooks/          # hooks de dados compartilhados (useEntidades, useServicos, useEmpresaConfig...)
 └── types/          # supabase.ts (tipos gerados do banco)
 ```
 
@@ -42,7 +43,7 @@ Toda tela nova de negócio entra em `src/features/<modulo>/`, não direto em `sr
 
 ## Banco de dados
 
-Schema completo versionado em `supabase/migrations/`. Nunca editar uma migration já aplicada — sempre criar uma nova (`0002_*.sql` etc.) e atualizar `docs/database-schema.md` junto. `supabase/seed.sql` tem o catálogo de serviços de exemplo (extraído dos relatórios reais dos parceiros, mantidos só localmente em `docs/assets/relatorios-exemplo/` — **não versionados**, pois contêm nomes de pacientes de terceiros e o repositório é público; ver `.gitignore`).
+Schema completo versionado em `supabase/migrations/`. Nunca editar uma migration já aplicada — sempre criar uma nova (`0003_*.sql` etc.) e atualizar `docs/database-schema.md` junto. `supabase/seed.sql` tem o **catálogo real de serviços e preços da GRS Lab** (fornecido pelo cliente — PDF original mantido só localmente em `docs/assets/lista-preco/`, não versionado por ser um asset binário, mas os dados em si estão aprovados para ficar públicos no `seed.sql`). Os relatórios de comissão de exemplo dos parceiros ficam só localmente em `docs/assets/relatorios-exemplo/` — **não versionados**, pois contêm nomes de pacientes de terceiros; ver `.gitignore`.
 
 ## Versionamento
 
@@ -68,4 +69,4 @@ Passo a passo completo (criar projeto Supabase, variáveis de ambiente, GitHub P
 - Não trocar GitHub Pages por Vercel/Netlify/outro host sem o usuário pedir explicitamente (já foi decidido e confirmado).
 - Não introduzir um backend/API própria "para simplificar" — vai contra a decisão de arquitetura.
 - Não usar bibliotecas de UI de tema fechado (Chakra, Mantine, MUI) — a identidade visual é própria, construída sobre Radix.
-- Não adicionar telas com múltiplos passos/wizards para operações simples (criar/editar demanda deve ser sempre 1 modal, 1 tela).
+- Não adicionar telas com múltiplos passos/wizards para operações simples (criar/editar OS deve ser sempre 1 modal, 1 tela — mesmo com múltiplos itens de serviço).
