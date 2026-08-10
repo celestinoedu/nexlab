@@ -2,6 +2,19 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), versionamento [SemVer](https://semver.org/lang/pt-BR/).
 
+## [0.6.0] - 2026-08-10 — Clientes/Parceiros + Catálogo de Serviços
+
+### Adicionado
+- Módulo **Clientes e Parceiros** (`EntidadesPage`): lista com busca, filtro por tipo (Todos/Clientes/Parceiros) e checkbox "Mostrar inativos"; cadastro em modal único (`EntidadeFormDialog`) com tipo, nome, documento, telefone, e-mail, endereço e observações.
+- **Tabela de Preços por entidade** (`TabelaPrecosDialog`), acessada pelo ícone de carteira em cada linha da lista: um campo por serviço do catálogo — "Preço" para Cliente, "Comissão" para Parceiro. Em branco, a OS volta a usar o preço padrão do catálogo automaticamente. Escrita restrita a `admin`; operador visualiza os valores com os campos desabilitados.
+- Módulo **Catálogo de Serviços** (`ServicosPage`): lista com busca e chips de categoria (derivados dos dados); cadastro em modal único (`ServicoFormDialog`) com nome, categoria, preço padrão e tempo médio de conclusão.
+- `useProfile`: hook que expõe `role`/`nome` do usuário logado (tabela `profiles`), usado para liberar ações de admin na interface.
+- `useEntidades`/`useServicos`: ganharam parâmetro para incluir registros inativos (usado só nas telas de cadastro; os comboboxes de OS continuam mostrando só ativos).
+
+### Alterado
+- **"Excluir" virou "desativar"** em Clientes/Parceiros e Catálogo de Serviços — um checkbox "Ativo" no formulário de edição, em vez de uma ação destrutiva. Preserva o histórico de OS já vinculado a um cadastro desativado.
+- Rotas `/clientes-parceiros` e `/servicos` deixam de mostrar "Em construção" e passam a carregar os módulos reais.
+
 ## [0.5.0] - 2026-08-09 — Ordens de Serviço multi-item + correções de UX
 
 ### Alterado

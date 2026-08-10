@@ -31,13 +31,14 @@ Arrastar e soltar (`@dnd-kit`) muda o `status` com atualização otimista (feedb
 
 ## Módulo Clientes e Parceiros
 
-- Lista em duas abas: "Clientes" e "Parceiros" (filtra por `entidades.tipo`).
-- Cadastro simples: nome, documento, telefone, e-mail, endereço.
-- Dentro do cadastro, uma seção **"Tabela de Preços"**: lista todo o catálogo de `servicos` com um campo de preço editável **inline** por linha (sem abrir outro modal); serviços ainda sem preço específico mostram o `preco_padrao` em cinza claro com um botão "usar este valor" que grava a linha em `tabela_precos`.
+- Lista única (`EntidadesPage`) com busca, chips de filtro "Todos / Clientes / Parceiros" e checkbox "Mostrar inativos" (registro nunca é apagado de verdade — ver abaixo).
+- Cadastro em modal único (`EntidadeFormDialog`): tipo (Cliente/Parceiro, botões), nome, documento, telefone, e-mail, endereço, observações; checkbox "Cadastro ativo" só aparece ao editar.
+- Cada linha da lista tem um ícone de carteira que abre a **Tabela de Preços** (`TabelaPrecosDialog`) — um modal separado (não um passo do mesmo formulário): um campo numérico por serviço do catálogo, rotulado "Preço" (Cliente) ou "Comissão" (Parceiro); deixar em branco volta a usar o `preco_padrao` do catálogo automaticamente, sem precisar de um botão extra. Escrita restrita a `admin` (operador visualiza os valores mas os campos ficam desabilitados, com aviso explicando o motivo).
+- "Excluir" não existe como ação destrutiva — desmarcar "Cadastro ativo" desativa o registro (some dos comboboxes de nova OS, mas o histórico de OS antigas continua intacto).
 
 ## Módulo Catálogo de Serviços
 
-CRUD simples (nome, categoria, preço padrão, tempo médio de conclusão em dias). Pré-requisito para o módulo de Ordens de Serviço funcionar — por isso semeado via `supabase/seed.sql` com o catálogo real da GRS Lab.
+Lista (`ServicosPage`) com busca e chips de categoria (derivados dos dados). CRUD em modal único (`ServicoFormDialog`): nome, categoria, preço padrão, tempo médio de conclusão em dias; checkbox "Serviço ativo" só aparece ao editar (mesma lógica de desativação, não exclusão, do módulo de Clientes e Parceiros). Pré-requisito para o módulo de Ordens de Serviço funcionar — por isso semeado via `supabase/seed.sql` com o catálogo real da GRS Lab.
 
 ## Módulo Contas a Receber
 

@@ -43,11 +43,12 @@ Correções pedidas após o primeiro teste do módulo (era "Demandas"):
 - [x] Ajustes de responsividade mobile no formulário (grids e itens empilham em telas pequenas).
 - [x] Nova migration `0002_ordens_servico.sql` (substitui `demandas` por `ordens_servico` + `ordem_servico_itens`).
 
-## Fase 3 — Clientes/Parceiros + Tabela de Preços (próxima)
+## Fase 3 — Clientes/Parceiros + Catálogo + Tabela de Preços ✅ concluída em 2026-08-10 (v0.6.0)
 
-- [ ] Cadastro de Clientes e Parceiros (abas, formulário simples).
-- [ ] CRUD do Catálogo de Serviços.
-- [ ] Tela de Tabela de Preços por entidade (edição inline por serviço).
+- [x] Cadastro de Clientes e Parceiros (`EntidadesPage`): lista com busca, filtro por tipo e opção "mostrar inativos"; formulário único de criar/editar (`EntidadeFormDialog`).
+- [x] CRUD do Catálogo de Serviços (`ServicosPage`): lista com busca e filtro por categoria; formulário único de criar/editar (`ServicoFormDialog`), incluindo preço padrão e tempo médio.
+- [x] Tela de Tabela de Preços por entidade (`TabelaPrecosDialog`), acessada a partir da lista de Clientes/Parceiros: um campo por serviço (preço para Cliente, comissão para Parceiro), em branco = usa o preço padrão do catálogo. Escrita restrita a `admin` (`useProfile`), operador só visualiza.
+- [x] "Exclusão" implementada como desativação (`ativo = false`) — preserva o histórico de OS já vinculado, consistente com o filtro que os comboboxes de OS já aplicavam.
 
 ## Fase 4 — Contas a Receber + Relatórios + Nota de Serviço
 
