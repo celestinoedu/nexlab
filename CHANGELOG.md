@@ -2,6 +2,12 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), versionamento [SemVer](https://semver.org/lang/pt-BR/).
 
+## [0.7.2] - 2026-08-10 — Comissão de Parceiro por %
+
+### Adicionado
+- Na Tabela de Preços, quando a entidade é Parceiro, cada linha ganhou um botão **R$ / %** para alternar a entrada: em "%", o campo aceita um percentual do preço padrão do serviço (mostra o valor em R$ calculado embaixo); o que é salvo em `tabela_precos.preco` continua sendo sempre o valor final em R$ — é só uma conveniência de digitação, não muda a regra de "valor fixo negociado por entidade × serviço" (ver `docs/business-rules.md`).
+- Parceiro **Laboratório Spartan** cadastrado, com comissões preenchidas para os serviços do catálogo que batem 1-para-1 com a lista de comissões 2026 fornecida.
+
 ## [0.7.1] - 2026-08-10 — Corrige erro ao entregar OS
 
 ### Corrigido

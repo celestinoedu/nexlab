@@ -24,6 +24,8 @@ Confirmado com o cliente: **não existe uma % genérica automática de comissão
 
 Por isso a tabela `tabela_precos` guarda o **valor final já negociado** por `entidade_id × servico_id`, e não uma fórmula. Ao adicionar um item de serviço numa OS, o sistema busca esse valor automaticamente; se não existir, cai no `preco_padrao` do catálogo (`servicos`) — só relevante para Clientes (Parceiros sem preço específico cadastrado não devem gerar comissão "adivinhada", o valor fica em branco para preenchimento manual).
 
+Na tela de Tabela de Preços, quando a entidade é Parceiro, cada linha tem um botão para alternar a entrada entre **R$** e **%** — o `%` é só uma conveniência de digitação (calcula `preco_padrao do serviço × %`); o que fica gravado em `tabela_precos.preco` é sempre o valor final em R$, nunca a fórmula. Não muda a regra acima: continua sendo um valor fixo por entidade × serviço, não uma % genérica aplicada automaticamente a tudo.
+
 ## Tempo médio de conclusão → sugestão de prazo
 
 Cada serviço do catálogo pode ter um `tempo_medio_dias` (dias médios estimados para conclusão). Ao montar uma OS, a **data de entrega prevista** é sugerida automaticamente como `data_recebimento + maior tempo_medio_dias entre os itens escolhidos` — é só uma sugestão inicial, sempre editável pelo usuário.
