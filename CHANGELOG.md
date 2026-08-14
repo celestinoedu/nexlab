@@ -2,6 +2,12 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), versionamento [SemVer](https://semver.org/lang/pt-BR/).
 
+## [0.10.1] - 2026-08-13 — Ajustes no canhoto: sem status, marca d'água da logo
+
+### Alterado
+- Canhoto de OS não mostra mais o **status** da OS — não faz sentido num papel impresso pra cortar e guardar.
+- Canhoto agora mostra a **logo do negócio como marca d'água** (centralizada, opacidade baixa, atrás do conteúdo) quando ela está cadastrada e com "Mostrar no cabeçalho" ligado em Configurações do negócio.
+
 ## [0.10.0] - 2026-08-13 — Hub de Relatórios, vias de canhoto, CSV, exclusão de despesas
 
 ### Adicionado

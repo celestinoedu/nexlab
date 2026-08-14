@@ -1,6 +1,7 @@
-import { Document, Page, View, Text, StyleSheet, pdf } from '@react-pdf/renderer'
+import { Document, Page, View, Text, Image, StyleSheet, pdf } from '@react-pdf/renderer'
 import { format, parseISO } from 'date-fns'
-import { ARCO_LABEL, STATUS_OS_LABEL, valorEfetivoItem, type OrdemServicoComRelacoes } from '@/types/domain'
+import { ARCO_LABEL, valorEfetivoItem, type OrdemServicoComRelacoes } from '@/types/domain'
+import type { EmpresaConfig } from '@/hooks/useEmpresaConfig'
 
 /**
  * Grade fixa por página — nunca varia conforme o conteúdo, exatamente para
@@ -33,11 +34,19 @@ const styles = StyleSheet.create({
     // dentro da própria célula, que já tem tamanho generoso para o caso comum.
     overflow: 'hidden',
   },
+  marcaDagua: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  marcaDaguaImg: { width: '55%', opacity: 0.08 },
   tesoura: { fontSize: 8, color: '#94a3b8', marginBottom: 3 },
-  topo: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
   numeroOs: { fontSize: 15, fontWeight: 700, color: '#0a4f4d' },
   copia: { fontSize: 7, color: '#94a3b8' },
-  status: { fontSize: 7, color: '#64748b', textTransform: 'uppercase', maxWidth: '45%', textAlign: 'right' },
   linhaInfo: { marginTop: 4 },
   label: { fontSize: 6.5, color: '#94a3b8', textTransform: 'uppercase' },
   valor: { fontSize: 8.5, fontWeight: 700, color: '#1e293b' },
@@ -73,6 +82,7 @@ interface CanhotoItem {
 interface CanhotosPdfDocumentProps {
   itens: CanhotoItem[]
   empresaNome: string
+  logoUrl?: string | null
 }
 
 function formatarData(data: string | null) {
@@ -94,7 +104,7 @@ function agrupar<T>(lista: T[], tamanho: number): T[][] {
   return grupos
 }
 
-export function CanhotosPdfDocument({ itens, empresaNome }: CanhotosPdfDocumentProps) {
+export function CanhotosPdfDocument({ itens, empresaNome, logoUrl }: CanhotosPdfDocumentProps) {
   const paginas = agrupar(itens, POR_PAGINA)
 
   return (
@@ -118,17 +128,17 @@ export function CanhotosPdfDocument({ itens, empresaNome }: CanhotosPdfDocumentP
 
                   return (
                     <View key={`${ordem.id}-${copia}`} style={styles.canhoto}>
+                      {logoUrl && (
+                        <View style={styles.marcaDagua}>
+                          <Image style={styles.marcaDaguaImg} src={logoUrl} />
+                        </View>
+                      )}
                       <View>
                         <Text style={styles.tesoura}>✂ - - - - - - - - - - - - - - - - - - -</Text>
-                        <View style={styles.topo}>
-                          <View>
-                            <Text style={styles.numeroOs}>OS Nº {ordem.numero_os}</Text>
-                            {totalCopias > 1 && (
-                              <Text style={styles.copia}>Via {copia} de {totalCopias}</Text>
-                            )}
-                          </View>
-                          <Text style={styles.status}>{STATUS_OS_LABEL[ordem.status]}</Text>
-                        </View>
+                        <Text style={styles.numeroOs}>OS Nº {ordem.numero_os}</Text>
+                        {totalCopias > 1 && (
+                          <Text style={styles.copia}>Via {copia} de {totalCopias}</Text>
+                        )}
                         <View style={styles.linhaInfo}>
                           <Text style={styles.label}>{ehParceiro ? 'Parceiro' : 'Cliente'}</Text>
                           <Text style={styles.valor}>{ordem.entidade.nome}</Text>
@@ -214,7 +224,7 @@ export function CanhotosPdfDocument({ itens, empresaNome }: CanhotosPdfDocumentP
 export async function baixarCanhotosPdf(
   ordens: OrdemServicoComRelacoes[],
   quantidades: Record<string, number>,
-  empresaNome = 'NexLab',
+  empresa: EmpresaConfig | undefined,
 ) {
   const ordenadas = [...ordens].sort((a, b) => a.numero_os - b.numero_os)
   const itens: CanhotoItem[] = []
@@ -225,7 +235,12 @@ export async function baixarCanhotosPdf(
     }
   }
 
-  const blob = await pdf(<CanhotosPdfDocument itens={itens} empresaNome={empresaNome} />).toBlob()
+  const empresaNome = empresa?.nome_fantasia || 'NexLab'
+  const logoUrl = empresa?.mostrar_logo ? empresa.logo_url : null
+
+  const blob = await pdf(
+    <CanhotosPdfDocument itens={itens} empresaNome={empresaNome} logoUrl={logoUrl} />,
+  ).toBlob()
   const url = URL.createObjectURL(blob)
   const link = document.createElement('a')
   link.href = url

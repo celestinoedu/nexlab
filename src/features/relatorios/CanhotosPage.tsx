@@ -101,7 +101,7 @@ export function CanhotosPage() {
       // Import dinâmico: @react-pdf/renderer é pesada e só é necessária
       // quando alguém realmente gera o PDF — mantém fora do bundle inicial.
       const { baixarCanhotosPdf } = await import('./components/CanhotosPdf')
-      await baixarCanhotosPdf(selecionadasOrdens, quantidades, empresaConfig?.nome_fantasia)
+      await baixarCanhotosPdf(selecionadasOrdens, quantidades, empresaConfig)
     } catch {
       toast.error('Não foi possível gerar o PDF agora. Tente novamente.')
     } finally {
