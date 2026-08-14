@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { toast } from 'sonner'
-import { Loader2, Lock } from 'lucide-react'
+import { Loader2, Lock, Search, Download } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
@@ -10,6 +10,8 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { baixarCsv, formatarNumeroCsv } from '@/lib/csv'
 import { useServicos } from '@/hooks/useServicos'
 import { useTabelaPrecos } from '@/hooks/useTabelaPrecos'
 import { useProfile } from '@/hooks/useProfile'
@@ -44,8 +46,15 @@ export function TabelaPrecosDialog({ open, onOpenChange, entidade }: TabelaPreco
   const [valores, setValores] = React.useState<Record<string, string>>({})
   const [valoresParceiro, setValoresParceiro] = React.useState<Record<string, string>>({})
   const [modos, setModos] = React.useState<Record<string, ModoEntrada>>({})
+  const [busca, setBusca] = React.useState('')
   const ehParceiro = entidade?.tipo === 'parceiro'
   const podeEditar = profile?.role === 'admin'
+
+  const servicosFiltrados = React.useMemo(() => {
+    const buscaLower = busca.trim().toLowerCase()
+    if (!buscaLower) return servicos ?? []
+    return (servicos ?? []).filter((s) => s.nome.toLowerCase().includes(buscaLower))
+  }, [servicos, busca])
 
   React.useEffect(() => {
     if (!open || !precosAtuais) return
@@ -58,6 +67,7 @@ export function TabelaPrecosDialog({ open, onOpenChange, entidade }: TabelaPreco
     setValores(iniciais)
     setValoresParceiro(iniciaisParceiro)
     setModos({}) // sempre volta pro modo "R$" — o valor salvo é sempre o final, não dá pra saber se veio de % antes
+    setBusca('')
   }, [open, precosAtuais])
 
   if (!entidade) return null
@@ -106,6 +116,30 @@ export function TabelaPrecosDialog({ open, onOpenChange, entidade }: TabelaPreco
     }
   }
 
+  function baixarCsvTabela() {
+    const cabecalho = ehParceiro
+      ? ['Serviço', 'Preço padrão (catálogo)', 'Preço do Parceiro', 'Comissão']
+      : ['Serviço', 'Preço padrão (catálogo)', 'Preço específico']
+    const linhas: (string | number)[][] = [
+      cabecalho,
+      ...servicosFiltrados.map((s) => {
+        const base = [s.nome, formatarNumeroCsv(s.preco_padrao)]
+        if (ehParceiro) {
+          const precoParceiro = valoresParceiro[s.id]?.trim()
+          const comissao = valores[s.id]?.trim()
+          return [
+            ...base,
+            precoParceiro ? formatarNumeroCsv(Number(precoParceiro.replace(',', '.'))) : '',
+            comissao ? formatarNumeroCsv(Number(comissao.replace(',', '.'))) : '',
+          ]
+        }
+        const preco = valores[s.id]?.trim()
+        return [...base, preco ? formatarNumeroCsv(Number(preco.replace(',', '.'))) : '']
+      }),
+    ]
+    baixarCsv(`tabela-precos-${(entidade?.nome ?? 'entidade').toLowerCase().replace(/\s+/g, '-')}.csv`, linhas)
+  }
+
   const gridCols = ehParceiro ? 'grid-cols-[1fr_9rem_9rem_3rem]' : 'grid-cols-[1fr_7rem]'
 
   return (
@@ -127,6 +161,29 @@ export function TabelaPrecosDialog({ open, onOpenChange, entidade }: TabelaPreco
           </div>
         )}
 
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="relative w-full sm:w-64">
+            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <Input
+              placeholder="Buscar serviço..."
+              value={busca}
+              onChange={(e) => setBusca(e.target.value)}
+              className="pl-9"
+            />
+          </div>
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            className="ml-auto"
+            onClick={baixarCsvTabela}
+            disabled={carregando || servicosFiltrados.length === 0}
+          >
+            <Download size={15} />
+            Baixar CSV
+          </Button>
+        </div>
+
         {carregando ? (
           <div className="flex justify-center py-10">
             <Loader2 className="animate-spin text-brand-600" size={24} />
@@ -147,7 +204,12 @@ export function TabelaPrecosDialog({ open, onOpenChange, entidade }: TabelaPreco
                 <span className="text-right">Preço (R$)</span>
               )}
             </div>
-            {(servicos ?? []).map((servico) => {
+            {servicosFiltrados.length === 0 && (
+              <div className="px-3 py-6 text-center text-sm text-slate-400">
+                Nenhum serviço encontrado para "{busca}".
+              </div>
+            )}
+            {servicosFiltrados.map((servico) => {
               const modo = modos[servico.id] ?? 'valor'
               const bruto = Number(valores[servico.id]?.replace(',', '.'))
               return (

@@ -1,9 +1,10 @@
 import * as React from 'react'
-import { Plus, Search, Loader2 } from 'lucide-react'
+import { Plus, Search, Loader2, Download } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/utils'
+import { baixarCsv, formatarNumeroCsv } from '@/lib/csv'
 import { useServicos } from '@/hooks/useServicos'
 import { ServicoFormDialog } from './components/ServicoFormDialog'
 import type { Servico } from '@/types/domain'
@@ -42,14 +43,34 @@ export function ServicosPage() {
     setDialogAberto(true)
   }
 
+  function baixarCsvServicos() {
+    const linhas: (string | number)[][] = [
+      ['Serviço', 'Categoria', 'Preço padrão', 'Tempo médio (dias)', 'Situação'],
+      ...filtrados.map((s) => [
+        s.nome,
+        s.categoria || '',
+        formatarNumeroCsv(s.preco_padrao),
+        s.tempo_medio_dias ?? '',
+        s.ativo ? 'Ativo' : 'Inativo',
+      ]),
+    ]
+    baixarCsv('catalogo-servicos.csv', linhas)
+  }
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl font-semibold text-slate-900">Catálogo de Serviços</h1>
-        <Button onClick={abrirNovo}>
-          <Plus size={18} />
-          Novo serviço
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="secondary" onClick={baixarCsvServicos} disabled={filtrados.length === 0}>
+            <Download size={18} />
+            Baixar CSV
+          </Button>
+          <Button onClick={abrirNovo}>
+            <Plus size={18} />
+            Novo serviço
+          </Button>
+        </div>
       </div>
 
       <div className="flex flex-wrap items-center gap-3">

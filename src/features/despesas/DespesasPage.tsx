@@ -1,19 +1,27 @@
 import * as React from 'react'
 import { format, parseISO } from 'date-fns'
-import { Plus, Search, Loader2 } from 'lucide-react'
+import { toast } from 'sonner'
+import { Plus, Search, Loader2, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/utils'
+import { useProfile } from '@/hooks/useProfile'
 import { useDespesas } from './hooks/useDespesas'
+import { useDespesaMutations } from './hooks/useDespesaMutations'
 import { DespesaFormDialog } from './components/DespesaFormDialog'
+import { ExcluirDespesaDialog } from './components/ExcluirDespesaDialog'
 import type { Despesa } from '@/types/domain'
 
 export function DespesasPage() {
   const { data: despesas, isLoading } = useDespesas()
+  const { data: profile } = useProfile()
+  const { deleteDespesa } = useDespesaMutations()
+  const podeExcluir = profile?.role === 'admin'
   const [busca, setBusca] = React.useState('')
   const [categoriaFiltro, setCategoriaFiltro] = React.useState('todas')
   const [dialogAberto, setDialogAberto] = React.useState(false)
   const [despesaSelecionada, setDespesaSelecionada] = React.useState<Despesa | null>(null)
+  const [despesaExcluindo, setDespesaExcluindo] = React.useState<Despesa | null>(null)
 
   const categorias = React.useMemo(() => {
     const set = new Set<string>()
@@ -40,6 +48,17 @@ export function DespesasPage() {
   function abrirEdicao(despesa: Despesa) {
     setDespesaSelecionada(despesa)
     setDialogAberto(true)
+  }
+
+  async function confirmarExclusao() {
+    if (!despesaExcluindo) return
+    try {
+      await deleteDespesa.mutateAsync(despesaExcluindo.id)
+      toast.success('Despesa excluída.')
+      setDespesaExcluindo(null)
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Não foi possível excluir agora.')
+    }
   }
 
   return (
@@ -119,6 +138,7 @@ export function DespesasPage() {
                 <th className="px-4 py-3">Categoria</th>
                 <th className="px-4 py-3">Data</th>
                 <th className="px-4 py-3 text-right">Valor</th>
+                <th className="px-4 py-3" />
               </tr>
             </thead>
             <tbody>
@@ -136,6 +156,22 @@ export function DespesasPage() {
                   <td className="px-4 py-3 text-right text-slate-700">
                     {despesa.valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                   </td>
+                  <td className="px-4 py-3">
+                    {podeExcluir && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setDespesaExcluindo(despesa)
+                        }}
+                        className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-danger-100 hover:text-danger-700"
+                        aria-label="Excluir despesa"
+                        title="Excluir despesa"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    )}
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -144,6 +180,13 @@ export function DespesasPage() {
       )}
 
       <DespesaFormDialog open={dialogAberto} onOpenChange={setDialogAberto} despesa={despesaSelecionada} />
+      <ExcluirDespesaDialog
+        open={Boolean(despesaExcluindo)}
+        onOpenChange={(open) => !open && setDespesaExcluindo(null)}
+        despesa={despesaExcluindo}
+        onConfirm={confirmarExclusao}
+        excluindo={deleteDespesa.isPending}
+      />
     </div>
   )
 }

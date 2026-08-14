@@ -1,0 +1,30 @@
+/**
+ * Gera um CSV a partir de linhas (array de arrays) e baixa como arquivo —
+ * sempre download, nunca abre em nova aba (mesmo padrão dos PDFs). Separador
+ * ";" (não ",") porque o Excel em pt-BR usa vírgula como separador decimal —
+ * com ";" os números com vírgula (ex.: "1234,56") abrem certo, célula a
+ * célula, sem precisar o usuário configurar nada.
+ */
+export function baixarCsv(nomeArquivo: string, linhas: (string | number)[][]) {
+  const escapar = (valor: string | number) => {
+    const texto = String(valor ?? '')
+    return /[;"\n]/.test(texto) ? `"${texto.replace(/"/g, '""')}"` : texto
+  }
+  const conteudo = linhas.map((linha) => linha.map(escapar).join(';')).join('\r\n')
+  // BOM UTF-8 no início — sem isso o Excel abre acentos quebrados.
+  const bom = String.fromCharCode(0xfeff)
+  const blob = new Blob([bom + conteudo], { type: 'text/csv;charset=utf-8;' })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = nomeArquivo
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+  URL.revokeObjectURL(url)
+}
+
+/** Formata um número no padrão pt-BR (vírgula decimal), sem símbolo de moeda — pra ficar numérico no CSV. */
+export function formatarNumeroCsv(valor: number) {
+  return valor.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+}

@@ -34,5 +34,15 @@ export function useDespesaMutations() {
     },
   })
 
-  return { createDespesa, updateDespesa }
+  const deleteDespesa = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from('despesas').delete().eq('id', id)
+      if (error) throw new Error('Não foi possível excluir a despesa agora. Tente novamente.')
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['despesas'] })
+    },
+  })
+
+  return { createDespesa, updateDespesa, deleteDespesa }
 }

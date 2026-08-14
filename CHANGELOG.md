@@ -2,6 +2,20 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), versionamento [SemVer](https://semver.org/lang/pt-BR/).
 
+## [0.10.0] - 2026-08-13 — Hub de Relatórios, vias de canhoto, CSV, exclusão de despesas
+
+### Adicionado
+- **Relatórios virou um hub de ferramentas**: `/relatorios` agora mostra cartões clicáveis (hoje só "Imprimir canhotos"); a tela de seleção de OS mudou para `/relatorios/canhotos`. Facilita adicionar novas ferramentas depois sem redesenhar a tela.
+- **Vias por OS na impressão de canhotos**: campo numérico por linha (padrão = soma das quantidades dos serviços da OS) controlando quantas cópias do canhoto daquela OS entram no PDF — mostra "Via X de Y" no canhoto quando é mais de uma.
+- **Canhotos com mais informações**: cada um agora traz os serviços com valor individual (cor/arco entre parênteses, comissão se for Parceiro), Total com desconto, Observações e as datas de Recebimento/Entrega — antes só tinha um resumo dos nomes dos serviços.
+- **Baixar CSV**: novo botão no Catálogo de Serviços e no pop-up Tabela de Preços (módulo Clientes e Parceiros), exportando a lista/tabela filtrada como está na tela.
+- **Busca no pop-up Tabela de Preços**: campo de busca por nome de serviço, útil pra catálogos grandes.
+- **Excluir despesa**: ação nova em Despesas (ícone de lixeira, só `admin`), com confirmação — exclusão definitiva, sem soft-delete (diferente de Contas a Receber).
+
+### Corrigido
+- **Canhotos podiam "vazar" pra uma página solta** quando uma OS tinha muitos serviços ou uma observação longa (o conteúdo ultrapassava a célula da grade e o react-pdf duplicava parte do canhoto numa página à parte, quebrando a marcação de recorte). Corrigido travando altura/overflow de cada célula e usando `wrap={false}` nas linhas da grade, garantindo que uma OS nunca fica cortada entre páginas mesmo em casos extremos.
+- **Formulário de OS**: colunas invertidas — dados gerais agora à esquerda, serviços à direita (desktop), mantendo dados gerais primeiro também no empilhamento mobile.
+
 ## [0.9.0] - 2026-08-13 — Impressão de canhotos de OS
 
 ### Adicionado

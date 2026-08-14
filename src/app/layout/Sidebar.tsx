@@ -50,7 +50,7 @@ export function Sidebar() {
         ))}
       </nav>
       <div className="border-t border-slate-100 px-6 py-4 text-xs text-slate-400">
-        GRS Lab · NexLab v0.9.0
+        GRS Lab · NexLab v0.10.0
       </div>
     </aside>
   )

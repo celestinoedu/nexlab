@@ -285,8 +285,8 @@ export function OrdemServicoFormDialog({ open, onOpenChange, ordem }: OrdemServi
 
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4" noValidate>
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-            {/* Coluna esquerda: serviços da OS */}
-            <div className="order-2 flex flex-col gap-2 lg:order-1">
+            {/* Coluna direita: serviços da OS */}
+            <div className="order-2 flex flex-col gap-2">
               <Label>Serviços da OS</Label>
               <div className="flex flex-col gap-3">
                 {fields.map((field, index) => (
@@ -324,8 +324,8 @@ export function OrdemServicoFormDialog({ open, onOpenChange, ordem }: OrdemServi
               </Button>
             </div>
 
-            {/* Coluna direita: dados gerais da OS */}
-            <div className="order-1 flex flex-col gap-4 lg:order-2">
+            {/* Coluna esquerda: dados gerais da OS */}
+            <div className="order-1 flex flex-col gap-4">
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                 <div className="flex flex-col gap-1.5">
                   <Label htmlFor="numero_os">Número da OS</Label>
