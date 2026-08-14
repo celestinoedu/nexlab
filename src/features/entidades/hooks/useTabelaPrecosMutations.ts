@@ -5,6 +5,8 @@ export interface LinhaTabelaPreco {
   servico_id: string
   /** `null` = sem valor específico cadastrado (limpa a linha, se existir). */
   preco: number | null
+  /** Só Parceiro: preço do serviço na tabela do próprio parceiro — referência, não entra em cálculo. */
+  preco_parceiro: number | null
 }
 
 /**
@@ -22,12 +24,15 @@ export function useTabelaPrecosMutations(entidadeId: string) {
       const semValor = linhas.filter((l) => l.preco === null).map((l) => l.servico_id)
 
       if (comValor.length > 0) {
-        const { error } = await supabase
-          .from('tabela_precos')
-          .upsert(
-            comValor.map((l) => ({ entidade_id: entidadeId, servico_id: l.servico_id, preco: l.preco })),
-            { onConflict: 'entidade_id,servico_id' },
-          )
+        const { error } = await supabase.from('tabela_precos').upsert(
+          comValor.map((l) => ({
+            entidade_id: entidadeId,
+            servico_id: l.servico_id,
+            preco: l.preco,
+            preco_parceiro: l.preco_parceiro,
+          })),
+          { onConflict: 'entidade_id,servico_id' },
+        )
         if (error) throw new Error('Não foi possível salvar a tabela de preços agora. Tente novamente.')
       }
 

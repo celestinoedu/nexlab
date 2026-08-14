@@ -14,7 +14,7 @@ export function useContasReceber() {
       const { data, error } = await supabase
         .from('contas_receber')
         .select(
-          '*, entidade:entidades(id,nome,tipo), ordem:ordens_servico(id,numero_os,cliente_final,data_entrega)',
+          '*, entidade:entidades(id,nome,tipo), ordem:ordens_servico(id,numero_os,cliente_final,nome_paciente,data_entrega)',
         )
         .order('created_at', { ascending: false })
 

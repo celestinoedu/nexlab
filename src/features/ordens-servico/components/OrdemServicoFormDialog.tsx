@@ -52,6 +52,7 @@ const schema = z
     numero_os: z.number().int().positive().nullable().optional(),
     entidade_id: z.string().min(1, 'Escolha um cliente ou parceiro antes de salvar'),
     cliente_final: z.string().optional(),
+    nome_paciente: z.string().optional(),
     status: z.enum(['recebido', 'em_producao', 'pronto_entrega', 'entregue', 'cancelado']),
     data_recebimento: z.string().min(1, 'Informe a data de recebimento'),
     data_prevista: z.string().optional(),
@@ -131,6 +132,7 @@ export function OrdemServicoFormDialog({ open, onOpenChange, ordem }: OrdemServi
         numero_os: ordem.numero_os,
         entidade_id: ordem.entidade_id,
         cliente_final: ordem.cliente_final ?? '',
+        nome_paciente: ordem.nome_paciente ?? '',
         status: ordem.status,
         data_recebimento: ordem.data_recebimento,
         data_prevista: ordem.data_prevista ?? '',
@@ -154,6 +156,7 @@ export function OrdemServicoFormDialog({ open, onOpenChange, ordem }: OrdemServi
         numero_os: null,
         entidade_id: '',
         cliente_final: '',
+        nome_paciente: '',
         status: 'recebido',
         data_recebimento: format(new Date(), 'yyyy-MM-dd'),
         data_prevista: '',
@@ -209,7 +212,7 @@ export function OrdemServicoFormDialog({ open, onOpenChange, ordem }: OrdemServi
   function aplicarPrecoSugerido(index: number, servicoId: string) {
     const servico = servicos?.find((s) => s.id === servicoId)
     if (!servico) return
-    const precoEspecifico = precos?.get(servicoId)
+    const precoEspecifico = precos?.get(servicoId)?.preco
     if (entidadeSelecionada?.tipo === 'parceiro') {
       setValue(`itens.${index}.valor_unitario`, servico.preco_padrao)
       setValue(`itens.${index}.valor_comissao`, precoEspecifico ?? null)
@@ -234,6 +237,7 @@ export function OrdemServicoFormDialog({ open, onOpenChange, ordem }: OrdemServi
       numero_os: values.numero_os ?? null,
       entidade_id: values.entidade_id,
       cliente_final: values.cliente_final?.trim() || null,
+      nome_paciente: values.nome_paciente?.trim() || null,
       status: values.status,
       data_recebimento: values.data_recebimento,
       data_prevista: values.data_prevista || null,
@@ -269,7 +273,7 @@ export function OrdemServicoFormDialog({ open, onOpenChange, ordem }: OrdemServi
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-2xl lg:max-w-5xl">
         <DialogHeader>
           <DialogTitle>{isEditing ? `Editar OS #${ordem?.numero_os}` : 'Nova Ordem de Serviço'}</DialogTitle>
           <DialogDescription>
@@ -280,140 +284,153 @@ export function OrdemServicoFormDialog({ open, onOpenChange, ordem }: OrdemServi
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4" noValidate>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="numero_os">Número da OS</Label>
-              <Input
-                id="numero_os"
-                type="number"
-                min={1}
-                placeholder="Automático"
-                {...register('numero_os', {
-                  setValueAs: (v) => (v === '' ? null : Number(v)),
-                })}
-              />
-            </div>
-
-            <div className="flex flex-col gap-1.5 sm:col-span-2">
-              <Label htmlFor="entidade_id">Cliente ou Parceiro</Label>
-              <Controller
-                control={control}
-                name="entidade_id"
-                render={({ field }) => (
-                  <Combobox
-                    id="entidade_id"
-                    options={entidadeOptions}
-                    value={field.value || null}
-                    onChange={field.onChange}
-                    placeholder="Selecione um cliente ou parceiro"
-                    searchPlaceholder="Buscar por nome..."
-                    emptyMessage="Nenhum cliente/parceiro encontrado."
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            {/* Coluna esquerda: serviços da OS */}
+            <div className="order-2 flex flex-col gap-2 lg:order-1">
+              <Label>Serviços da OS</Label>
+              <div className="flex flex-col gap-3">
+                {fields.map((field, index) => (
+                  <ItemRow
+                    key={field.id}
+                    index={index}
+                    control={control}
+                    register={register}
+                    servicoOptions={servicoOptions}
+                    ehParceiro={entidadeSelecionada?.tipo === 'parceiro'}
+                    onServicoChange={(servicoId) => aplicarPrecoSugerido(index, servicoId)}
+                    onRemover={fields.length > 1 ? () => remove(index) : undefined}
+                    erroServico={errors.itens?.[index]?.servico_id?.message}
+                    erroValor={errors.itens?.[index]?.valor_unitario?.message}
+                    temPrecoEspecifico={
+                      itensAtuais?.[index]?.servico_id
+                        ? precos?.has(itensAtuais[index].servico_id)
+                        : undefined
+                    }
                   />
-                )}
-              />
-              {errors.entidade_id && (
-                <p className="text-sm text-danger-500">{errors.entidade_id.message}</p>
-              )}
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="cliente_final">Cliente final / Paciente (opcional)</Label>
-            <Input id="cliente_final" placeholder="Nome do paciente ou consultório" {...register('cliente_final')} />
-          </div>
-
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="data_recebimento">Data de recebimento</Label>
-              <Input id="data_recebimento" type="date" {...register('data_recebimento')} />
-              {errors.data_recebimento && (
-                <p className="text-sm text-danger-500">{errors.data_recebimento.message}</p>
-              )}
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="data_prevista">Data de entrega (prevista)</Label>
-              <Input id="data_prevista" type="date" {...register('data_prevista')} />
-            </div>
-          </div>
-
-          <div className={cn('grid grid-cols-1 gap-4', status === 'entregue' && 'sm:grid-cols-2')}>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="status">Status</Label>
-              <select
-                id="status"
-                className="h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40"
-                {...register('status')}
-              >
-                {(Object.keys(STATUS_OS_LABEL) as StatusOS[]).map((opcao) => (
-                  <option key={opcao} value={opcao}>
-                    {STATUS_OS_LABEL[opcao]}
-                  </option>
                 ))}
-              </select>
+              </div>
+              {errors.itens?.message && (
+                <p className="text-sm text-danger-500">{errors.itens.message}</p>
+              )}
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                className="self-start"
+                onClick={() => append(ITEM_VAZIO)}
+              >
+                <PlusCircle size={16} />
+                Adicionar serviço
+              </Button>
             </div>
-            {status === 'entregue' && (
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="data_entrega">Data de entrega</Label>
-                <Input id="data_entrega" type="date" {...register('data_entrega')} />
-                {errors.data_entrega && (
-                  <p className="text-sm text-danger-500">{errors.data_entrega.message}</p>
+
+            {/* Coluna direita: dados gerais da OS */}
+            <div className="order-1 flex flex-col gap-4 lg:order-2">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="numero_os">Número da OS</Label>
+                  <Input
+                    id="numero_os"
+                    type="number"
+                    min={1}
+                    placeholder="Automático"
+                    {...register('numero_os', {
+                      setValueAs: (v) => (v === '' ? null : Number(v)),
+                    })}
+                  />
+                </div>
+
+                <div className="flex flex-col gap-1.5 sm:col-span-2">
+                  <Label htmlFor="entidade_id">Cliente ou Parceiro</Label>
+                  <Controller
+                    control={control}
+                    name="entidade_id"
+                    render={({ field }) => (
+                      <Combobox
+                        id="entidade_id"
+                        options={entidadeOptions}
+                        value={field.value || null}
+                        onChange={field.onChange}
+                        placeholder="Selecione um cliente ou parceiro"
+                        searchPlaceholder="Buscar por nome..."
+                        emptyMessage="Nenhum cliente/parceiro encontrado."
+                      />
+                    )}
+                  />
+                  {errors.entidade_id && (
+                    <p className="text-sm text-danger-500">{errors.entidade_id.message}</p>
+                  )}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="cliente_final">Cliente final (opcional)</Label>
+                  <Input id="cliente_final" placeholder="Nome do consultório" {...register('cliente_final')} />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="nome_paciente">Nome do paciente (opcional)</Label>
+                  <Input id="nome_paciente" placeholder="Nome do paciente" {...register('nome_paciente')} />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="data_recebimento">Data de recebimento</Label>
+                  <Input id="data_recebimento" type="date" {...register('data_recebimento')} />
+                  {errors.data_recebimento && (
+                    <p className="text-sm text-danger-500">{errors.data_recebimento.message}</p>
+                  )}
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="data_prevista">Data de entrega (prevista)</Label>
+                  <Input id="data_prevista" type="date" {...register('data_prevista')} />
+                </div>
+              </div>
+
+              <div className={cn('grid grid-cols-1 gap-4', status === 'entregue' && 'sm:grid-cols-2')}>
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="status">Status</Label>
+                  <select
+                    id="status"
+                    className="h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40"
+                    {...register('status')}
+                  >
+                    {(Object.keys(STATUS_OS_LABEL) as StatusOS[]).map((opcao) => (
+                      <option key={opcao} value={opcao}>
+                        {STATUS_OS_LABEL[opcao]}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                {status === 'entregue' && (
+                  <div className="flex flex-col gap-1.5">
+                    <Label htmlFor="data_entrega">Data de entrega</Label>
+                    <Input id="data_entrega" type="date" {...register('data_entrega')} />
+                    {errors.data_entrega && (
+                      <p className="text-sm text-danger-500">{errors.data_entrega.message}</p>
+                    )}
+                  </div>
                 )}
               </div>
-            )}
-          </div>
 
-          <Button
-            type="button"
-            variant="secondary"
-            className="self-start"
-            onClick={() => setInfoFinanceiraAberta(true)}
-          >
-            <Wallet size={16} />
-            Informações financeiras
-            <Badge variant={statusPagamento === 'pago' ? 'success' : 'warning'}>
-              {statusPagamento === 'pago' ? 'Pago' : 'Pendente'}
-            </Badge>
-          </Button>
-
-          <div className="flex flex-col gap-2">
-            <Label>Serviços da OS</Label>
-            <div className="flex flex-col gap-3">
-              {fields.map((field, index) => (
-                <ItemRow
-                  key={field.id}
-                  index={index}
-                  control={control}
-                  register={register}
-                  servicoOptions={servicoOptions}
-                  ehParceiro={entidadeSelecionada?.tipo === 'parceiro'}
-                  onServicoChange={(servicoId) => aplicarPrecoSugerido(index, servicoId)}
-                  onRemover={fields.length > 1 ? () => remove(index) : undefined}
-                  erroServico={errors.itens?.[index]?.servico_id?.message}
-                  erroValor={errors.itens?.[index]?.valor_unitario?.message}
-                  temPrecoEspecifico={
-                    itensAtuais?.[index]?.servico_id
-                      ? precos?.has(itensAtuais[index].servico_id)
-                      : undefined
-                  }
-                />
-              ))}
+              <Button
+                type="button"
+                variant="secondary"
+                className="self-start"
+                onClick={() => setInfoFinanceiraAberta(true)}
+              >
+                <Wallet size={16} />
+                Informações financeiras
+                <Badge variant={statusPagamento === 'pago' ? 'success' : 'warning'}>
+                  {statusPagamento === 'pago' ? 'Pago' : 'Pendente'}
+                </Badge>
+              </Button>
             </div>
-            {errors.itens?.message && (
-              <p className="text-sm text-danger-500">{errors.itens.message}</p>
-            )}
-            <Button
-              type="button"
-              variant="secondary"
-              size="sm"
-              className="self-start"
-              onClick={() => append(ITEM_VAZIO)}
-            >
-              <PlusCircle size={16} />
-              Adicionar serviço
-            </Button>
           </div>
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          {/* Rodapé: desconto, total e observações */}
+          <div className="grid grid-cols-1 gap-4 border-t border-slate-100 pt-4 sm:grid-cols-2">
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="desconto">Desconto (opcional)</Label>
               <Input

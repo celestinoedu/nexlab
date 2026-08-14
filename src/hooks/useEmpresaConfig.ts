@@ -10,9 +10,13 @@ export interface EmpresaConfig {
   email: string | null
   endereco: string | null
   logo_url: string | null
+  mostrar_endereco: boolean
+  mostrar_telefone: boolean
+  mostrar_email: boolean
+  mostrar_logo: boolean
 }
 
-/** Dados do GRS Lab (singleton) usados nos cabeçalhos de PDF. */
+/** Dados do GRS Lab (singleton) usados nos cabeçalhos de PDF e na tela de Configurações. */
 export function useEmpresaConfig() {
   return useQuery({
     queryKey: ['empresa_config'],

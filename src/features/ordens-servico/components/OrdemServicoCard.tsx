@@ -73,8 +73,10 @@ export function OrdemServicoCard({ ordem, onClick, onImprimir, overlay }: OrdemS
         </Badge>
       </div>
       <p className="truncate text-sm text-slate-600">{descricaoServicos}</p>
-      {ordem.cliente_final && (
-        <p className="truncate text-xs text-slate-400">{ordem.cliente_final}</p>
+      {(ordem.cliente_final || ordem.nome_paciente) && (
+        <p className="truncate text-xs text-slate-400">
+          {[ordem.cliente_final, ordem.nome_paciente].filter(Boolean).join(' — ')}
+        </p>
       )}
     </div>
   )

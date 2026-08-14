@@ -5,24 +5,25 @@
 ## Módulo Ordens de Serviço — OS (prioridade #1)
 
 ### Criar/editar uma OS
-Um único botão de destaque (**accent**, cor âmbar) "+ Nova OS", visível tanto na Lista quanto no Kanban, abre um **modal único** (mesmo componente `OrdemServicoFormDialog` para criar e editar):
+Um único botão de destaque (**accent**, cor âmbar) "+ Nova OS", visível tanto na Lista quanto no Kanban, abre um **modal único** (mesmo componente `OrdemServicoFormDialog` para criar e editar), largo (`lg:max-w-5xl`) e dividido em **2 colunas no desktop** (empilha em 1 coluna no mobile, dados gerais primeiro):
 
-1. **Número da OS** — sugerido automaticamente (próximo disponível), mas editável (ex.: para manter numeração legada) ou deixar em branco.
-2. **Entidade** (combobox com busca por nome, badge indicando Cliente/Parceiro) — obrigatório, autofoco.
-3. **Cliente final / Paciente** (texto livre, opcional).
-4. **Data de recebimento** (default hoje) + **Data de entrega prevista** — a segunda é sugerida automaticamente a partir do `tempo_medio_dias` dos serviços escolhidos, sempre editável.
-5. **Status** (select — Recebido/Em Produção/Pronto para Entrega/Entregue/Cancelado, o mesmo enum do Kanban): ao escolher "Entregue", revela um campo **Data de entrega** (default hoje) — a mesma OS pode assim ser criada/editada já como entregue, sem precisar passar pelo Kanban.
-6. Botão secundário **"Informações financeiras"** (com um badge Pendente/Pago ao lado, mostrando o estado atual) abre um popup à parte (`InfoFinanceiraDialog`) com Status financeiro (toggle Pendente/Pago), Forma de pagamento e — só quando Pago — Data de pagamento. Fica fora do corpo principal do formulário pra não poluir a tela na maioria das OS (que ficam Pendente); os dados só entram no formulário ao clicar "Salvar" dentro do popup. Viram o ponto de partida da linha em Contas a Receber quando a OS é marcada como entregue (ver "Módulo Contas a Receber" abaixo).
-7. **Lista de serviços da OS** — uma OS pode ter vários: cada linha tem Serviço (combobox, auto-preenche valor/comissão de `tabela_precos`, com aviso quando cai no preço padrão ou falta comissão de parceiro), Cor (texto livre), Arco (Superior/Inferior/—), Quantidade (stepper), Valor e Comissão (se parceiro). Botão "+ Adicionar serviço" para novas linhas, mínimo 1. Total da OS calculado e mostrado em tempo real.
-8. Botão único "Salvar". Fecha o modal e volta para onde o usuário estava (Lista ou Kanban), sem navegação de página.
+- **Coluna esquerda — Serviços da OS**: uma OS pode ter vários — cada linha tem Serviço (combobox, auto-preenche valor/comissão de `tabela_precos`, com aviso quando cai no preço padrão ou falta comissão de parceiro), Cor (texto livre), Arco (Superior/Inferior/—), Quantidade (stepper), Valor e Comissão (se parceiro). Botão "+ Adicionar serviço" para novas linhas, mínimo 1.
+- **Coluna direita — Dados gerais**:
+  1. **Número da OS** — sugerido automaticamente (próximo disponível), mas editável (ex.: para manter numeração legada) ou deixar em branco.
+  2. **Entidade** (combobox com busca por nome, badge indicando Cliente/Parceiro) — obrigatório, autofoco.
+  3. **Cliente final** (consultório, opcional) e **Nome do paciente** (opcional) — dois campos separados lado a lado.
+  4. **Data de recebimento** (default hoje) + **Data de entrega prevista** — a segunda é sugerida automaticamente a partir do `tempo_medio_dias` dos serviços escolhidos, sempre editável.
+  5. **Status** (select — Recebido/Em Produção/Pronto para Entrega/Entregue/Cancelado, o mesmo enum do Kanban): ao escolher "Entregue", revela um campo **Data de entrega** (default hoje) — a mesma OS pode assim ser criada/editada já como entregue, sem precisar passar pelo Kanban.
+  6. Botão secundário **"Informações financeiras"** (com um badge Pendente/Pago ao lado, mostrando o estado atual) abre um popup à parte (`InfoFinanceiraDialog`) com Status financeiro (toggle Pendente/Pago), Forma de pagamento e — só quando Pago — Data de pagamento. Fica fora do corpo principal do formulário pra não poluir a tela na maioria das OS (que ficam Pendente); os dados só entram no formulário ao clicar "Salvar" dentro do popup. Viram o ponto de partida da linha em Contas a Receber quando a OS é marcada como entregue (ver "Módulo Contas a Receber" abaixo).
+- **Rodapé** (largura total, abaixo das duas colunas): **Desconto** (opcional) + **Total da OS** calculado em tempo real, **Observações** (opcional) e o botão único "Salvar". Fecha o modal e volta para onde o usuário estava (Lista ou Kanban), sem navegação de página.
 
 ### Visão Lista (padrão)
-Tabela com busca (nº OS, cliente final, entidade, serviço), filtros rápidos por status (chips clicáveis) e por mês. Coluna "Serviços" mostra o nome do item quando a OS tem só 1, ou "N serviços" quando tem mais. Editar abre o mesmo modal de criação, sem trocar de página. Linhas de OS com status **Entregue** têm um botão de baixar o PDF da OS. Toggle Lista ⇄ Kanban fica fixo no topo do módulo e preserva os filtros ativos ao alternar.
+Tabela com busca (nº OS, cliente final/paciente, entidade, serviço), filtros rápidos por status (chips clicáveis) e por mês. Coluna "Serviços" mostra o nome do item quando a OS tem só 1, ou "N serviços" quando tem mais. Editar abre o mesmo modal de criação, sem trocar de página. Linhas de OS com status **Entregue** têm um botão de baixar o PDF da OS. Toggle Lista ⇄ Kanban fica fixo no topo do módulo e preserva os filtros ativos ao alternar.
 
 ### Visão Kanban
 Colunas, na ordem: **Recebido → Em Produção → Pronto para Entrega → Entregue**. `Cancelado` fica fora do quadro (evita poluir visualmente) — acessível via filtro na Lista.
 
-Card mostra: nº OS, nome da entidade, descrição do(s) serviço(s) (nome do item se só 1, "N serviços" se mais), cliente final, e um badge de prazo:
+Card mostra: nº OS, nome da entidade, descrição do(s) serviço(s) (nome do item se só 1, "N serviços" se mais), cliente final/paciente, e um badge de prazo:
 - 🟢 verde — dentro do prazo (`data_prevista` no futuro, folga confortável)
 - 🟡 amarelo — próximo do prazo (ex.: ≤ 2 dias)
 - 🔴 vermelho — atrasado (`data_prevista` no passado e ainda não `entregue`)
@@ -37,7 +38,7 @@ Arrastar e soltar (`@dnd-kit`) muda o `status` com atualização otimista (feedb
 - **Clicar numa linha abre o Extrato** (`EntidadeExtratoPage`, `/clientes-parceiros/:id`) — não mais o cadastro direto. Cada linha também tem dois ícones à parte: lápis (edição rápida do cadastro, sem sair da lista) e carteira (Tabela de Preços).
 - Botão "Novo cadastro" continua abrindo direto o modal de criação (`EntidadeFormDialog`) — não faz sentido mostrar um extrato vazio para quem ainda não existe.
 - Cadastro em modal único (`EntidadeFormDialog`): tipo (Cliente/Parceiro, botões), nome, documento, telefone, e-mail, endereço, observações; checkbox "Cadastro ativo" só aparece ao editar.
-- A **Tabela de Preços** (`TabelaPrecosDialog`) é um modal separado (não um passo do mesmo formulário): um campo numérico por serviço do catálogo, rotulado "Preço" (Cliente) ou "Comissão" (Parceiro); deixar em branco volta a usar o `preco_padrao` do catálogo automaticamente, sem precisar de um botão extra. Para Parceiros, um botão **R$ / %** ao lado de cada linha alterna a entrada: em "%", o campo aceita um percentual do preço padrão do serviço e mostra o valor em R$ calculado logo abaixo — o que é salvo é sempre o valor final em R$ (não uma fórmula). Escrita restrita a `admin` (operador visualiza os valores mas os campos ficam desabilitados, com aviso explicando o motivo). Acessível tanto pela lista quanto pelo Extrato.
+- A **Tabela de Preços** (`TabelaPrecosDialog`) é um modal separado (não um passo do mesmo formulário), largo (~70% da tela no desktop — a lista de serviços é longa). Para Cliente: um campo "Preço (R$)" por serviço do catálogo. Para Parceiro: **dois** campos por linha — "Preço do Parceiro" (o que ele mesmo cobra, só referência) e "Comissão" (o que o GRS Lab recebe, esse sim usado em tudo); deixar a Comissão em branco volta a usar o `preco_padrao` do catálogo automaticamente. Um botão **R$ / %** ao lado da Comissão alterna a entrada: em "%", calcula a partir do Preço do Parceiro já digitado (ou do preço padrão do catálogo, se ainda não preencheu) e mostra o valor em R$ calculado logo abaixo — o que é salvo é sempre o valor final em R$ (não uma fórmula). Escrita restrita a `admin` (operador visualiza os valores mas os campos ficam desabilitados, com aviso explicando o motivo). Acessível tanto pela lista quanto pelo Extrato.
 - "Excluir" não existe como ação destrutiva — desmarcar "Cadastro ativo" desativa o registro (some dos comboboxes de nova OS, mas o histórico de OS antigas continua intacto).
 
 ### Extrato por entidade (`EntidadeExtratoPage`)
@@ -56,7 +57,7 @@ Lista (`ServicosPage`) com busca e chips de categoria (derivados dos dados). CRU
 
 ## Módulo Contas a Receber (`ContasReceberPage`, `/financeiro`)
 
-- Uma linha por OS entregue (tabela `contas_receber`, criada automaticamente — ver `docs/business-rules.md`). Busca por cliente final/nº OS, **filtro dedicado por Cliente/Parceiro** (combobox, essencial pro fluxo de pagamento em massa abaixo), filtro de mês, chips de status (Todos/Aberto/Pago), checkbox **"Mostrar cancelados"** (desmarcado por padrão — uma linha cancelada só aparece se o usuário pedir).
+- Uma linha por OS entregue (tabela `contas_receber`, criada automaticamente — ver `docs/business-rules.md`). Busca por cliente final/paciente/nº OS, **filtro dedicado por Cliente/Parceiro** (combobox, essencial pro fluxo de pagamento em massa abaixo), filtro de mês, chips de status (Todos/Aberto/Pago), checkbox **"Mostrar cancelados"** (desmarcado por padrão — uma linha cancelada só aparece se o usuário pedir).
 - Ação **"Marcar como pago"** (ícone de check verde, uma linha por vez): abre um modal pequeno pedindo data e forma de pagamento (mesmo padrão do `EntregaConfirmDialog` de Ordens de Serviço), default hoje. Uma conta paga pode voltar para aberta (ícone de cifrão âmbar) sem exigir confirmação — é uma correção operacional simples.
 - **Marcar como pago em massa**: cada linha em aberto tem um checkbox (mais um "selecionar todas as abertas" no cabeçalho da tabela); com 1+ selecionadas aparece uma barra de ação com o total selecionado e um botão que abre `MarcarVariasPagoDialog` (mesma data/forma de pagamento aplicada a todas de uma vez). Pensado pro Cliente/Parceiro que paga tudo de um período junto — filtra por entidade + mês e marca tudo de uma vez, em vez de OS por OS.
 - Ação **"Cancelar"** (ícone de proibido, só visível para `admin`): abre modal com campo de justificativa **obrigatório**. Confirmar marca `status = cancelado` — a linha some da lista padrão, mas nunca é apagada de verdade, e volta a aparecer com "Mostrar cancelados" marcado.
@@ -71,6 +72,10 @@ Cadastro simples, mesmo padrão visual do Catálogo de Serviços: busca, chips d
 - Seletor de mês (`input type="month"`). Mostra três números: **Recebido no mês** (Contas a Receber pagas, pelo mês do pagamento), **Despesas no mês** e **Resultado** (recebido − despesas).
 - Antes de fechado, os valores são recalculados toda vez que a tela abre. Botão **"Fechar o mês"** (só `admin`) trava um snapshot — a partir daí a tela mostra sempre esse valor travado para aquele mês, com a data em que foi fechado. Fechar de novo atualiza o snapshot (não é uma ação de uso único).
 - Distinto do fechamento por entidade que já existe (`fechamentos`, sem tela própria) — este é o resultado do laboratório inteiro.
+
+## Configurações do negócio
+
+Atalho no Topbar, ao lado do menu do usuário: um botão com o nome do negócio (`empresa_config.nome_fantasia`) e um ícone de prédio, abre o `EmpresaConfigDialog`. Campos: Nome do negócio (sempre aparece nos documentos, sem toggle), Logo (upload de imagem pro bucket público `logos` do Storage, com pré-visualização), Endereço, Telefone e E-mail — cada um dos quatro últimos com um checkbox **"Mostrar no cabeçalho"** ao lado, que controla se aquele dado aparece no cabeçalho dos PDFs (OS, Relatório de Fechamento). Escrita restrita a `admin`; qualquer usuário ativo pode abrir e consultar, mas os campos ficam desabilitados.
 
 ## Emissão de documentos
 

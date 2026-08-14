@@ -1,6 +1,6 @@
 # NexLab — Schema do banco de dados
 
-> Espelha `supabase/migrations/0001_init.sql` a `0005_financeiro_ajustes.sql`. Se o schema mudar, atualize a migration nova + este arquivo no mesmo commit — nunca deixe este documento desatualizado em relação às migrations reais.
+> Espelha `supabase/migrations/0001_init.sql` a `0008_config_negocio.sql`. Se o schema mudar, atualize a migration nova + este arquivo no mesmo commit — nunca deixe este documento desatualizado em relação às migrations reais.
 
 ## Diagrama de relacionamento (visão simplificada)
 
@@ -55,9 +55,9 @@ Perfil interno de cada usuário (não há cadastro público — usuários são c
 | `created_at` | timestamptz | |
 
 ### `empresa_config`
-Singleton (`id` sempre `1`) com os dados do GRS Lab usados nos cabeçalhos de PDF.
+Singleton (`id` sempre `1`) com os dados do GRS Lab usados nos cabeçalhos de PDF — editável na tela "Informações do negócio" (`EmpresaConfigDialog`, atalho no Topbar, escrita só `admin`).
 
-`nome_fantasia`, `razao_social`, `documento`, `telefone`, `email`, `endereco`, `logo_url`, `prefixo_nota_servico` (default `'NS'`), `proximo_numero_nota` (default `1`), `updated_at`.
+`nome_fantasia`, `razao_social`, `documento`, `telefone`, `email`, `endereco`, `logo_url`, `prefixo_nota_servico` (default `'NS'`), `proximo_numero_nota` (default `1`), `updated_at`. Migration `0008`: `mostrar_endereco`, `mostrar_telefone`, `mostrar_email`, `mostrar_logo` (boolean, default `true` cada) — controlam se o campo aparece no cabeçalho dos PDFs (`nome_fantasia` sempre aparece, sem toggle). `logo_url` aponta pro bucket público de Storage `logos` (migration `0008`: leitura pública, escrita só `admin`).
 
 ### `entidades`
 Unifica **Clientes** (consultórios/dentistas — cobrança direta) e **Parceiros** (laboratórios maiores — pagam comissão). Diferenciados pela coluna `tipo`.
@@ -95,7 +95,8 @@ Preço (se `entidades.tipo = 'cliente'`) ou valor de comissão (se `tipo = 'parc
 | `id` | uuid PK | |
 | `entidade_id` | uuid FK → `entidades` | |
 | `servico_id` | uuid FK → `servicos` | |
-| `preco` | numeric(10,2) | semântica depende de `entidades.tipo` |
+| `preco` | numeric(10,2) | semântica depende de `entidades.tipo`: preço (Cliente) ou comissão que o GRS Lab recebe (Parceiro) — o único valor usado em cálculos (OS, Contas a Receber, Fechamento) |
+| `preco_parceiro` | numeric(10,2) | migration `0006` — só Parceiro: preço do serviço na tabela do próprio parceiro. **Só referência**, pra conferir se a comissão negociada está correta (o pagamento da comissão é baseado na tabela de preço do Parceiro, não na do GRS Lab) — não entra em nenhum cálculo |
 | `updated_at` | timestamptz | |
 
 `unique (entidade_id, servico_id)` — uma linha por combinação.
@@ -108,7 +109,8 @@ Núcleo do sistema: o **cabeçalho** de cada Ordem de Serviço, base do Kanban e
 | `id` | uuid PK | |
 | `numero_os` | bigint, identity | numeração interna do GRS Lab — sugerida automaticamente mas editável na criação (ex.: para manter uma numeração legada); continua única |
 | `entidade_id` | uuid FK → `entidades` | quem será cobrado/comissionado |
-| `cliente_final` | text | nome do paciente/consultório final — **texto livre, não é FK** (informativo, como aparece nos relatórios reais dos parceiros) |
+| `cliente_final` | text | nome do consultório/cliente final — **texto livre, não é FK** (informativo, como aparece nos relatórios reais dos parceiros) |
+| `nome_paciente` | text | nome do paciente, separado do `cliente_final` (migration `0007`) — texto livre, não é FK |
 | `status` | `status_os` | default `recebido` — colunas do Kanban |
 | `data_recebimento` | date | default hoje (era `data_entrada`) — editável no formulário |
 | `data_prevista` | date | data de entrega prevista; sugerida a partir do `tempo_medio_dias` dos itens, editável |

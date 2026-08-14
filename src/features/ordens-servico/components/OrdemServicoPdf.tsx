@@ -1,4 +1,4 @@
-import { Document, Page, View, Text, StyleSheet, pdf } from '@react-pdf/renderer'
+import { Document, Page, View, Text, Image, StyleSheet, pdf } from '@react-pdf/renderer'
 import { format, parseISO } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { ARCO_LABEL, STATUS_OS_LABEL, valorEfetivoItem, type OrdemServicoComRelacoes } from '@/types/domain'
@@ -7,6 +7,8 @@ import type { EmpresaConfig } from '@/hooks/useEmpresaConfig'
 const styles = StyleSheet.create({
   page: { padding: 32, fontSize: 10, color: '#1e293b', fontFamily: 'Helvetica' },
   headerRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 16 },
+  empresaBloco: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  logo: { width: 40, height: 40, objectFit: 'contain' },
   empresaNome: { fontSize: 16, fontWeight: 700, color: '#0a4f4d' },
   empresaLinha: { fontSize: 9, color: '#64748b' },
   osTitulo: { fontSize: 14, fontWeight: 700, textAlign: 'right' },
@@ -61,11 +63,22 @@ export function OrdemServicoPdfDocument({ ordem, empresa }: OrdemServicoPdfDocum
     <Document>
       <Page size="A4" style={styles.page}>
         <View style={styles.headerRow}>
-          <View>
-            <Text style={styles.empresaNome}>{empresa?.nome_fantasia ?? 'GRS Lab'}</Text>
-            {empresa?.telefone && <Text style={styles.empresaLinha}>{empresa.telefone}</Text>}
-            {empresa?.email && <Text style={styles.empresaLinha}>{empresa.email}</Text>}
-            {empresa?.endereco && <Text style={styles.empresaLinha}>{empresa.endereco}</Text>}
+          <View style={styles.empresaBloco}>
+            {empresa?.mostrar_logo && empresa.logo_url && (
+              <Image style={styles.logo} src={empresa.logo_url} />
+            )}
+            <View>
+              <Text style={styles.empresaNome}>{empresa?.nome_fantasia ?? 'GRS Lab'}</Text>
+              {empresa?.mostrar_telefone && empresa.telefone && (
+                <Text style={styles.empresaLinha}>{empresa.telefone}</Text>
+              )}
+              {empresa?.mostrar_email && empresa.email && (
+                <Text style={styles.empresaLinha}>{empresa.email}</Text>
+              )}
+              {empresa?.mostrar_endereco && empresa.endereco && (
+                <Text style={styles.empresaLinha}>{empresa.endereco}</Text>
+              )}
+            </View>
           </View>
           <View>
             <Text style={styles.osTitulo}>Ordem de Serviço #{ordem.numero_os}</Text>
@@ -80,8 +93,12 @@ export function OrdemServicoPdfDocument({ ordem, empresa }: OrdemServicoPdfDocum
               <Text style={styles.infoValor}>{ordem.entidade.nome}</Text>
             </View>
             <View style={styles.infoItem}>
-              <Text style={styles.infoLabel}>Cliente final / Paciente</Text>
+              <Text style={styles.infoLabel}>Cliente final</Text>
               <Text style={styles.infoValor}>{ordem.cliente_final || '—'}</Text>
+            </View>
+            <View style={styles.infoItem}>
+              <Text style={styles.infoLabel}>Nome do paciente</Text>
+              <Text style={styles.infoValor}>{ordem.nome_paciente || '—'}</Text>
             </View>
             <View style={styles.infoItem}>
               <Text style={styles.infoLabel}>Data de recebimento</Text>

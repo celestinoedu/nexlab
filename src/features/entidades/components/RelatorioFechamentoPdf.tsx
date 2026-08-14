@@ -1,4 +1,4 @@
-import { Document, Page, View, Text, StyleSheet, pdf } from '@react-pdf/renderer'
+import { Document, Page, View, Text, Image, StyleSheet, pdf } from '@react-pdf/renderer'
 import { format, parseISO } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { valorTotalOrdem, type Entidade, type OrdemServicoComRelacoes } from '@/types/domain'
@@ -7,6 +7,8 @@ import type { EmpresaConfig } from '@/hooks/useEmpresaConfig'
 const styles = StyleSheet.create({
   page: { padding: 32, fontSize: 10, color: '#1e293b', fontFamily: 'Helvetica' },
   headerRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 16 },
+  empresaBloco: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  logo: { width: 40, height: 40, objectFit: 'contain' },
   empresaNome: { fontSize: 16, fontWeight: 700, color: '#0a4f4d' },
   empresaLinha: { fontSize: 9, color: '#64748b' },
   tituloDireita: { fontSize: 14, fontWeight: 700, textAlign: 'right' },
@@ -63,10 +65,22 @@ export function RelatorioFechamentoPdfDocument({
     <Document>
       <Page size="A4" style={styles.page}>
         <View style={styles.headerRow}>
-          <View>
-            <Text style={styles.empresaNome}>{empresa?.nome_fantasia ?? 'GRS Lab'}</Text>
-            {empresa?.telefone && <Text style={styles.empresaLinha}>{empresa.telefone}</Text>}
-            {empresa?.email && <Text style={styles.empresaLinha}>{empresa.email}</Text>}
+          <View style={styles.empresaBloco}>
+            {empresa?.mostrar_logo && empresa.logo_url && (
+              <Image style={styles.logo} src={empresa.logo_url} />
+            )}
+            <View>
+              <Text style={styles.empresaNome}>{empresa?.nome_fantasia ?? 'GRS Lab'}</Text>
+              {empresa?.mostrar_telefone && empresa.telefone && (
+                <Text style={styles.empresaLinha}>{empresa.telefone}</Text>
+              )}
+              {empresa?.mostrar_email && empresa.email && (
+                <Text style={styles.empresaLinha}>{empresa.email}</Text>
+              )}
+              {empresa?.mostrar_endereco && empresa.endereco && (
+                <Text style={styles.empresaLinha}>{empresa.endereco}</Text>
+              )}
+            </View>
           </View>
           <View>
             <Text style={styles.tituloDireita}>Relatório de Fechamento</Text>
@@ -83,7 +97,7 @@ export function RelatorioFechamentoPdfDocument({
           <View style={styles.tableHeader}>
             <Text style={[styles.th, styles.colOs]}>Nº OS</Text>
             <Text style={[styles.th, styles.colData]}>Data</Text>
-            <Text style={[styles.th, styles.colCliente]}>Cliente final</Text>
+            <Text style={[styles.th, styles.colCliente]}>Cliente final / Paciente</Text>
             <Text style={[styles.th, styles.colServico]}>Serviços</Text>
             <Text style={[styles.th, styles.colValor]}>{entidade.tipo === 'parceiro' ? 'Comissão' : 'Valor'}</Text>
           </View>
@@ -91,7 +105,9 @@ export function RelatorioFechamentoPdfDocument({
             <View key={ordem.id} style={styles.tableRow}>
               <Text style={[styles.td, styles.colOs]}>#{ordem.numero_os}</Text>
               <Text style={[styles.td, styles.colData]}>{formatarData(ordem.data_entrega ?? ordem.data_recebimento)}</Text>
-              <Text style={[styles.td, styles.colCliente]}>{ordem.cliente_final || '—'}</Text>
+              <Text style={[styles.td, styles.colCliente]}>
+                {[ordem.cliente_final, ordem.nome_paciente].filter(Boolean).join(' — ') || '—'}
+              </Text>
               <Text style={[styles.td, styles.colServico]}>
                 {ordem.itens.map((i) => i.servico.nome).join(', ')}
               </Text>

@@ -52,6 +52,8 @@ export interface TabelaPreco {
   entidade_id: string
   servico_id: string
   preco: number
+  /** Preço do serviço na tabela do próprio Parceiro — só referência, não entra em cálculo. */
+  preco_parceiro: number | null
   updated_at: string
 }
 
@@ -61,6 +63,7 @@ export interface OrdemServico {
   numero_os: number
   entidade_id: string
   cliente_final: string | null
+  nome_paciente: string | null
   status: StatusOS
   data_recebimento: string
   data_prevista: string | null
@@ -112,7 +115,7 @@ export interface ContaReceber {
 
 export interface ContaReceberComRelacoes extends ContaReceber {
   entidade: Pick<Entidade, 'id' | 'nome' | 'tipo'>
-  ordem: Pick<OrdemServico, 'id' | 'numero_os' | 'cliente_final' | 'data_entrega'>
+  ordem: Pick<OrdemServico, 'id' | 'numero_os' | 'cliente_final' | 'nome_paciente' | 'data_entrega'>
 }
 
 export interface Despesa {

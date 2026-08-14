@@ -15,6 +15,7 @@ export interface OrdemServicoFormInput {
   numero_os: number | null
   entidade_id: string
   cliente_final: string | null
+  nome_paciente: string | null
   status: StatusOS
   data_recebimento: string
   data_prevista: string | null

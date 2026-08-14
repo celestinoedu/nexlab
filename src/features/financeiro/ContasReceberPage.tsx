@@ -77,6 +77,7 @@ export function ContasReceberPage() {
       return (
         c.entidade.nome.toLowerCase().includes(buscaLower) ||
         (c.ordem.cliente_final ?? '').toLowerCase().includes(buscaLower) ||
+        (c.ordem.nome_paciente ?? '').toLowerCase().includes(buscaLower) ||
         String(c.ordem.numero_os).includes(buscaLower)
       )
     })
@@ -319,7 +320,10 @@ export function ContasReceberPage() {
                     </div>
                   </td>
                   <td className="px-4 py-3 text-slate-500">
-                    #{conta.ordem.numero_os} {conta.ordem.cliente_final ? `— ${conta.ordem.cliente_final}` : ''}
+                    #{conta.ordem.numero_os}
+                    {[conta.ordem.cliente_final, conta.ordem.nome_paciente].filter(Boolean).length > 0
+                      ? ` — ${[conta.ordem.cliente_final, conta.ordem.nome_paciente].filter(Boolean).join(' — ')}`
+                      : ''}
                   </td>
                   <td className="px-4 py-3 text-slate-500">{conta.forma_pagamento || '—'}</td>
                   <td className="px-4 py-3">

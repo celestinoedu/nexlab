@@ -2,6 +2,14 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), versionamento [SemVer](https://semver.org/lang/pt-BR/).
 
+## [0.8.0] - 2026-08-10 — Preço do parceiro, formulário de OS em 2 colunas, Configurações do negócio
+
+### Adicionado
+- **Preço do Parceiro** na Tabela de Preços (`tabela_precos.preco_parceiro`, migration `0006`): novo campo por serviço, só pra Parceiro — o que ele mesmo cobra na tabela dele. É só referência pra conferir a Comissão (o pagamento da comissão é calculado em cima da tabela do parceiro, não da GRS Lab); não entra em nenhum cálculo. O botão R$/% da Comissão agora converte a partir desse valor quando preenchido.
+- **Nome do paciente** separado de **Cliente final** no formulário de OS (`ordens_servico.nome_paciente`, migration `0007`) — antes era um campo só. Refletido em toda exibição (Lista, Kanban, PDF da OS, Relatório de Fechamento, busca de Contas a Receber).
+- **Formulário de OS redesenhado**: dialog mais largo (`lg:max-w-5xl`), 2 colunas no desktop — serviços à esquerda, dados gerais à direita (empilha em 1 coluna no mobile) — com Desconto/Total/Observações num rodapé de largura total.
+- **Configurações do negócio** (`EmpresaConfigDialog`, migration `0008`): tela pra editar nome, logo (upload pro bucket público `logos` do Storage), endereço, telefone e e-mail do GRS Lab, cada um (exceto nome) com um toggle "Mostrar no cabeçalho dos documentos" — já aplicado no PDF da OS e no Relatório de Fechamento. Atalho novo no Topbar, ao lado do menu do usuário.
+
 ## [0.7.5] - 2026-08-10 — Corrige tela em branco após login (cache do GitHub Pages)
 
 ### Corrigido

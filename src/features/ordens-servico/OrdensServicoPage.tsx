@@ -52,6 +52,7 @@ export function OrdensServicoPage() {
       return (
         String(o.numero_os).includes(buscaLower) ||
         (o.cliente_final ?? '').toLowerCase().includes(buscaLower) ||
+        (o.nome_paciente ?? '').toLowerCase().includes(buscaLower) ||
         o.entidade.nome.toLowerCase().includes(buscaLower) ||
         o.itens.some((item) => item.servico.nome.toLowerCase().includes(buscaLower))
       )

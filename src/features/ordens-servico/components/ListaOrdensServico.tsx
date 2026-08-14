@@ -35,7 +35,7 @@ export function ListaOrdensServico({ ordens, onEditOrdem, onImprimirOrdem }: Lis
             <th className="px-4 py-3">Nº OS</th>
             <th className="px-4 py-3">Cliente / Parceiro</th>
             <th className="px-4 py-3">Serviços</th>
-            <th className="px-4 py-3">Cliente final</th>
+            <th className="px-4 py-3">Cliente final / Paciente</th>
             <th className="px-4 py-3">Status</th>
             <th className="px-4 py-3">Recebimento</th>
             <th className="px-4 py-3">Previsão</th>
@@ -68,7 +68,18 @@ export function ListaOrdensServico({ ordens, onEditOrdem, onImprimirOrdem }: Lis
                   </span>
                 )}
               </td>
-              <td className="px-4 py-3 text-slate-500">{ordem.cliente_final || '—'}</td>
+              <td className="px-4 py-3 text-slate-500">
+                {ordem.cliente_final || ordem.nome_paciente ? (
+                  <div className="flex flex-col">
+                    {ordem.cliente_final && <span>{ordem.cliente_final}</span>}
+                    {ordem.nome_paciente && (
+                      <span className="text-xs text-slate-400">{ordem.nome_paciente}</span>
+                    )}
+                  </div>
+                ) : (
+                  '—'
+                )}
+              </td>
               <td className="px-4 py-3">
                 <div className="flex flex-wrap items-center gap-1">
                   <Badge variant={STATUS_BADGE_VARIANT[ordem.status]}>{STATUS_OS_LABEL[ordem.status]}</Badge>
