@@ -73,6 +73,10 @@ Cadastro simples, mesmo padrão visual do Catálogo de Serviços: busca, chips d
 - Antes de fechado, os valores são recalculados toda vez que a tela abre. Botão **"Fechar o mês"** (só `admin`) trava um snapshot — a partir daí a tela mostra sempre esse valor travado para aquele mês, com a data em que foi fechado. Fechar de novo atualiza o snapshot (não é uma ação de uso único).
 - Distinto do fechamento por entidade que já existe (`fechamentos`, sem tela própria) — este é o resultado do laboratório inteiro.
 
+## Módulo Relatórios (`RelatoriosPage`, `/relatorios`)
+
+Hoje concentra a **impressão de canhotos de OS**: lista de todas as OS (busca por nº/cliente/serviço, filtro por status e por mês), cada linha com checkbox + checkbox "selecionar todas" no cabeçalho da tabela. Ao selecionar 1+ OS, aparece uma barra de ação com "Imprimir canhotos", que gera e baixa um PDF único (`canhotos-os-<data-hora>.pdf`) — um canhoto por OS (nº, cliente/parceiro, cliente final/paciente, resumo dos serviços, status, data de entrega), organizados numa grade fixa de 2 colunas × 4 linhas por página A4 com borda tracejada fazendo a marcação de recorte. A grade é sempre fixa e cada canhoto ocupa uma célula inteira — nunca uma OS fica cortada entre duas colunas/linhas nem entre duas páginas, mesmo quando a última página fica incompleta.
+
 ## Configurações do negócio
 
 Atalho no Topbar, ao lado do menu do usuário: um botão com o nome do negócio (`empresa_config.nome_fantasia`) e um ícone de prédio, abre o `EmpresaConfigDialog`. Campos: Nome do negócio (sempre aparece nos documentos, sem toggle), Logo (upload de imagem pro bucket público `logos` do Storage, com pré-visualização), Endereço, Telefone e E-mail — cada um dos quatro últimos com um checkbox **"Mostrar no cabeçalho"** ao lado, que controla se aquele dado aparece no cabeçalho dos PDFs (OS, Relatório de Fechamento). Escrita restrita a `admin`; qualquer usuário ativo pode abrir e consultar, mas os campos ficam desabilitados.
@@ -82,6 +86,7 @@ Atalho no Topbar, ao lado do menu do usuário: um botão com o nome do negócio 
 - **PDF da Ordem de Serviço**: disponível para OS com status `entregue`, na Lista (ação da linha) e no Kanban (ícone no card) — sempre **baixa o arquivo** (`OS-<número>.pdf`), nunca só abre para visualizar.
 - **Relatório de Fechamento**: baixado a partir do Extrato de um Cliente/Parceiro (`EntidadeExtratoPage`), com as OS do período filtrado — sempre baixa o arquivo (`Fechamento-<nome>.pdf`), pronto para enviar ao próprio Cliente/Parceiro.
 - **Nota de Serviço** (Fase 4, ainda não implementada): acionada a partir de uma OS `entregue` — documento formal numerado, diferente do PDF simples da OS.
+- **Canhotos de OS**: a partir de Relatórios (`/relatorios`), com 1+ OS selecionadas — sempre baixa um único arquivo (`canhotos-os-<data-hora>.pdf`) com um canhoto por OS numa grade impressa, nunca abre só para visualizar.
 
 ## Estados vazios e erros
 

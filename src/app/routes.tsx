@@ -10,6 +10,7 @@ import { ServicosPage } from '@/features/servicos/ServicosPage'
 import { ContasReceberPage } from '@/features/financeiro/ContasReceberPage'
 import { DespesasPage } from '@/features/despesas/DespesasPage'
 import { FechamentoFinanceiroPage } from '@/features/fechamento/FechamentoFinanceiroPage'
+import { RelatoriosPage } from '@/features/relatorios/RelatoriosPage'
 import { EmConstrucao } from '@/components/shared/EmConstrucao'
 
 export function AppRoutes() {
@@ -29,7 +30,7 @@ export function AppRoutes() {
             <Route path="/financeiro" element={<ContasReceberPage />} />
             <Route path="/despesas" element={<DespesasPage />} />
             <Route path="/fechamento" element={<FechamentoFinanceiroPage />} />
-            <Route path="/relatorios" element={<EmConstrucao titulo="Relatórios" />} />
+            <Route path="/relatorios" element={<RelatoriosPage />} />
             <Route path="/configuracoes" element={<EmConstrucao titulo="Configurações" />} />
           </Route>
         </Route>

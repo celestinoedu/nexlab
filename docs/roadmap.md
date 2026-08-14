@@ -63,6 +63,10 @@ Pedido do usuário após testar o módulo de Clientes/Parceiros: gestão mínima
 - [ ] Dashboard com indicadores reais (substituir placeholders da Fase 1) — adiado.
 - [ ] Tela própria para `fechamentos` (fechamento por entidade, existente desde a v0.1.0) — segue sem UI, não foi pedida nesta rodada.
 
+## Fase 4.1 — Relatórios: impressão de canhotos ✅ concluída em 2026-08-13 (v0.9.0)
+
+- [x] **Impressão de canhotos de OS** (`RelatoriosPage`, `/relatorios`, substitui o "Em construção"): lista de OS com busca/filtro por status/mês e seleção por checkbox; botão "Imprimir canhotos" gera um único PDF com um canhoto por OS numa grade fixa 2×4 por página A4 com borda tracejada de recorte — grade sempre fixa, nunca corta uma OS entre colunas/linhas ou entre páginas.
+
 ## Fase 5 — Deploy final e polish
 
 - [ ] Domínio próprio (se o cliente quiser).

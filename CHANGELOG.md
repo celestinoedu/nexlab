@@ -2,6 +2,11 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), versionamento [SemVer](https://semver.org/lang/pt-BR/).
 
+## [0.9.0] - 2026-08-13 — Impressão de canhotos de OS
+
+### Adicionado
+- **Relatórios → Impressão de canhotos**: tela nova (antes "Em construção") com a lista de OS (busca, filtro por status e por mês) e seleção por checkbox; botão "Imprimir canhotos" gera e baixa um PDF único com um canhoto por OS selecionada, numa grade fixa de 2×4 por página A4 com borda tracejada (marcação de recorte) — a grade é sempre fixa e cada canhoto ocupa uma célula inteira, então uma OS nunca fica cortada entre duas colunas/linhas nem entre duas páginas. Cada canhoto traz nº da OS, cliente/parceiro, cliente final/paciente, resumo dos serviços, status e data de entrega.
+
 ## [0.8.0] - 2026-08-10 — Preço do parceiro, formulário de OS em 2 colunas, Configurações do negócio
 
 ### Adicionado
