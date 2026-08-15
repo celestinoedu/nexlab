@@ -4,28 +4,35 @@ import {
   ClipboardList,
   Users,
   Package,
+  Boxes,
   Wallet,
   Receipt,
   Landmark,
   FileText,
+  LayoutDashboard,
   Settings,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { APP_VERSION, APP_ATUALIZADO_EM } from '@/lib/appInfo'
 import { Logo } from '@/components/shared/Logo'
+import { useEmpresaConfig } from '@/hooks/useEmpresaConfig'
 
 const NAV_ITEMS = [
   { to: '/', label: 'Ordens de Serviço', icon: ClipboardList, end: true },
   { to: '/clientes-parceiros', label: 'Clientes e Parceiros', icon: Users },
   { to: '/servicos', label: 'Catálogo de Serviços', icon: Package },
+  { to: '/estoque', label: 'Estoque', icon: Boxes },
   { to: '/financeiro', label: 'Contas a Receber', icon: Wallet },
   { to: '/despesas', label: 'Despesas', icon: Receipt },
   { to: '/fechamento', label: 'Fechamento', icon: Landmark },
   { to: '/relatorios', label: 'Relatórios', icon: FileText },
+  { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/configuracoes', label: 'Configurações', icon: Settings },
 ]
 
 export function Sidebar() {
+  const { data: empresa } = useEmpresaConfig()
+
   return (
     <aside className="hidden w-64 shrink-0 flex-col border-r border-slate-200 bg-white md:flex">
       <div className="flex h-16 shrink-0 items-center px-6">
@@ -52,7 +59,9 @@ export function Sidebar() {
         ))}
       </nav>
       <div className="shrink-0 border-t border-slate-100 px-6 py-3 text-xs text-slate-400">
-        <p className="font-medium text-slate-500">GRS Lab · NexLab</p>
+        <p className="font-medium text-slate-500">
+          {empresa?.nome_fantasia ? `${empresa.nome_fantasia} · NexLab` : 'NexLab'}
+        </p>
         <p>
           Atualização nº {APP_VERSION} · {format(parseISO(APP_ATUALIZADO_EM), 'dd/MM/yyyy')}
         </p>

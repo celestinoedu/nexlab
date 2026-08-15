@@ -2,6 +2,33 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), versionamento [SemVer](https://semver.org/lang/pt-BR/).
 
+## [0.16.1] - 2026-08-15 — Remove menções fixas a "GRS Lab" da interface
+
+### Alterado
+- **Textos da interface deixam de citar "GRS Lab" como se fosse o único cliente do sistema** (login, Sidebar, Topbar, cabeçalho dos PDFs, Termos e Condições) — reflexo direto da v0.14.0 (multi-tenant): esses textos agora usam o nome da própria empresa logada (`empresas.nome_fantasia`, via `useEmpresaConfig`) ou uma redação genérica, nunca mais um nome de cliente fixo no código. Termos e Condições (`TermosPage`) passa a citar dinamicamente o nome do laboratório logado como responsável pelo tratamento de dados (LGPD), em vez de sempre "GRS Lab".
+
+## [0.16.0] - 2026-08-15 — Módulo Estoque, Dashboard e melhorias na Lista de OS
+
+### Adicionado
+- **Módulo Estoque** (`/estoque`, `0012_estoque.sql`): cadastro simples de insumos (nome, categoria, quantidade, unidade, valor unitário, local do estoque) com opção manual de "sinalizar para compra". Segue o mesmo padrão multi-tenant/RLS de `despesas` (qualquer usuário ativo cria/edita, exclusão só admin).
+- **Ícone de Alertas no Topbar**: sino ao lado do botão "Informações do negócio", com contador e popover listando os insumos sinalizados para compra, linkando pra `/estoque`.
+- **Dashboard** (`/dashboard`, novo item na Sidebar, no fim antes de Configurações — Ordens de Serviço continua sendo a Home): indicadores reais do negócio — serviços vencendo/atrasados, produção do mês (com anel de progresso), financeiro (a receber/recebido/despesas do mês), estoque sinalizado e clientes/parceiros sem OS recente. Substitui o placeholder que existia desde a Fase 1 e nunca tinha rota.
+- **Linha expansível na Lista de OS**: um chevron por linha mostra, ao expandir, a lista completa de serviços (com cor/arco/valor), observações, forma de pagamento e data de entrega real.
+
+### Alterado
+- **Lista de OS**: alinhamento das tags corrigido (células com `align-top`, nome do cliente/parceiro sem quebrar linha, badges de Status da OS e Status de Pagamento sempre empilhadas na mesma posição) — antes a distância entre as tags variava de linha pra linha dependendo de quanto texto quebrava em cada célula.
+
+## [0.15.0] - 2026-08-15 — Empresa Demonstração, canhotos legíveis e catálogo em PDF
+
+### Adicionado
+- **Empresa Demonstração** (`0011_empresa_demo.sql` + `seed_demo.sql`): tenant fictício pra prospects testarem o NexLab — login `teste@teste.com`/`teste123`, ~3 meses de OS/clientes/parceiros/financeiro inventados. Nenhuma escrita chega ao banco nessa conta: todo hook de mutação (OS, Entidades, Serviços, Despesas, Contas a Receber, Tabela de Preços, Fechamento) passa a checar `is_demo` e, se for o caso, aplica a alteração só no cache do TanStack Query (`src/lib/demoMode.ts`) — some ao recarregar ou logar de novo. Configurações (Usuários, Dados da empresa, Termos) fica bloqueada nessa conta. Link "Ver demonstração" na tela de login entra direto. Runbook de provisionamento em `SETUP.md`.
+- **Catálogo de serviços em PDF** (`ServicosPage` → "Baixar catálogo (PDF)"): exportação A4 com borda, organizada por categoria, formato lista com preço, cabeçalho com dados da empresa e nota de validade de 20 dias.
+
+### Alterado
+- **Canhotos de impressão**: tipografia fixa e legível (título 18pt, corpo 12pt com negrito nos dados importantes, rodapé 10pt, sempre preto) — grade de 6 canhotos por A4 (2×3) já era fixa, só a fonte estava pequena demais pra imprimir.
+- Campo "Cor" do item de OS renomeado para "Cor / Dente" (formulário e PDF da OS).
+- `AuthProvider` limpa todo o cache do TanStack Query numa troca de sessão (login/logout/troca de conta) — evita reaproveitar dado de outro tenant ou de uma sessão demo anterior.
+
 ## [0.14.0] - 2026-08-15 — Multi-tenant: NexLab passa a atender vários clientes
 
 ### Adicionado

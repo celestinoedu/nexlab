@@ -1,21 +1,25 @@
 import * as React from 'react'
-import { Plus, Search, Loader2, Download } from 'lucide-react'
+import { Plus, Search, Loader2, Download, FileText } from 'lucide-react'
+import { toast } from 'sonner'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/utils'
 import { baixarCsv, formatarNumeroCsv } from '@/lib/csv'
 import { useServicos } from '@/hooks/useServicos'
+import { useEmpresaConfig } from '@/hooks/useEmpresaConfig'
 import { ServicoFormDialog } from './components/ServicoFormDialog'
 import type { Servico } from '@/types/domain'
 
 export function ServicosPage() {
   const { data: servicos, isLoading } = useServicos(true)
+  const { data: empresaConfig } = useEmpresaConfig()
   const [busca, setBusca] = React.useState('')
   const [categoriaFiltro, setCategoriaFiltro] = React.useState('todas')
   const [mostrarInativos, setMostrarInativos] = React.useState(false)
   const [dialogAberto, setDialogAberto] = React.useState(false)
   const [servicoSelecionado, setServicoSelecionado] = React.useState<Servico | null>(null)
+  const [gerandoPdf, setGerandoPdf] = React.useState(false)
 
   const categorias = React.useMemo(() => {
     const set = new Set<string>()
@@ -57,11 +61,29 @@ export function ServicosPage() {
     baixarCsv('catalogo-servicos.csv', linhas)
   }
 
+  async function baixarCatalogoPdf() {
+    setGerandoPdf(true)
+    try {
+      // Import dinâmico: @react-pdf/renderer é pesada e só é necessária
+      // quando alguém realmente gera o PDF — mantém fora do bundle inicial.
+      const { baixarCatalogoServicosPdf } = await import('./components/CatalogoServicosPdf')
+      await baixarCatalogoServicosPdf(servicos ?? [], empresaConfig)
+    } catch {
+      toast.error('Não foi possível gerar o catálogo agora. Tente novamente.')
+    } finally {
+      setGerandoPdf(false)
+    }
+  }
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl font-semibold text-slate-900">Catálogo de Serviços</h1>
         <div className="flex items-center gap-2">
+          <Button variant="secondary" onClick={baixarCatalogoPdf} disabled={(servicos ?? []).length === 0 || gerandoPdf}>
+            {gerandoPdf ? <Loader2 size={18} className="animate-spin" /> : <FileText size={18} />}
+            Baixar catálogo (PDF)
+          </Button>
           <Button variant="secondary" onClick={baixarCsvServicos} disabled={filtrados.length === 0}>
             <Download size={18} />
             Baixar CSV

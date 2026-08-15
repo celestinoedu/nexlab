@@ -66,6 +66,21 @@ Sempre que uma assinatura for confirmada na landing page da Lotus, o NexLab **n�
 
 Só o **primeiro** usuário de cada empresa precisa desse passo manual — os próximos usuários daquele mesmo cliente podem ser criados normalmente pela tela **Configurações → Usuários** do próprio NexLab (o admin logado já vincula ao `empresa_id` certo automaticamente).
 
+## Provisionar a empresa Demonstração
+
+Empresa fictícia usada por prospects pra testar o NexLab (login fixo `teste@teste.com` / `teste123`, ~3 meses de dado inventado) — nenhuma escrita feita durante o uso dessa conta chega a este banco, o frontend intercepta toda mutação e mantém só em cache do navegador (ver `docs/architecture.md` § Modo demonstração e `src/lib/demoMode.ts`). Só precisa ser feito **uma vez** por projeto Supabase:
+
+1. Rode a migration [`supabase/migrations/0011_empresa_demo.sql`](./supabase/migrations/0011_empresa_demo.sql) no **SQL Editor** — cria a coluna `empresas.is_demo` e a linha da empresa "Laboratório Demonstração" com um `id` fixo (`de000000-0000-4000-8000-000000000001`).
+2. Criar o usuário de login: **Authentication → Users → Add user → Create new user**, e-mail `teste@teste.com`, senha `teste123`, com **Auto Confirm User** marcado (mesmo processo do passo 4 lá em cima). Copie o UUID gerado.
+3. Vincular esse usuário à empresa demo, como `admin`:
+   ```sql
+   insert into profiles (id, nome, role, empresa_id)
+   values ('COLE-O-UUID-DO-USUARIO', 'Usuário Demonstração', 'admin', 'de000000-0000-4000-8000-000000000001');
+   ```
+4. Rodar [`supabase/seed_demo.sql`](./supabase/seed_demo.sql) no SQL Editor — popula catálogo, clientes/parceiros, ~48 Ordens de Serviço e despesas fictícias nos últimos 3 meses. É reexecutável a qualquer momento pra "resetar" o dado demo (apaga e recria só o dado dessa empresa, nunca mexe em outro tenant).
+
+Depois disso, `teste@teste.com` / `teste123` já funciona em qualquer ambiente publicado do NexLab que aponte pra esse mesmo projeto Supabase — inclusive o link "Ver demonstração" da tela de login.
+
 ## 5. Configurar as variáveis de ambiente
 
 ### Para rodar localmente

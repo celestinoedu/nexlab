@@ -547,7 +547,7 @@ function ItemRow({
 
       <div className="flex flex-wrap items-end gap-2">
         <div className="flex w-full flex-col gap-1 sm:w-28">
-          <Label className="text-xs text-slate-500">Cor</Label>
+          <Label className="text-xs text-slate-500">Cor / Dente</Label>
           <Input placeholder="Ex.: A2" {...register(`itens.${index}.cor`)} />
         </div>
 

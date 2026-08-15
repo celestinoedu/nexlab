@@ -46,9 +46,10 @@ const ESTADO_VAZIO: CampoState = {
 }
 
 /**
- * Informações do negócio (GRS Lab): endereço, telefone, e-mail e logo, cada
- * um com um toggle "mostrar no cabeçalho dos documentos" (PDF de OS e de
- * Relatório de Fechamento). Escrita restrita a admin (ver docs/database-schema.md § RLS).
+ * Informações do negócio (do laboratório/empresa logada): endereço,
+ * telefone, e-mail e logo, cada um com um toggle "mostrar no cabeçalho dos
+ * documentos" (PDF de OS e de Relatório de Fechamento). Escrita restrita a
+ * admin (ver docs/database-schema.md § RLS).
  */
 export function EmpresaConfigDialog({ open, onOpenChange }: EmpresaConfigDialogProps) {
   const { data: empresa, isLoading: carregando } = useEmpresaConfig()
@@ -90,7 +91,7 @@ export function EmpresaConfigDialog({ open, onOpenChange }: EmpresaConfigDialogP
   async function onSalvar() {
     try {
       await salvar.mutateAsync({
-        nome_fantasia: estado.nome_fantasia.trim() || 'GRS Lab',
+        nome_fantasia: estado.nome_fantasia.trim() || empresa?.nome_fantasia || 'NexLab',
         endereco: estado.endereco.trim() || null,
         telefone: estado.telefone.trim() || null,
         email: estado.email.trim() || null,

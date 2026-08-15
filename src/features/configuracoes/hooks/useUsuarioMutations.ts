@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
+import { isDemoAtivo, ERRO_INDISPONIVEL_DEMO } from '@/lib/demoMode'
 import type { RoleUsuario } from '@/types/domain'
 
 export interface VincularUsuarioInput {
@@ -29,6 +30,7 @@ export function useUsuarioMutations() {
 
   const vincularUsuario = useMutation({
     mutationFn: async (input: VincularUsuarioInput) => {
+      if (isDemoAtivo(queryClient)) throw new Error(ERRO_INDISPONIVEL_DEMO)
       const { error } = await supabase.from('profiles').insert(input)
       if (error) throw new Error(traduzErro(error))
     },
@@ -39,6 +41,7 @@ export function useUsuarioMutations() {
 
   const atualizarUsuario = useMutation({
     mutationFn: async ({ id, input }: { id: string; input: AtualizarUsuarioInput }) => {
+      if (isDemoAtivo(queryClient)) throw new Error(ERRO_INDISPONIVEL_DEMO)
       const { error } = await supabase.from('profiles').update(input).eq('id', id)
       if (error) throw new Error(traduzErro(error))
     },

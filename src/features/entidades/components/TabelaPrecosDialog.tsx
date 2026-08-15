@@ -34,7 +34,7 @@ type ModoEntrada = 'valor' | 'percentual'
  * Pra Parceiro, mostra também o "Preço do Parceiro" (o que ele mesmo cobra
  * por aquele serviço na tabela dele) — é só referência pra conferir se a
  * comissão está correta (o pagamento da comissão é baseado na tabela de
- * preço do Parceiro, não na do GRS Lab). Não entra em nenhum cálculo: OS e
+ * preço do Parceiro, não na do laboratório). Não entra em nenhum cálculo: OS e
  * Fechamento Financeiro continuam 100% baseados na comissão.
  */
 export function TabelaPrecosDialog({ open, onOpenChange, entidade }: TabelaPrecosDialogProps) {
@@ -149,7 +149,7 @@ export function TabelaPrecosDialog({ open, onOpenChange, entidade }: TabelaPreco
           <DialogTitle>Tabela de preços — {entidade.nome}</DialogTitle>
           <DialogDescription>
             {ehParceiro
-              ? 'Preço do Parceiro é o que ele mesmo cobra por esse serviço (só referência, pra conferir a comissão — não entra em nenhum cálculo). Comissão é o valor que o GRS Lab recebe: digite em R$ ou toque em "%" pra calcular a partir do Preço do Parceiro (ou do preço padrão do catálogo, se ainda não preencheu). Deixe a comissão em branco pra não cadastrar preço específico.'
+              ? 'Preço do Parceiro é o que ele mesmo cobra por esse serviço (só referência, pra conferir a comissão — não entra em nenhum cálculo). Comissão é o valor que o laboratório recebe: digite em R$ ou toque em "%" pra calcular a partir do Preço do Parceiro (ou do preço padrão do catálogo, se ainda não preencheu). Deixe a comissão em branco pra não cadastrar preço específico.'
               : 'Preço específico deste cliente por serviço. Deixe em branco para usar o preço padrão do catálogo.'}
           </DialogDescription>
         </DialogHeader>

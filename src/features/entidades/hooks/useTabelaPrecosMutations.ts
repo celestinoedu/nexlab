@@ -1,5 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
+import { isDemoAtivo, invalidarSeReal } from '@/lib/demoMode'
+import type { PrecoEntidadeServico } from '@/hooks/useTabelaPrecos'
 
 export interface LinhaTabelaPreco {
   servico_id: string
@@ -20,6 +22,21 @@ export function useTabelaPrecosMutations(entidadeId: string) {
 
   const salvar = useMutation({
     mutationFn: async (linhas: LinhaTabelaPreco[]) => {
+      if (isDemoAtivo(queryClient)) {
+        queryClient.setQueryData<Map<string, PrecoEntidadeServico>>(['tabela_precos', entidadeId], (old) => {
+          const porServico = new Map(old ?? [])
+          for (const linha of linhas) {
+            if (linha.preco === null) {
+              porServico.delete(linha.servico_id)
+            } else {
+              porServico.set(linha.servico_id, { preco: linha.preco, precoParceiro: linha.preco_parceiro })
+            }
+          }
+          return porServico
+        })
+        return
+      }
+
       const comValor = linhas.filter((l) => l.preco !== null)
       const semValor = linhas.filter((l) => l.preco === null).map((l) => l.servico_id)
 
@@ -46,7 +63,7 @@ export function useTabelaPrecosMutations(entidadeId: string) {
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['tabela_precos', entidadeId] })
+      invalidarSeReal(queryClient, ['tabela_precos', entidadeId])
     },
   })
 

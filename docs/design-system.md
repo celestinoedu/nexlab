@@ -1,6 +1,6 @@
 # NexLab — Design System
 
-> Identidade visual do sistema NexLab (ERP do GRS Lab). Este arquivo é a fonte única de verdade sobre cor, tipografia, espaçamento e tom de voz. Qualquer tela nova deve reutilizar estes tokens — não criar cor/estilo "solto" no componente.
+> Identidade visual do sistema NexLab (ERP multi-tenant para laboratórios de próteses dentárias — o GRS Lab foi o primeiro cliente). Este arquivo é a fonte única de verdade sobre cor, tipografia, espaçamento e tom de voz. Qualquer tela nova deve reutilizar estes tokens — não criar cor/estilo "solto" no componente.
 
 ## 1. Posicionamento da marca
 

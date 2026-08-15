@@ -14,6 +14,8 @@ export interface EmpresaConfig {
   mostrar_telefone: boolean
   mostrar_email: boolean
   mostrar_logo: boolean
+  /** Tenant de demonstração (migration 0011) — ver `src/lib/demoMode.ts`. */
+  is_demo: boolean
 }
 
 /**
@@ -31,4 +33,10 @@ export function useEmpresaConfig() {
     },
     staleTime: 5 * 60_000,
   })
+}
+
+/** Atalho pra saber se o usuário logado está na empresa Demonstração — ver `src/lib/demoMode.ts`. */
+export function useIsDemo(): boolean {
+  const { data } = useEmpresaConfig()
+  return Boolean(data?.is_demo)
 }

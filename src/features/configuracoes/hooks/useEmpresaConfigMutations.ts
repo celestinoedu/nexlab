@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
+import { isDemoAtivo, ERRO_INDISPONIVEL_DEMO } from '@/lib/demoMode'
 
 export interface EmpresaConfigFormInput {
   nome_fantasia: string
@@ -19,6 +20,7 @@ export function useEmpresaConfigMutations(empresaId: string | undefined) {
 
   const salvar = useMutation({
     mutationFn: async (input: EmpresaConfigFormInput) => {
+      if (isDemoAtivo(queryClient)) throw new Error(ERRO_INDISPONIVEL_DEMO)
       if (!empresaId) throw new Error('Empresa não carregada ainda. Tente novamente em instantes.')
       const { error } = await supabase.from('empresas').update(input).eq('id', empresaId)
       if (error) throw new Error('Não foi possível salvar as informações do negócio agora. Tente novamente.')
@@ -31,6 +33,7 @@ export function useEmpresaConfigMutations(empresaId: string | undefined) {
   /** Sobe o arquivo pro bucket público "logos" (numa pasta por empresa) e devolve a URL pública. */
   const enviarLogo = useMutation({
     mutationFn: async (arquivo: File) => {
+      if (isDemoAtivo(queryClient)) throw new Error(ERRO_INDISPONIVEL_DEMO)
       if (!empresaId) throw new Error('Empresa não carregada ainda. Tente novamente em instantes.')
       const extensao = arquivo.name.split('.').pop() ?? 'png'
       const caminho = `${empresaId}/logo-${Date.now()}.${extensao}`

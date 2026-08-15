@@ -68,7 +68,7 @@ export function OrdemServicoPdfDocument({ ordem, empresa }: OrdemServicoPdfDocum
               <Image style={styles.logo} src={empresa.logo_url} />
             )}
             <View>
-              <Text style={styles.empresaNome}>{empresa?.nome_fantasia ?? 'GRS Lab'}</Text>
+              <Text style={styles.empresaNome}>{empresa?.nome_fantasia ?? 'NexLab'}</Text>
               {empresa?.mostrar_telefone && empresa.telefone && (
                 <Text style={styles.empresaLinha}>{empresa.telefone}</Text>
               )}
@@ -114,7 +114,7 @@ export function OrdemServicoPdfDocument({ ordem, empresa }: OrdemServicoPdfDocum
         <View style={styles.table}>
           <View style={styles.tableHeader}>
             <Text style={[styles.th, styles.colServico]}>Serviço</Text>
-            <Text style={[styles.th, styles.colCor]}>Cor</Text>
+            <Text style={[styles.th, styles.colCor]}>Cor / Dente</Text>
             <Text style={[styles.th, styles.colArco]}>Arco</Text>
             <Text style={[styles.th, styles.colQtd]}>Qtd</Text>
             <Text style={[styles.th, styles.colValor]}>{ehParceiro ? 'Comissão' : 'Valor'}</Text>

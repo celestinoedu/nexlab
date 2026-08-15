@@ -70,7 +70,7 @@ export function RelatorioFechamentoPdfDocument({
               <Image style={styles.logo} src={empresa.logo_url} />
             )}
             <View>
-              <Text style={styles.empresaNome}>{empresa?.nome_fantasia ?? 'GRS Lab'}</Text>
+              <Text style={styles.empresaNome}>{empresa?.nome_fantasia ?? 'NexLab'}</Text>
               {empresa?.mostrar_telefone && empresa.telefone && (
                 <Text style={styles.empresaLinha}>{empresa.telefone}</Text>
               )}

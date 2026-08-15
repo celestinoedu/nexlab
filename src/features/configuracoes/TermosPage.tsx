@@ -1,14 +1,18 @@
 import { useNavigate } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
+import { useEmpresaConfig } from '@/hooks/useEmpresaConfig'
 
 /**
- * Texto estático (sem banco) — se precisar mudar o conteúdo, é só editar este
- * arquivo. Cobre uso interno do NexLab e tratamento de dados pessoais de
- * terceiros (nome de cliente final/paciente) sob a LGPD, já que o sistema
- * guarda esse tipo de dado desde o módulo de Ordens de Serviço.
+ * Texto praticamente estático — só o nome da empresa/tenant é dinâmico
+ * (`useEmpresaConfig`), já que o NexLab atende vários laboratórios (ver
+ * docs/database-schema.md § Multi-tenant): cada cliente vê os Termos com o
+ * próprio nome como responsável pelo tratamento dos dados, nunca o de outro.
+ * Se precisar mudar o conteúdo em si, é só editar este arquivo.
  */
 export function TermosPage() {
   const navigate = useNavigate()
+  const { data: empresa } = useEmpresaConfig()
+  const nomeEmpresa = empresa?.nome_fantasia || 'o laboratório contratante'
 
   return (
     <div className="flex flex-col gap-4">
@@ -29,10 +33,11 @@ export function TermosPage() {
         <section className="flex flex-col gap-2">
           <h2 className="text-base font-semibold text-slate-900">1. Sobre o NexLab</h2>
           <p>
-            O NexLab é um sistema de gestão de uso <strong>interno</strong>, desenvolvido sob medida para o
-            GRS Lab (laboratório de próteses dentárias), para controle de Ordens de Serviço, cadastro de
-            clientes e parceiros, catálogo de serviços e financeiro. Não é um produto de acesso público —
-            só pessoas autorizadas pela direção do GRS Lab têm login.
+            O NexLab é um sistema de gestão de uso <strong>interno</strong>, desenvolvido para laboratórios de
+            próteses dentárias controlarem Ordens de Serviço, cadastro de clientes e parceiros, catálogo de
+            serviços e financeiro. Cada laboratório cliente (como <strong>{nomeEmpresa}</strong>) tem seus dados
+            isolados dos demais dentro do sistema. Não é um produto de acesso público — só pessoas autorizadas
+            pela direção de <strong>{nomeEmpresa}</strong> têm login.
           </p>
         </section>
 
@@ -41,12 +46,12 @@ export function TermosPage() {
           <ul className="list-disc space-y-1 pl-5">
             <li>O acesso é pessoal e intransferível — cada usuário é responsável pelo que for feito com seu login.</li>
             <li>
-              Não existe cadastro público: novos acessos são criados manualmente pela direção do GRS Lab,
-              com papel de <strong>Administrador</strong> (acesso completo, incluindo preços/comissões e
-              fechamento financeiro) ou <strong>Operador</strong> (uso do dia a dia, sem esses acessos
-              sensíveis).
+              Não existe cadastro público: novos acessos são criados manualmente pela direção de{' '}
+              <strong>{nomeEmpresa}</strong>, com papel de <strong>Administrador</strong> (acesso completo,
+              incluindo preços/comissões e fechamento financeiro) ou <strong>Operador</strong> (uso do dia a dia,
+              sem esses acessos sensíveis).
             </li>
-            <li>Os dados cadastrados (Ordens de Serviço, clientes, parceiros, financeiro) são de responsabilidade do GRS Lab.</li>
+            <li>Os dados cadastrados (Ordens de Serviço, clientes, parceiros, financeiro) são de responsabilidade de <strong>{nomeEmpresa}</strong>.</li>
           </ul>
         </section>
 
@@ -55,17 +60,18 @@ export function TermosPage() {
           <p>
             O NexLab trata dados pessoais de terceiros — principalmente <strong>nome do cliente final</strong>{' '}
             e <strong>nome do paciente</strong> vinculados a cada Ordem de Serviço — necessários para a
-            prestação do serviço de prótese dentária contratado pelos Clientes e Parceiros do GRS Lab.
+            prestação do serviço de prótese dentária contratado pelos Clientes e Parceiros de{' '}
+            <strong>{nomeEmpresa}</strong>.
           </p>
           <ul className="list-disc space-y-1 pl-5">
             <li>
-              <strong>Base legal</strong>: execução de contrato/legítimo interesse do GRS Lab na prestação
-              do serviço, conforme art. 7º da Lei nº 13.709/2018 (LGPD).
+              <strong>Base legal</strong>: execução de contrato/legítimo interesse de <strong>{nomeEmpresa}</strong> na
+              prestação do serviço, conforme art. 7º da Lei nº 13.709/2018 (LGPD).
             </li>
             <li>
-              <strong>Quem acessa</strong>: só usuários autenticados do GRS Lab, controlado por papel
-              (Administrador/Operador) via regras de segurança no banco de dados (Row Level Security) — não
-              há exposição pública de nenhum dado.
+              <strong>Quem acessa</strong>: só usuários autenticados de <strong>{nomeEmpresa}</strong>, controlado
+              por papel (Administrador/Operador) via regras de segurança no banco de dados (Row Level Security) —
+              não há exposição pública de nenhum dado, nem acesso de um laboratório cliente aos dados de outro.
             </li>
             <li>
               <strong>Onde fica armazenado</strong>: banco de dados Supabase (Postgres), com conexão
@@ -73,13 +79,13 @@ export function TermosPage() {
             </li>
             <li>
               <strong>Retenção</strong>: os dados ficam enquanto forem necessários para o histórico
-              operacional e financeiro do GRS Lab, ou até o titular solicitar a exclusão (respeitado o
-              prazo legal de guarda de documentos fiscais/contábeis, quando aplicável).
+              operacional e financeiro de <strong>{nomeEmpresa}</strong>, ou até o titular solicitar a exclusão
+              (respeitado o prazo legal de guarda de documentos fiscais/contábeis, quando aplicável).
             </li>
             <li>
               <strong>Direitos do titular</strong>: qualquer pessoa cujo nome apareça em uma Ordem de
               Serviço (paciente/cliente final) pode solicitar acesso, correção ou exclusão dos seus dados
-              diretamente ao GRS Lab, responsável pelo tratamento.
+              diretamente a <strong>{nomeEmpresa}</strong>, responsável pelo tratamento.
             </li>
           </ul>
         </section>
@@ -88,7 +94,7 @@ export function TermosPage() {
           <h2 className="text-base font-semibold text-slate-900">4. Contato</h2>
           <p>
             Dúvidas sobre uso do sistema ou sobre dados pessoais tratados: fale diretamente com a direção
-            do <strong>GRS Lab</strong>, responsável pelo tratamento dos dados cadastrados no sistema.
+            de <strong>{nomeEmpresa}</strong>, responsável pelo tratamento dos dados cadastrados no sistema.
           </p>
           <p className="text-xs text-slate-400">
             O NexLab é desenvolvido e mantido por{' '}
@@ -101,7 +107,7 @@ export function TermosPage() {
               Lotus Negócios LTDA
             </a>{' '}
             — CNPJ 45.537.878/0001-07 — como fornecedora de tecnologia, sem acesso operacional aos dados
-            cadastrados pelo GRS Lab no dia a dia.
+            cadastrados por <strong>{nomeEmpresa}</strong> no dia a dia.
           </p>
         </section>
       </div>

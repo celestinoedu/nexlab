@@ -102,6 +102,21 @@ Preparação pra vender o NexLab como assinatura pela landing page da Lotus, ate
 - [ ] Landing page da Lotus com assinatura + formulário de qualificação de lead — fora deste repositório (`github.com/celestinoedu/lotus`), tratado à parte.
 - [ ] Automatizar o provisionamento (ex.: Edge Function reagindo a um webhook de pagamento) — avaliado e adiado por ora, mantém "sem backend próprio".
 
+## Fase 8 — Empresa Demonstração, canhotos legíveis e catálogo em PDF ✅ concluída em 2026-08-15 (v0.15.0)
+
+- [x] **Empresa Demonstração**: tenant fictício (`is_demo = true`, `0011_empresa_demo.sql` + `supabase/seed_demo.sql`) com ~3 meses de dado inventado, login `teste@teste.com`/`teste123`. Toda mutação das telas operacionais (OS, Entidades, Serviços, Despesas, Contas a Receber, Tabela de Preços, Fechamento) fica só em cache do navegador nessa conta (`src/lib/demoMode.ts`) — nunca grava no banco; some ao logar de novo. Configurações fica bloqueada (toast). Link "Ver demonstração" na tela de login. Runbook em `SETUP.md`.
+- [x] **Canhotos de impressão**: tipografia fixa e legível (título 18pt, corpo 12pt com negrito, rodapé 10pt, sempre preto) — grade de 6 por A4 (2×3) já era fixa.
+- [x] **Catálogo de serviços em PDF**: exportação A4 com borda, por categoria, com preço, validade de 20 dias.
+- [ ] Testar o provisionamento da empresa Demonstração de ponta a ponta no Supabase real (migration + seed rodados manualmente pelo responsável do projeto — feito fora deste repositório/sessão).
+
+## Fase 9 — Módulo Estoque, Dashboard e melhorias na Lista de OS ✅ concluída em 2026-08-15 (v0.16.0)
+
+- [x] **Lista de OS**: alinhamento fixo das tags (`align-top` nas células, nome sem quebrar linha, badges de Status da OS/Status de Pagamento sempre empilhadas na mesma posição) e linha expansível (chevron por linha, mostra itens completos/observações/forma de pagamento/data de entrega ao expandir).
+- [x] **Dashboard** (`/dashboard`, item novo na Sidebar no fim antes de Configurações): indicadores reais — serviços vencendo/atrasados, produção do mês (anel de progresso), financeiro, estoque sinalizado, clientes/parceiros sem OS recente. Home continua Ordens de Serviço.
+- [x] **Módulo Estoque** (`0012_estoque.sql`, `/estoque`): cadastro de insumos (quantidade, unidade, valor, local, sinalizar para compra) + ícone de Alertas no Topbar com popover dos itens sinalizados.
+- [ ] Rodar `seed_demo.sql` atualizado (com os insumos fictícios da seção 5) e concluir o provisionamento do usuário `teste@teste.com` — pendente do lado do responsável do projeto (fora deste repositório/sessão).
+- [x] **v0.16.1**: interface para de citar "GRS Lab" como se fosse o único cliente (login, Sidebar, Topbar, PDFs, Termos) — passa a usar o nome da própria empresa logada ou redação genérica, coerente com o multi-tenant da v0.14.0.
+
 ## Ideias para avaliar depois (fora do escopo atual, não implementar sem pedir)
 
 - App mobile nativo/PWA instalável.

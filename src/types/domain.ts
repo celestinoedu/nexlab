@@ -130,6 +130,22 @@ export interface Despesa {
   updated_at: string
 }
 
+/** Item do cadastro simples de Estoque (insumos do laboratório). */
+export interface Insumo {
+  id: string
+  nome: string
+  categoria: string | null
+  quantidade: number
+  unidade: string | null
+  valor_unitario: number
+  local_estoque: string | null
+  sinalizar_compra: boolean
+  observacoes: string | null
+  created_by: string | null
+  created_at: string
+  updated_at: string
+}
+
 export interface FechamentoFinanceiro {
   id: string
   mes_referencia: string

@@ -6,16 +6,25 @@ import type { EmpresaConfig } from '@/hooks/useEmpresaConfig'
 /**
  * Grade fixa por página — nunca varia conforme o conteúdo, exatamente para
  * garantir que uma OS nunca fique "cortada" entre duas colunas/linhas: cada
- * canhoto ocupa sempre uma célula inteira da grade, nunca metade de uma.
+ * canhoto ocupa sempre uma célula inteira de medida fixa da grade (6 por
+ * folha A4: 2 colunas × 3 linhas), nunca metade de uma.
+ *
+ * Tipografia obrigatória (impressora deixava o texto ilegível quando pequeno
+ * demais): título 18pt, corpo 12pt (negrito nos dados importantes), rodapé
+ * 10pt, sempre preto. Não existe um quarto tamanho "de rótulo" menor — por
+ * isso rótulo e valor ficam na mesma linha ("Cliente: Fulano"), em vez do
+ * layout anterior de rótulo pequeno numa linha e valor em outra.
  */
 const COLUNAS = 2
 const LINHAS = 3
 const POR_PAGINA = COLUNAS * LINHAS
-const MAX_ITENS_LISTADOS = 4
-const MAX_CHARS_OBSERVACAO = 110
+const MAX_ITENS_LISTADOS = 3
+const MAX_CHARS_OBSERVACAO = 55
+
+const PRETO = '#000000'
 
 const styles = StyleSheet.create({
-  page: { padding: 18, fontFamily: 'Helvetica' },
+  page: { padding: 18, fontFamily: 'Helvetica', color: PRETO },
   grade: { flexDirection: 'column', flex: 1 },
   // wrap={false}: se uma linha não couber no espaço restante da página,
   // o react-pdf empurra a linha inteira pra próxima página — nunca corta
@@ -32,6 +41,9 @@ const styles = StyleSheet.create({
     // longo (observação enorme, muitos serviços), ele nunca vaza pro
     // canhoto vizinho ou pra próxima página — só é cortado visualmente
     // dentro da própria célula, que já tem tamanho generoso para o caso comum.
+    // A própria borda tracejada da célula já funciona como marcação de corte
+    // (dispensa uma linha de texto "✂ - - -" separada, que não cabia mais
+    // no espaço com a fonte obrigatória de 12pt).
     overflow: 'hidden',
   },
   marcaDagua: {
@@ -44,33 +56,32 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   marcaDaguaImg: { width: '55%', opacity: 0.08 },
-  tesoura: { fontSize: 8, color: '#94a3b8', marginBottom: 3 },
-  numeroOs: { fontSize: 15, fontWeight: 700, color: '#0a4f4d' },
-  copia: { fontSize: 7, color: '#94a3b8' },
-  linhaInfo: { marginTop: 4 },
-  label: { fontSize: 6.5, color: '#94a3b8', textTransform: 'uppercase' },
-  valor: { fontSize: 8.5, fontWeight: 700, color: '#1e293b' },
-  servicosBloco: { marginTop: 4 },
+  tituloRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 4 },
+  numeroOs: { fontSize: 18, fontWeight: 700, color: PRETO },
+  copia: { fontSize: 10, color: PRETO },
+  linhaCorpo: { fontSize: 12, color: PRETO, marginTop: 2 },
+  rotulo: { fontSize: 12, fontWeight: 400, color: PRETO },
+  valorForte: { fontSize: 12, fontWeight: 700, color: PRETO },
+  servicosBloco: { marginTop: 4, borderTopWidth: 1, borderTopColor: '#cbd5e1', paddingTop: 3 },
   itemLinha: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 2 },
-  itemNome: { fontSize: 7.5, color: '#334155', flex: 1, marginRight: 4 },
-  itemDetalhe: { fontSize: 6.5, color: '#94a3b8' },
-  itemValor: { fontSize: 7.5, fontWeight: 700, color: '#1e293b' },
-  itemExtra: { fontSize: 7, color: '#94a3b8', marginTop: 2 },
+  itemNome: { fontSize: 12, color: PRETO, flex: 1, marginRight: 4 },
+  itemValor: { fontSize: 12, fontWeight: 700, color: PRETO },
+  itemExtra: { fontSize: 12, color: PRETO, marginTop: 2 },
   totalRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginTop: 4,
     paddingTop: 3,
     borderTopWidth: 1,
-    borderTopColor: '#e2e8f0',
+    borderTopColor: '#cbd5e1',
   },
-  totalLabel: { fontSize: 7.5, color: '#64748b' },
-  totalValor: { fontSize: 10, fontWeight: 700, color: '#0a4f4d' },
-  observacoes: { fontSize: 7, color: '#475569', marginTop: 4 },
-  rodape: { marginTop: 5 },
+  totalLabel: { fontSize: 12, color: PRETO },
+  totalValor: { fontSize: 12, fontWeight: 700, color: PRETO },
+  observacoes: { fontSize: 12, color: PRETO, marginTop: 4 },
+  rodape: { marginTop: 5, borderTopWidth: 1, borderTopColor: '#cbd5e1', paddingTop: 3 },
   datasRow: { flexDirection: 'row', justifyContent: 'space-between' },
-  data: { fontSize: 6.5, color: '#64748b' },
-  marca: { fontSize: 6.5, color: '#cbd5e1', textAlign: 'right', marginTop: 2 },
+  data: { fontSize: 10, color: PRETO },
+  marca: { fontSize: 10, color: PRETO, textAlign: 'right', marginTop: 2 },
 })
 
 interface CanhotoItem {
@@ -134,42 +145,34 @@ export function CanhotosPdfDocument({ itens, empresaNome, logoUrl }: CanhotosPdf
                         </View>
                       )}
                       <View>
-                        <Text style={styles.tesoura}>✂ - - - - - - - - - - - - - - - - - - -</Text>
-                        <Text style={styles.numeroOs}>OS Nº {ordem.numero_os}</Text>
-                        {totalCopias > 1 && (
-                          <Text style={styles.copia}>Via {copia} de {totalCopias}</Text>
-                        )}
-                        <View style={styles.linhaInfo}>
-                          <Text style={styles.label}>{ehParceiro ? 'Parceiro' : 'Cliente'}</Text>
-                          <Text style={styles.valor}>{ordem.entidade.nome}</Text>
+                        <View style={styles.tituloRow}>
+                          <Text style={styles.numeroOs}>OS Nº {ordem.numero_os}</Text>
+                          {totalCopias > 1 && (
+                            <Text style={styles.copia}>Via {copia} de {totalCopias}</Text>
+                          )}
                         </View>
+
+                        <Text style={styles.linhaCorpo}>
+                          <Text style={styles.rotulo}>{ehParceiro ? 'Parceiro: ' : 'Cliente: '}</Text>
+                          <Text style={styles.valorForte}>{ordem.entidade.nome}</Text>
+                        </Text>
                         {(ordem.cliente_final || ordem.nome_paciente) && (
-                          <View style={styles.linhaInfo}>
-                            <Text style={styles.label}>Cliente final / Paciente</Text>
-                            <Text style={styles.valor}>
+                          <Text style={styles.linhaCorpo}>
+                            <Text style={styles.rotulo}>Paciente: </Text>
+                            <Text style={styles.valorForte}>
                               {[ordem.cliente_final, ordem.nome_paciente].filter(Boolean).join(' — ')}
                             </Text>
-                          </View>
+                          </Text>
                         )}
 
                         <View style={styles.servicosBloco}>
-                          <Text style={styles.label}>{ehParceiro ? 'Serviços / Comissão' : 'Serviços / Valor'}</Text>
                           {itensExibidos.map((item) => (
                             <View key={item.id} style={styles.itemLinha}>
                               <Text style={styles.itemNome}>
                                 {item.servico.nome}
-                                {(item.cor || item.arco) && (
-                                  <Text style={styles.itemDetalhe}>
-                                    {'  ('}
-                                    {[item.cor, item.arco ? ARCO_LABEL[item.arco] : null]
-                                      .filter(Boolean)
-                                      .join(' · ')}
-                                    {')'}
-                                  </Text>
-                                )}
-                                {item.quantidade > 1 && (
-                                  <Text style={styles.itemDetalhe}> x{item.quantidade}</Text>
-                                )}
+                                {(item.cor || item.arco) &&
+                                  `  (${[item.cor, item.arco ? ARCO_LABEL[item.arco] : null].filter(Boolean).join(' · ')})`}
+                                {item.quantidade > 1 && ` x${item.quantidade}`}
                               </Text>
                               <Text style={styles.itemValor}>
                                 {formatarMoeda(valorEfetivoItem(item, ordem.entidade.tipo))}

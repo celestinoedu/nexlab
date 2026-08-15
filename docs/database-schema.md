@@ -6,6 +6,8 @@
 
 Desde a migration `0010_multi_tenant.sql`, o NexLab atende vários clientes (labs) dentro do **mesmo** projeto Supabase — cada cliente é uma linha em `empresas` (tenant), e praticamente toda outra tabela de negócio carrega uma coluna `empresa_id` que isola os dados de um cliente dos demais. Decisão de arquitetura: um único projeto Supabase compartilhado, não um projeto por cliente — o plano Free do Supabase limita quantos projetos gratuitos ativos dá pra ter por organização, o que inviabilizaria escalar pra vários clientes sem virar pago (restrição #1 do `CLAUDE.md`). Provisionar uma empresa nova é manual (ver `SETUP.md` § "Provisionar uma empresa nova"), disparado quando uma assinatura é confirmada na landing page da Lotus.
 
+**Empresa Demonstração** (migration `0011_empresa_demo.sql`): um tenant a mais, igual a qualquer outro, só marcado com `empresas.is_demo = true` e populado com dado fictício (`supabase/seed_demo.sql`) — login `teste@teste.com`/`teste123`, ver `SETUP.md` § "Provisionar a empresa Demonstração". A RLS desse tenant não tem nenhuma exceção; o que muda é só no frontend: com `is_demo = true`, toda mutação (criar/editar/excluir OS, entidade, serviço, despesa, conta a receber, tabela de preços) é interceptada **antes** de chamar o Supabase e aplicada só no cache do TanStack Query — nunca grava no banco. Configurações (Usuários, Dados da empresa, Termos) fica bloqueada nessa conta (toast "indisponível na demonstração"), porque depende do painel Auth do Supabase (não dá pra simular criação de usuário só no navegador). Detalhes da implementação em `src/lib/demoMode.ts`.
+
 ## Diagrama de relacionamento (visão simplificada)
 
 ```
@@ -50,7 +52,7 @@ Uma **Ordem de Serviço (OS)** pode ter vários serviços (itens). Cor e arco (s
 
 ## Tabelas
 
-> Desde a migration `0010`, **todas** as tabelas de negócio abaixo (`entidades`, `servicos`, `tabela_precos`, `ordens_servico`, `ordem_servico_itens`, `notas_servico`, `fechamentos`, `contas_receber`, `despesas`, `fechamentos_financeiros`, além de `profiles`) têm uma coluna `empresa_id uuid not null references empresas (id)`, omitida das tabelas de coluna abaixo por brevidade (já documentada uma vez aqui). Ela nunca vem do payload do frontend — é preenchida automaticamente por trigger (`security definer`) na criação da linha, e travada contra alteração depois (`trg_fn_lock_empresa_id`). Duas origens possíveis: **do usuário que está inserindo** (`trg_fn_set_empresa_id`, via `current_empresa_id()`) nas tabelas sem linha-pai (`profiles`, `entidades`, `servicos`, `despesas`, `notas_servico`, `fechamentos`, `fechamentos_financeiros`, e a variante dedicada `ordens_servico`), ou **denormalizada da linha-mãe** (`trg_fn_empresa_id_from_ordem`/`trg_fn_empresa_id_from_entidade`) em `ordem_servico_itens`, `contas_receber` (a partir da OS) e `tabela_precos` (a partir da entidade) — mesmo padrão que o projeto já usa pra `entidade_id`/`mes_referencia` em `contas_receber`.
+> Desde a migration `0010` (e `insumos`, que já nasceu multi-tenant na migration `0012`), **todas** as tabelas de negócio abaixo (`entidades`, `servicos`, `tabela_precos`, `ordens_servico`, `ordem_servico_itens`, `notas_servico`, `fechamentos`, `contas_receber`, `despesas`, `fechamentos_financeiros`, `insumos`, além de `profiles`) têm uma coluna `empresa_id uuid not null references empresas (id)`, omitida das tabelas de coluna abaixo por brevidade (já documentada uma vez aqui). Ela nunca vem do payload do frontend — é preenchida automaticamente por trigger (`security definer`) na criação da linha, e travada contra alteração depois (`trg_fn_lock_empresa_id`). Duas origens possíveis: **do usuário que está inserindo** (`trg_fn_set_empresa_id`, via `current_empresa_id()`) nas tabelas sem linha-pai (`profiles`, `entidades`, `servicos`, `despesas`, `notas_servico`, `fechamentos`, `fechamentos_financeiros`, e a variante dedicada `ordens_servico`), ou **denormalizada da linha-mãe** (`trg_fn_empresa_id_from_ordem`/`trg_fn_empresa_id_from_entidade`) em `ordem_servico_itens`, `contas_receber` (a partir da OS) e `tabela_precos` (a partir da entidade) — mesmo padrão que o projeto já usa pra `entidade_id`/`mes_referencia` em `contas_receber`.
 
 ### `profiles`
 Perfil interno de cada usuário (não há cadastro público — usuários são criados via convite no painel Supabase Auth). Cada usuário pertence a **uma única** empresa.
@@ -67,7 +69,7 @@ Perfil interno de cada usuário (não há cadastro público — usuários são c
 ### `empresas` (era `empresa_config`, singleton — virou multi-linha na migration `0010`)
 Um cliente (tenant) do NexLab — dados usados nos cabeçalhos de PDF, editável na tela "Informações do negócio" (`EmpresaConfigDialog`, atalho no Topbar, escrita só `admin` **da própria empresa**). É a raiz do isolamento multi-tenant (ver § Multi-tenant): toda outra tabela de negócio tem `empresa_id` apontando pra uma linha aqui.
 
-`nome_fantasia`, `razao_social`, `documento`, `telefone`, `email`, `endereco`, `logo_url`, `prefixo_nota_servico` (default `'NS'`), `proximo_numero_nota` (default `1`), `updated_at`. Migration `0008`: `mostrar_endereco`, `mostrar_telefone`, `mostrar_email`, `mostrar_logo` (boolean, default `true` cada) — controlam se o campo aparece no cabeçalho dos PDFs (`nome_fantasia` sempre aparece, sem toggle). `logo_url` aponta pro bucket público de Storage `logos`, num caminho prefixado por empresa (`${empresaId}/logo-*`) — leitura pública, escrita só `admin` da empresa dona do arquivo. Migration `0010`: `proximo_numero_os` (bigint, default `1` — contador do próximo número de OS **por empresa**, ver `ordens_servico.numero_os`) e `status_assinatura` (`text`, default `'ativa'`, informativo — situação junto à Lotus, sem automação de cobrança).
+`nome_fantasia`, `razao_social`, `documento`, `telefone`, `email`, `endereco`, `logo_url`, `prefixo_nota_servico` (default `'NS'`), `proximo_numero_nota` (default `1`), `updated_at`. Migration `0008`: `mostrar_endereco`, `mostrar_telefone`, `mostrar_email`, `mostrar_logo` (boolean, default `true` cada) — controlam se o campo aparece no cabeçalho dos PDFs (`nome_fantasia` sempre aparece, sem toggle). `logo_url` aponta pro bucket público de Storage `logos`, num caminho prefixado por empresa (`${empresaId}/logo-*`) — leitura pública, escrita só `admin` da empresa dona do arquivo. Migration `0010`: `proximo_numero_os` (bigint, default `1` — contador do próximo número de OS **por empresa**, ver `ordens_servico.numero_os`) e `status_assinatura` (`text`, default `'ativa'`, informativo — situação junto à Lotus, sem automação de cobrança). Migration `0011`: `is_demo` (boolean, default `false`) — marca o tenant fictício de demonstração (ver § Multi-tenant acima); o frontend usa essa flag pra bloquear escrita real no banco.
 
 ### `entidades`
 Unifica **Clientes** (consultórios/dentistas — cobrança direta) e **Parceiros** (laboratórios maiores — pagam comissão). Diferenciados pela coluna `tipo`.
@@ -187,6 +189,23 @@ Cadastro simples de saídas de caixa do laboratório.
 
 `categoria` (text, livre — mesmo padrão de `servicos.categoria`), `descricao` (obrigatória), `valor`, `data_despesa` (default hoje), `observacoes`, `created_by`.
 
+### `insumos` (nova na migration `0012`)
+Cadastro simples de Estoque do laboratório — sem controle de movimentação (entrada/saída), só a foto atual.
+
+| Coluna | Tipo | Notas |
+|---|---|---|
+| `id` | uuid PK | |
+| `nome` | text | |
+| `categoria` | text | opcional, livre — mesmo padrão de `servicos.categoria` |
+| `quantidade` | numeric(10,2) | default 0 |
+| `unidade` | text | opcional, livre (ex.: "un", "kg", "litro") |
+| `valor_unitario` | numeric(10,2) | default 0 |
+| `local_estoque` | text | opcional — onde o item fica guardado |
+| `sinalizar_compra` | boolean | default `false` — marcação **manual** (sem limite mínimo automático); conta pro ícone de Alertas no Topbar |
+| `observacoes`, `created_by`, `created_at`, `updated_at` | | |
+
+RLS: leitura/criação/edição para qualquer usuário ativo da empresa, exclusão só `admin` — mesmo padrão de `despesas`.
+
 ### `fechamentos_financeiros` (nova na migration `0003`)
 Snapshot do **resultado do laboratório inteiro** por mês (não por entidade): `total_receitas` (soma de `contas_receber.valor` com `status = pago` no mês, por `data_pagamento`) menos `total_despesas` (soma de `despesas.valor` no mês, por `data_despesa`).
 
@@ -205,9 +224,9 @@ Cenário desde a migration `0010`: **vários** laboratórios (tenants) no mesmo 
 
 - Três funções `security definer`: `is_active_user()` (existe em `profiles`, `ativo = true`), `is_admin_user()` (idem + `role = 'admin'`) e `current_empresa_id()` (devolve o `empresa_id` de `profiles` do usuário logado). Usadas em todas as policies — evita repetir a subquery e evita recursão de RLS (a função roda com privilégio do dono, ignorando RLS de `profiles` na sua própria checagem).
 - **Toda policy de toda tabela de negócio** (além da checagem de papel que já existia) agora também exige `empresa_id = current_empresa_id()` — um usuário nunca enxerga nem altera linha de outra empresa, mesmo sendo `admin`.
-- **Leitura**: todo usuário ativo lê tudo da própria empresa (`entidades`, `servicos`, `ordens_servico`, `ordem_servico_itens`, `tabela_precos`, `fechamentos`, `notas_servico`, `contas_receber`, `despesas`, `fechamentos_financeiros`, `empresas`).
-- **Criação/edição do dia a dia** (`entidades`, `servicos`, `ordens_servico`, `ordem_servico_itens`, `notas_servico`, `despesas`): qualquer usuário ativo, sempre dentro da própria empresa — `empresa_id` nunca vem do payload do cliente, é preenchido por trigger (ver § Multi-tenant) e travado contra alteração depois.
-- **Exclusão** (`entidades`, `servicos`, `ordens_servico`, `despesas`): só `admin` da própria empresa. Itens de OS (`ordem_servico_itens`) podem ser excluídos por qualquer usuário ativo (faz parte de editar a lista de serviços de uma OS).
+- **Leitura**: todo usuário ativo lê tudo da própria empresa (`entidades`, `servicos`, `ordens_servico`, `ordem_servico_itens`, `tabela_precos`, `fechamentos`, `notas_servico`, `contas_receber`, `despesas`, `insumos`, `fechamentos_financeiros`, `empresas`).
+- **Criação/edição do dia a dia** (`entidades`, `servicos`, `ordens_servico`, `ordem_servico_itens`, `notas_servico`, `despesas`, `insumos`): qualquer usuário ativo, sempre dentro da própria empresa — `empresa_id` nunca vem do payload do cliente, é preenchido por trigger (ver § Multi-tenant) e travado contra alteração depois.
+- **Exclusão** (`entidades`, `servicos`, `ordens_servico`, `despesas`, `insumos`): só `admin` da própria empresa. Itens de OS (`ordem_servico_itens`) podem ser excluídos por qualquer usuário ativo (faz parte de editar a lista de serviços de uma OS).
 - **Preços/comissões** (`tabela_precos`) e **configuração da empresa** (`empresas`): escrita só `admin` da própria empresa — evita que um operador altere um valor financeiro por engano, e que um admin edite a empresa de outro cliente. `empresas` não tem policy de insert/delete pra usuário comum — provisionar uma empresa nova é manual (ver `SETUP.md`).
 - **Fechamentos** (`fechamentos` e `fechamentos_financeiros`): leitura para todo usuário ativo da empresa, escrita (fechar mês / marcar pago) só `admin` da empresa.
 - **Contas a Receber** (`contas_receber`): leitura para ativo da empresa; qualquer usuário ativo pode marcar como pago/pendente, mas **só admin pode cancelar** (`with check` que só bloqueia especificamente `status = 'cancelado'` para não-admin) — a inserção normal acontece via trigger `security definer`, que ignora RLS mas ainda assim deriva `empresa_id` da OS de origem.

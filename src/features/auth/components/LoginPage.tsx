@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { toast } from 'sonner'
-import { Eye, EyeOff, Loader2 } from 'lucide-react'
+import { Eye, EyeOff, FlaskConical, Loader2 } from 'lucide-react'
 import { useAuth } from '@/features/auth/AuthProvider'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -19,10 +19,15 @@ const schema = z.object({
 
 type FormValues = z.infer<typeof schema>
 
+/** Credenciais fixas da empresa Demonstração — ver SETUP.md § "Provisionar a empresa Demonstração". */
+const DEMO_EMAIL = 'teste@teste.com'
+const DEMO_SENHA = 'teste123'
+
 export function LoginPage() {
   const { session, loading, signInWithPassword } = useAuth()
   const location = useLocation()
   const [showPassword, setShowPassword] = React.useState(false)
+  const [entrandoDemo, setEntrandoDemo] = React.useState(false)
 
   const {
     register,
@@ -42,6 +47,15 @@ export function LoginPage() {
     }
   }
 
+  async function acessarDemonstracao() {
+    setEntrandoDemo(true)
+    const { error } = await signInWithPassword(DEMO_EMAIL, DEMO_SENHA)
+    if (error) {
+      toast.error('A demonstração não está disponível neste ambiente no momento.')
+      setEntrandoDemo(false)
+    }
+  }
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
       <div className="w-full max-w-sm">
@@ -53,7 +67,7 @@ export function LoginPage() {
           <CardHeader>
             <h1 className="text-xl font-semibold text-slate-900">Entrar</h1>
             <p className="text-sm text-slate-500">
-              Acesse o sistema do GRS Lab com seu e-mail e senha.
+              Acesse o sistema com seu e-mail e senha.
             </p>
           </CardHeader>
           <CardContent>
@@ -114,8 +128,18 @@ export function LoginPage() {
           </CardContent>
         </Card>
 
+        <button
+          type="button"
+          onClick={acessarDemonstracao}
+          disabled={entrandoDemo}
+          className="mx-auto mt-4 flex items-center gap-1.5 text-sm font-medium text-brand-600 hover:text-brand-700 disabled:opacity-60"
+        >
+          {entrandoDemo ? <Loader2 className="animate-spin" size={15} /> : <FlaskConical size={15} />}
+          Ver demonstração
+        </button>
+
         <p className="mt-6 text-center text-xs text-slate-400">
-          NexLab · Sistema de gestão do GRS Lab
+          NexLab · Sistema de gestão para laboratórios de prótese dentária
         </p>
       </div>
     </div>

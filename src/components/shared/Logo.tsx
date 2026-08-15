@@ -6,8 +6,10 @@ interface LogoProps {
 }
 
 /**
- * Wordmark v1 do NexLab (ver docs/design-system.md, seção 7).
- * Quando houver um logo definitivo do GRS Lab, substituir só este componente.
+ * Wordmark v1 do NexLab (ver docs/design-system.md, seção 7) — marca do
+ * produto, a mesma pra todo cliente. O logo de cada laboratório (por
+ * empresa/tenant) é outra coisa: aparece à parte no Topbar e nos PDFs,
+ * vindo de `empresas.logo_url` (ver `EmpresaConfigDialog`).
  */
 export function Logo({ className, iconOnly = false }: LogoProps) {
   return (

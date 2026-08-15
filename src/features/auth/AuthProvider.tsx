@@ -1,5 +1,6 @@
 import * as React from 'react'
 import type { Session, User } from '@supabase/supabase-js'
+import { useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 
 interface AuthContextValue {
@@ -17,20 +18,34 @@ const AuthContext = React.createContext<AuthContextValue | undefined>(undefined)
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = React.useState<Session | null>(null)
   const [loading, setLoading] = React.useState(true)
+  const queryClient = useQueryClient()
+  // undefined = ainda não resolvido; null = deslogado.
+  const usuarioAnteriorRef = React.useRef<string | null | undefined>(undefined)
 
   React.useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
       setSession(data.session)
+      usuarioAnteriorRef.current = data.session?.user.id ?? null
       setLoading(false)
     })
 
     const { data: subscription } = supabase.auth.onAuthStateChange((_event, newSession) => {
+      const novoUsuarioId = newSession?.user.id ?? null
+      // Limpa todo o cache do TanStack Query sempre que o usuário logado muda
+      // (login, logout, ou troca de conta no mesmo navegador) — evita
+      // reaproveitar dado de outra empresa (multi-tenant) ou, na conta
+      // Demonstração, dado editado só em cache numa sessão anterior (ver
+      // src/lib/demoMode.ts). Refresh de token da mesma sessão não conta.
+      if (novoUsuarioId !== usuarioAnteriorRef.current) {
+        queryClient.clear()
+        usuarioAnteriorRef.current = novoUsuarioId
+      }
       setSession(newSession)
       setLoading(false)
     })
 
     return () => subscription.subscription.unsubscribe()
-  }, [])
+  }, [queryClient])
 
   const signInWithPassword = React.useCallback(async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({ email, password })
