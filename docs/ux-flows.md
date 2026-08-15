@@ -87,9 +87,21 @@ Cadastro simples, mesmo padrão visual do Catálogo de Serviços: busca, chips d
 - Cada canhoto traz: nº da OS, Cliente/Parceiro, Cliente final/Paciente, **itens de serviço com valor de cada um** (cor/arco entre parênteses, comissão em vez de valor quando é Parceiro), Total (com desconto se houver), **Observações** (truncadas se muito longas) e as datas de **Recebimento** e **Entrega** — sem o status da OS (não faz sentido num papel impresso pra ser cortado e guardado). Se a empresa tiver logo cadastrada e "Mostrar no cabeçalho" ligado (`Configurações do negócio`), ela aparece como **marca d'água** centralizada e discreta atrás do conteúdo de cada canhoto.
 - Grade fixa de 2 colunas × 3 linhas por página A4, borda tracejada fazendo a marcação de recorte. A grade é sempre fixa e cada canhoto ocupa uma célula inteira com altura e overflow travados — nunca uma OS fica cortada entre duas colunas/linhas nem "vaza" pra uma página solta, mesmo com muitos serviços ou uma observação longa.
 
-## Configurações do negócio
+## Módulo Configurações (`ConfiguracoesPage`, `/configuracoes`)
 
-Atalho no Topbar, ao lado do menu do usuário: um botão com o nome do negócio (`empresa_config.nome_fantasia`) e um ícone de prédio, abre o `EmpresaConfigDialog`. Campos: Nome do negócio (sempre aparece nos documentos, sem toggle), Logo (upload de imagem pro bucket público `logos` do Storage, com pré-visualização), Endereço, Telefone e E-mail — cada um dos quatro últimos com um checkbox **"Mostrar no cabeçalho"** ao lado, que controla se aquele dado aparece no cabeçalho dos PDFs (OS, Relatório de Fechamento). Escrita restrita a `admin`; qualquer usuário ativo pode abrir e consultar, mas os campos ficam desabilitados.
+Hub com 3 cartões — mesmo padrão do hub de Relatórios:
+
+### Informações do Negócio
+Abre o mesmo `EmpresaConfigDialog` do atalho no Topbar (ícone de prédio, ao lado do menu do usuário) — os dois pontos de entrada abrem o mesmo modal. Campos: Nome do negócio (sempre aparece nos documentos, sem toggle), Logo (upload de imagem pro bucket público `logos` do Storage, com pré-visualização), Endereço, Telefone e E-mail — cada um dos quatro últimos com um checkbox **"Mostrar no cabeçalho"** ao lado, que controla se aquele dado aparece no cabeçalho dos PDFs (OS, Relatório de Fechamento, canhotos). Escrita restrita a `admin`; qualquer usuário ativo pode abrir e consultar, mas os campos ficam desabilitados.
+
+### Usuários (`UsuariosPage`, `/configuracoes/usuarios`)
+Lista todo mundo com login no NexLab (tabela `profiles`) — nome, papel (badge Administrador/Operador) e status (Ativo/Inativo). RLS já limita quem vê o quê: `admin` vê todos, qualquer outro usuário só vê a si mesmo (mesma regra desde a v0.1.0, sem mudança).
+
+- **Criar um usuário é sempre 2 passos**, porque o NexLab não tem backend próprio e nunca expõe a chave `service_role` no navegador (ver `CLAUDE.md` § restrições): **1.** o admin cria o acesso (e-mail/senha) direto no painel do Supabase (Authentication → Users → Add user) — isso não tem como sair do painel; **2.** volta no NexLab, clica em "Novo usuário" e cola o UUID gerado lá, junto com nome e papel — isso grava a linha em `profiles`, substituindo o `insert` manual via SQL Editor que antes era o único jeito (documentado no `SETUP.md`).
+- **Editar** (só `admin`): nome, papel (Administrador/Operador) e ativo/inativo — desativar bloqueia o acesso sem apagar o cadastro nem o histórico de OS/ações daquele usuário. Um admin não consegue alterar o próprio papel nem se autodesativar por essa tela (trava de segurança, evita se trancar fora do sistema sem querer).
+
+### Termos e Condições (`TermosPage`, `/configuracoes/termos`)
+Texto estático (sem tabela nova no banco) com Termos de Uso + tratamento de dados pessoais sob a LGPD — cobre especificamente o nome de cliente final/paciente que trafega pelas Ordens de Serviço (base legal, quem acessa, onde fica armazenado, retenção, direitos do titular). Editar o conteúdo é editar o arquivo `TermosPage.tsx` diretamente.
 
 ## Emissão de documentos
 

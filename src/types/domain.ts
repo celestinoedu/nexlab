@@ -166,6 +166,11 @@ export const ARCO_LABEL: Record<TipoArco, string> = {
   inferior: 'Inferior',
 }
 
+export const ROLE_USUARIO_LABEL: Record<RoleUsuario, string> = {
+  admin: 'Administrador',
+  operador: 'Operador',
+}
+
 /** Ordem das colunas do Kanban — "cancelado" fica fora do quadro de propósito. */
 export const STATUS_KANBAN_ORDEM: StatusOS[] = [
   'recebido',

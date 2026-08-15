@@ -2,6 +2,13 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), versionamento [SemVer](https://semver.org/lang/pt-BR/).
 
+## [0.13.0] - 2026-08-15 — Módulo Configurações: Usuários e Termos/LGPD
+
+### Adicionado
+- **Configurações** (`/configuracoes`, substitui o "Em construção"): vira um hub com 3 áreas — Informações do Negócio (mesmo modal de sempre), **Usuários** e **Termos e Condições**.
+- **Usuários** (`/configuracoes/usuarios`): lista quem tem acesso ao NexLab (nome, papel, ativo/inativo). Admin pode editar nome/papel/status de qualquer usuário e "vincular" um usuário novo (cola o UUID criado no painel do Supabase + nome + papel) — substitui o passo manual de SQL do `SETUP.md`. Criar o acesso (e-mail/senha) em si continua no painel do Supabase — decisão de arquitetura, o NexLab não expõe a chave `service_role` no navegador.
+- **Termos e Condições** (`/configuracoes/termos`): texto estático com Termos de Uso e tratamento de dados pessoais sob a LGPD (nome de cliente final/paciente processado nas Ordens de Serviço).
+
 ## [0.12.0] - 2026-08-15 — Ocultar KPIs, rodapé fixo com mais informações
 
 ### Adicionado

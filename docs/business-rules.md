@@ -69,5 +69,7 @@ Cadastro simples de saídas de caixa do laboratório (categoria livre, descriç�
 
 ## Perfis de usuário
 
-- `admin`: acesso completo, incluindo editar preços/comissões (`tabela_precos`), configuração da empresa, cancelar uma conta a receber (com justificativa) e fechar o mês (por entidade em `fechamentos`, ou o resultado do laboratório em `fechamentos_financeiros`).
+- `admin`: acesso completo, incluindo editar preços/comissões (`tabela_precos`), configuração da empresa, cancelar uma conta a receber (com justificativa), fechar o mês (por entidade em `fechamentos`, ou o resultado do laboratório em `fechamentos_financeiros`) e gerenciar usuários (`Configurações → Usuários`).
 - `operador`: opera o dia a dia (criar/editar Ordens de Serviço, cadastrar Clientes/Parceiros, lançar Despesas, marcar uma conta a receber como paga/pendente, baixar PDF de OS e do Relatório de Fechamento) mas não altera preços nem fecha o financeiro — reduz risco de erro por parte de quem só usa o sistema para o fluxo operacional.
+
+**Criar um usuário novo é sempre manual em 2 etapas** — não existe cadastro público nem convite por e-mail automático, de propósito (ver `CLAUDE.md` § restrições — o NexLab não tem backend próprio, e criar um usuário de verdade exige a chave `service_role` do Supabase, que nunca pode ir para o navegador): 1) o acesso (e-mail/senha) é criado direto no painel do Supabase; 2) o vínculo com um papel (`profiles.role`) é feito em `Configurações → Usuários` colando o UUID gerado no passo 1 — essa segunda etapa substituiu o `insert` manual via SQL Editor que era o único jeito antes da v0.13.0.

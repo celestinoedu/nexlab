@@ -78,6 +78,12 @@ Pedido do usuário após testar o módulo de Clientes/Parceiros: gestão mínima
 - [x] **Ocultar valores dos KPIs** (Ordens de Serviço): toggle com ícone de olho, preferência salva no navegador.
 - [x] **Rodapé da Sidebar fixo** (`AppShell` com `h-screen overflow-hidden`, só `<main>` rola) + mais informações: nº e data da atualização (`src/lib/appInfo.ts`), dados da desenvolvedora (Lotus Negócios LTDA, CNPJ, site).
 
+## Fase 6 — Módulo Configurações ✅ concluída em 2026-08-15 (v0.13.0)
+
+- [x] **Hub de Configurações** (`ConfiguracoesPage`, `/configuracoes`, substitui o "Em construção"): 3 cartões — Informações do Negócio (mesmo modal do atalho no Topbar), Usuários, Termos e Condições.
+- [x] **Usuários** (`UsuariosPage`, `/configuracoes/usuarios`): lista `profiles` (RLS já existente desde a v0.1.0 cuida da visibilidade), editar nome/papel/ativo (só admin), e um formulário "Novo usuário" que vincula um UUID já criado no painel do Supabase a um papel — substitui o `insert` manual via SQL Editor do `SETUP.md`. Sem criação de acesso (e-mail/senha) pelo próprio NexLab — continua exigindo o painel do Supabase, decisão de arquitetura (sem backend próprio, sem expor `service_role` no navegador).
+- [x] **Termos e Condições** (`TermosPage`, `/configuracoes/termos`): texto estático (Termos de Uso + tratamento de dados pessoais sob a LGPD, cobrindo nome de cliente final/paciente).
+
 ## Fase 5 — Deploy final e polish
 
 - [ ] Domínio próprio (se o cliente quiser).
