@@ -85,12 +85,25 @@ No repositório GitHub, vá em **Settings → Secrets and variables → Actions 
 
 No repositório, vá em **Settings → Pages** e em "Build and deployment → Source" escolha **GitHub Actions** (não "Deploy from a branch"). O workflow `.github/workflows/deploy.yml` cuida do resto a partir do próximo push em `main`.
 
+## 6.1. Domínio customizado — `nexlab.lotusnegocios.com`
+
+O NexLab é servido no subdomínio `nexlab.lotusnegocios.com` (não no domínio raiz da Lotus — GitHub Pages associa um domínio customizado a um único repositório, não dá pra combinar dois repos num mesmo domínio por caminho sem um proxy reverso extra). Passo a passo (feito uma única vez):
+
+1. O arquivo `public/CNAME` (já versionado, conteúdo `nexlab.lotusnegocios.com`) é copiado pro `dist/` a cada build pelo Vite — o GitHub Pages lê ele automaticamente no deploy.
+2. No provedor de DNS onde `lotusnegocios.com` está registrado, criar um registro **CNAME**:
+   - Nome/host: `nexlab`
+   - Valor/destino: `celestinoedu.github.io`
+3. No repositório, **Settings → Pages → Custom domain**: digitar `nexlab.lotusnegocios.com` e salvar (o GitHub confirma o DNS automaticamente assim que o registro propagar — pode levar de minutos a algumas horas).
+4. Depois que o domínio for verificado (ícone verde), marcar **Enforce HTTPS** na mesma tela — o GitHub emite o certificado TLS automaticamente, sem custo.
+
+Enquanto o DNS não propaga, o site continua acessível pelo endereço padrão `https://celestinoedu.github.io/nexlab/`.
+
 ## 7. Publicar
 
 ```bash
 git push origin main
 ```
-Acompanhe o progresso na aba **Actions** do repositório. Quando o workflow terminar, o link do site aparece em **Settings → Pages** (formato `https://celestinoedu.github.io/nexlab/`).
+Acompanhe o progresso na aba **Actions** do repositório. Quando o workflow terminar, o site fica disponível em `https://nexlab.lotusnegocios.com` (depois do passo 6.1) ou `https://celestinoedu.github.io/nexlab/` (antes/sem domínio customizado) — o link exato também aparece em **Settings → Pages**.
 
 ## Regenerar os tipos TypeScript do banco (opcional, avançado)
 
