@@ -2,6 +2,11 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), versionamento [SemVer](https://semver.org/lang/pt-BR/).
 
+## [0.11.1] - 2026-08-13 — Reorganiza layout dos KPIs de OS
+
+### Alterado
+- Cards de KPI em Ordens de Serviço: "Em Produção" e "Entregue" ficam lado a lado à esquerda, "Total a Receber" vai para o extremo direito (antes eram 3 colunas iguais).
+
 ## [0.11.0] - 2026-08-13 — KPIs em Ordens de Serviço, Cliente novo herda preços da GRS Lab
 
 ### Adicionado

@@ -112,24 +112,27 @@ export function OrdensServicoPage() {
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+      <div className="flex flex-wrap items-stretch gap-3">
         <KpiCard
           icon={Wrench}
           label="Em Produção"
           value={String(kpiEmProducao)}
           colorClass="bg-warning-100 text-warning-700"
-        />
-        <KpiCard
-          icon={Wallet}
-          label="Total a Receber"
-          value={kpiAReceber.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-          colorClass="bg-brand-100 text-brand-700"
+          className="sm:w-56"
         />
         <KpiCard
           icon={PackageCheck}
           label="Entregue"
           value={String(kpiEntregue)}
           colorClass="bg-success-100 text-success-700"
+          className="sm:w-56"
+        />
+        <KpiCard
+          icon={Wallet}
+          label="Total a Receber"
+          value={kpiAReceber.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+          colorClass="bg-brand-100 text-brand-700"
+          className="sm:ml-auto sm:w-64"
         />
       </div>
 
@@ -231,14 +234,16 @@ function KpiCard({
   label,
   value,
   colorClass,
+  className,
 }: {
   icon: typeof Wrench
   label: string
   value: string
   colorClass: string
+  className?: string
 }) {
   return (
-    <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-4">
+    <div className={cn('flex w-full items-center gap-3 rounded-xl border border-slate-200 bg-white p-4', className)}>
       <div className={cn('flex size-10 shrink-0 items-center justify-center rounded-lg', colorClass)}>
         <Icon size={18} strokeWidth={1.75} />
       </div>
