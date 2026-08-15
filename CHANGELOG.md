@@ -2,6 +2,11 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), versionamento [SemVer](https://semver.org/lang/pt-BR/).
 
+## [0.16.3] - 2026-08-15 — Corrige número de versão exibido no rodapé da Sidebar
+
+### Corrigido
+- `src/lib/appInfo.ts` (`APP_VERSION`, mostrado como "Atualização nº" no rodapé da Sidebar) estava esquecido em `0.13.0` desde o início desta sessão — os bumps de versão foram feitos só em `package.json`, não neste arquivo separado. Atualizado pra `0.16.3` e sincronizado com o `package.json` daqui em diante.
+
 ## [0.16.2] - 2026-08-15 — Corrige alinhamento de verdade na Lista de OS
 
 ### Corrigido
