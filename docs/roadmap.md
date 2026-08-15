@@ -73,6 +73,11 @@ Pedido do usuário após testar o módulo de Clientes/Parceiros: gestão mínima
 - [x] **3 cards de KPI em Ordens de Serviço** (Em Produção, Total a Receber, Entregue), respeitando o filtro de período já existente na tela.
 - [x] **Cliente novo copia a tabela de preços da GRS Lab** (`preco_padrao` do catálogo) automaticamente ao cadastrar — via trigger no banco (`0009_copia_precos_cliente.sql`, precisa rodar a migration). Parceiro continua nascendo sem tabela de preços.
 
+## Fase 4.3 — Ocultar KPIs, rodapé fixo com info da Lotus ✅ concluída em 2026-08-15 (v0.12.0)
+
+- [x] **Ocultar valores dos KPIs** (Ordens de Serviço): toggle com ícone de olho, preferência salva no navegador.
+- [x] **Rodapé da Sidebar fixo** (`AppShell` com `h-screen overflow-hidden`, só `<main>` rola) + mais informações: nº e data da atualização (`src/lib/appInfo.ts`), dados da desenvolvedora (Lotus Negócios LTDA, CNPJ, site).
+
 ## Fase 5 — Deploy final e polish
 
 - [ ] Domínio próprio (se o cliente quiser).

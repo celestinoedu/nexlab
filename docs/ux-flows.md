@@ -5,7 +5,7 @@
 ## Módulo Ordens de Serviço — OS (prioridade #1)
 
 ### KPIs no topo
-3 cards logo abaixo do cabeçalho (antes da busca): **Em Produção** (contagem de OS com esse status), **Total a Receber** (soma do valor das OS com status financeiro Pendente, exclui Canceladas) e **Entregue** (contagem). Todos recalculam pelo filtro de **período (mês)** já existente na tela — mudou o mês, os 3 cards mudam junto. Não são afetados pela busca por texto nem pelo chip de status da lista (dão uma visão geral do período, não da busca pontual do momento).
+3 cards logo abaixo do cabeçalho (antes da busca): **Em Produção** (contagem de OS com esse status), **Entregue** (contagem) e **Total a Receber** (soma do valor das OS com status financeiro Pendente, exclui Canceladas). Todos recalculam pelo filtro de **período (mês)** já existente na tela — mudou o mês, os 3 cards mudam junto. Não são afetados pela busca por texto nem pelo chip de status da lista (dão uma visão geral do período, não da busca pontual do momento). Botão com ícone de olho acima dos cards **oculta os valores** (mostra "••••" no lugar dos 3 números) — preferência salva no navegador (`localStorage`), útil quando a tela fica visível no balcão pra qualquer pessoa que passe.
 
 ### Criar/editar uma OS
 Um único botão de destaque (**accent**, cor âmbar) "+ Nova OS", visível tanto na Lista quanto no Kanban, abre um **modal único** (mesmo componente `OrdemServicoFormDialog` para criar e editar), largo (`lg:max-w-5xl`) e dividido em **2 colunas no desktop** (empilha em 1 coluna no mobile, dados gerais primeiro):
@@ -107,3 +107,7 @@ Atalho no Topbar, ao lado do menu do usuário: um botão com o nome do negócio 
 ## Responsividade
 
 Sidebar completa em telas médias/grandes (`md:` e acima). Em telas pequenas (celular/tablet no balcão do laboratório), uma barra de navegação horizontal simplificada substitui a sidebar (`MobileNav`). Revisão fina de responsividade fica para a Fase 5 do roadmap — a base atual já é utilizável em tablet, mas não polida.
+
+## Layout geral (`AppShell`)
+
+Sidebar e Topbar ficam **fixos** na viewport (`AppShell` usa `h-screen overflow-hidden`, só o `<main>` rola) — o rodapé da Sidebar (versão, data de atualização, dados da Lotus Negócios) fica sempre visível, mesmo com a página de conteúdo tendo uma lista longa. `APP_VERSION`/`APP_ATUALIZADO_EM` ficam centralizados em `src/lib/appInfo.ts`, atualizados a cada release junto com `package.json`.

@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { format, parseISO } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
-import { LayoutGrid, List, Plus, Search, Loader2, Wrench, Wallet, PackageCheck } from 'lucide-react'
+import { LayoutGrid, List, Plus, Search, Loader2, Wrench, Wallet, PackageCheck, Eye, EyeOff } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -30,6 +30,9 @@ const STATUS_FILTROS: FiltroStatus[] = [
   'cancelado',
 ]
 
+const CHAVE_MOSTRAR_KPIS = 'nexlab-mostrar-kpis-os'
+const VALOR_OCULTO = '••••'
+
 export function OrdensServicoPage() {
   const { data: ordens, isLoading } = useOrdensServico()
   const { data: empresaConfig } = useEmpresaConfig()
@@ -40,6 +43,21 @@ export function OrdensServicoPage() {
   const [mesFiltro, setMesFiltro] = React.useState('todos')
   const [dialogAberto, setDialogAberto] = React.useState(false)
   const [ordemEditando, setOrdemEditando] = React.useState<OrdemServicoComRelacoes | null>(null)
+  // Preferência de mostrar/ocultar os valores dos KPIs — persiste entre sessões
+  // (útil no balcão do laboratório, com tela visível a qualquer um por perto).
+  const [mostrarValores, setMostrarValores] = React.useState(true)
+
+  React.useEffect(() => {
+    setMostrarValores(localStorage.getItem(CHAVE_MOSTRAR_KPIS) !== 'false')
+  }, [])
+
+  function alternarMostrarValores() {
+    setMostrarValores((prev) => {
+      const proximo = !prev
+      localStorage.setItem(CHAVE_MOSTRAR_KPIS, String(proximo))
+      return proximo
+    })
+  }
 
   const meses = React.useMemo(() => {
     const set = new Set<string>()
@@ -112,25 +130,43 @@ export function OrdensServicoPage() {
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-        <KpiCard
-          icon={Wrench}
-          label="Em Produção"
-          value={String(kpiEmProducao)}
-          colorClass="bg-warning-100 text-warning-700"
-        />
-        <KpiCard
-          icon={PackageCheck}
-          label="Entregue"
-          value={String(kpiEntregue)}
-          colorClass="bg-success-100 text-success-700"
-        />
-        <KpiCard
-          icon={Wallet}
-          label="Total a Receber"
-          value={kpiAReceber.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-          colorClass="bg-brand-100 text-brand-700"
-        />
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center justify-between">
+          <span className="text-xs font-medium text-slate-400">Resumo do período</span>
+          <button
+            type="button"
+            onClick={alternarMostrarValores}
+            className="flex items-center gap-1.5 rounded-lg px-2 py-1 text-xs font-medium text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
+            title={mostrarValores ? 'Ocultar valores' : 'Mostrar valores'}
+          >
+            {mostrarValores ? <Eye size={15} /> : <EyeOff size={15} />}
+            {mostrarValores ? 'Ocultar valores' : 'Mostrar valores'}
+          </button>
+        </div>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <KpiCard
+            icon={Wrench}
+            label="Em Produção"
+            value={mostrarValores ? String(kpiEmProducao) : VALOR_OCULTO}
+            colorClass="bg-warning-100 text-warning-700"
+          />
+          <KpiCard
+            icon={PackageCheck}
+            label="Entregue"
+            value={mostrarValores ? String(kpiEntregue) : VALOR_OCULTO}
+            colorClass="bg-success-100 text-success-700"
+          />
+          <KpiCard
+            icon={Wallet}
+            label="Total a Receber"
+            value={
+              mostrarValores
+                ? kpiAReceber.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+                : VALOR_OCULTO
+            }
+            colorClass="bg-brand-100 text-brand-700"
+          />
+        </div>
       </div>
 
       <div className="flex flex-wrap items-center gap-3">

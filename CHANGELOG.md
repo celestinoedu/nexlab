@@ -2,6 +2,12 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), versionamento [SemVer](https://semver.org/lang/pt-BR/).
 
+## [0.12.0] - 2026-08-15 — Ocultar KPIs, rodapé fixo com mais informações
+
+### Adicionado
+- **Ocultar valores dos KPIs** em Ordens de Serviço: botão com ícone de olho (aberto/riscado) acima dos cards, esconde os 3 números atrás de "••••" — preferência salva no navegador (fica lembrada entre sessões, útil com a tela visível no balcão do laboratório).
+- **Rodapé da Sidebar fixo** (não rola mais junto com o conteúdo da página) e com mais informações: "Atualização nº" + data da última atualização, e um aviso de que o NexLab é desenvolvido pela Lotus Negócios LTDA (CNPJ + link do site).
+
 ## [0.11.2] - 2026-08-13 — Ajusta layout dos KPIs de OS
 
 ### Alterado

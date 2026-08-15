@@ -1,4 +1,5 @@
 import { NavLink } from 'react-router-dom'
+import { format, parseISO } from 'date-fns'
 import {
   ClipboardList,
   Users,
@@ -10,6 +11,7 @@ import {
   Settings,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { APP_VERSION, APP_ATUALIZADO_EM } from '@/lib/appInfo'
 import { Logo } from '@/components/shared/Logo'
 
 const NAV_ITEMS = [
@@ -26,10 +28,10 @@ const NAV_ITEMS = [
 export function Sidebar() {
   return (
     <aside className="hidden w-64 shrink-0 flex-col border-r border-slate-200 bg-white md:flex">
-      <div className="flex h-16 items-center px-6">
+      <div className="flex h-16 shrink-0 items-center px-6">
         <Logo />
       </div>
-      <nav className="flex flex-1 flex-col gap-1 px-3 py-2">
+      <nav className="flex flex-1 flex-col gap-1 overflow-y-auto px-3 py-2">
         {NAV_ITEMS.map((item) => (
           <NavLink
             key={item.to}
@@ -49,8 +51,23 @@ export function Sidebar() {
           </NavLink>
         ))}
       </nav>
-      <div className="border-t border-slate-100 px-6 py-4 text-xs text-slate-400">
-        GRS Lab · NexLab v0.11.2
+      <div className="shrink-0 border-t border-slate-100 px-6 py-3 text-xs text-slate-400">
+        <p className="font-medium text-slate-500">GRS Lab · NexLab</p>
+        <p>
+          Atualização nº {APP_VERSION} · {format(parseISO(APP_ATUALIZADO_EM), 'dd/MM/yyyy')}
+        </p>
+        <p className="mt-2 text-[10px] leading-snug text-slate-300">
+          NexLab é um sistema desenvolvido por{' '}
+          <a
+            href="https://www.lotusnegocios.com"
+            target="_blank"
+            rel="noreferrer"
+            className="underline decoration-dotted hover:text-slate-500"
+          >
+            Lotus Negócios LTDA
+          </a>{' '}
+          — CNPJ 45.537.878/0001-07
+        </p>
       </div>
     </aside>
   )
