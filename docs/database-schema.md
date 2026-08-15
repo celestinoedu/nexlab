@@ -101,6 +101,8 @@ Preço (se `entidades.tipo = 'cliente'`) ou valor de comissão (se `tipo = 'parc
 
 `unique (entidade_id, servico_id)` — uma linha por combinação.
 
+**Cópia automática pra Cliente novo**: trigger `trg_copiar_precos_cliente` (função `trg_fn_copiar_precos_cliente`, `security definer`, migration `0009`) dispara em `after insert on entidades` e, só quando `new.tipo = 'cliente'`, copia `servicos.preco_padrao` (só ativos) pra cada linha de `tabela_precos` daquele cliente — nasce igual ao catálogo, editável depois. `security definer` porque criar Entidade é liberado a qualquer usuário ativo, mas escrever em `tabela_precos` é só `admin`. Parceiro **não** tem cópia automática — a tabela dele nasce vazia, pra preenchimento manual (preço do parceiro + comissão).
+
 ### `ordens_servico` (era `demandas` — renomeada na migration `0002`)
 Núcleo do sistema: o **cabeçalho** de cada Ordem de Serviço, base do Kanban e da Lista. Os serviços da OS ficam em `ordem_servico_itens` (uma OS pode ter vários).
 

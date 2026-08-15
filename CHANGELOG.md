@@ -2,6 +2,12 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), versionamento [SemVer](https://semver.org/lang/pt-BR/).
 
+## [0.11.0] - 2026-08-13 — KPIs em Ordens de Serviço, Cliente novo herda preços da GRS Lab
+
+### Adicionado
+- **3 cards de KPI** no topo de Ordens de Serviço: **Em Produção** (contagem), **Total a Receber** (soma do valor das OS com status financeiro pendente) e **Entregue** (contagem) — todos respeitam o filtro de período (mês) já existente na tela.
+- **Cliente novo nasce com a tabela de preços da GRS Lab**: ao cadastrar uma Entidade tipo Cliente, o `preco_padrao` de cada serviço ativo do catálogo é copiado automaticamente pra tabela de preços dele (editável depois, linha a linha). Parceiro continua nascendo sem tabela de preços (preenchimento manual, sem "comissão padrão" pra copiar). Implementado via trigger no banco (`0009_copia_precos_cliente.sql`) — precisa rodar a migration pra ativar.
+
 ## [0.10.1] - 2026-08-13 — Ajustes no canhoto: sem status, marca d'água da logo
 
 ### Alterado

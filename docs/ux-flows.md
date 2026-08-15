@@ -4,6 +4,9 @@
 
 ## Módulo Ordens de Serviço — OS (prioridade #1)
 
+### KPIs no topo
+3 cards logo abaixo do cabeçalho (antes da busca): **Em Produção** (contagem de OS com esse status), **Total a Receber** (soma do valor das OS com status financeiro Pendente, exclui Canceladas) e **Entregue** (contagem). Todos recalculam pelo filtro de **período (mês)** já existente na tela — mudou o mês, os 3 cards mudam junto. Não são afetados pela busca por texto nem pelo chip de status da lista (dão uma visão geral do período, não da busca pontual do momento).
+
 ### Criar/editar uma OS
 Um único botão de destaque (**accent**, cor âmbar) "+ Nova OS", visível tanto na Lista quanto no Kanban, abre um **modal único** (mesmo componente `OrdemServicoFormDialog` para criar e editar), largo (`lg:max-w-5xl`) e dividido em **2 colunas no desktop** (empilha em 1 coluna no mobile, dados gerais primeiro):
 
@@ -37,7 +40,7 @@ Arrastar e soltar (`@dnd-kit`) muda o `status` com atualização otimista (feedb
 - Lista única (`EntidadesPage`) com busca, chips de filtro "Todos / Clientes / Parceiros" e checkbox "Mostrar inativos" (registro nunca é apagado de verdade — ver abaixo).
 - **Clicar numa linha abre o Extrato** (`EntidadeExtratoPage`, `/clientes-parceiros/:id`) — não mais o cadastro direto. Cada linha também tem dois ícones à parte: lápis (edição rápida do cadastro, sem sair da lista) e carteira (Tabela de Preços).
 - Botão "Novo cadastro" continua abrindo direto o modal de criação (`EntidadeFormDialog`) — não faz sentido mostrar um extrato vazio para quem ainda não existe.
-- Cadastro em modal único (`EntidadeFormDialog`): tipo (Cliente/Parceiro, botões), nome, documento, telefone, e-mail, endereço, observações; checkbox "Cadastro ativo" só aparece ao editar.
+- Cadastro em modal único (`EntidadeFormDialog`): tipo (Cliente/Parceiro, botões), nome, documento, telefone, e-mail, endereço, observações; checkbox "Cadastro ativo" só aparece ao editar. Ao salvar um **Cliente** novo, a tabela de preços dele já nasce preenchida com o `preco_padrao` do catálogo (copiado automaticamente, editável depois); um **Parceiro** novo nasce com a tabela vazia, pra preenchimento manual — não existe "comissão padrão" pra copiar.
 - A **Tabela de Preços** (`TabelaPrecosDialog`) é um modal separado (não um passo do mesmo formulário), largo (~70% da tela no desktop — a lista de serviços é longa), com **busca por nome de serviço** e botão **"Baixar CSV"** (exporta exatamente as linhas visíveis com o filtro de busca atual — inclui os valores digitados na tela, mesmo antes de salvar). Para Cliente: um campo "Preço (R$)" por serviço do catálogo. Para Parceiro: **dois** campos por linha — "Preço do Parceiro" (o que ele mesmo cobra, só referência) e "Comissão" (o que o GRS Lab recebe, esse sim usado em tudo); deixar a Comissão em branco volta a usar o `preco_padrao` do catálogo automaticamente. Um botão **R$ / %** ao lado da Comissão alterna a entrada: em "%", calcula a partir do Preço do Parceiro já digitado (ou do preço padrão do catálogo, se ainda não preencheu) e mostra o valor em R$ calculado logo abaixo — o que é salvo é sempre o valor final em R$ (não uma fórmula). Escrita restrita a `admin` (operador visualiza os valores mas os campos ficam desabilitados, com aviso explicando o motivo). Acessível tanto pela lista quanto pelo Extrato.
 - "Excluir" não existe como ação destrutiva — desmarcar "Cadastro ativo" desativa o registro (some dos comboboxes de nova OS, mas o histórico de OS antigas continua intacto).
 

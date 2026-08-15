@@ -68,6 +68,11 @@ Pedido do usuário após testar o módulo de Clientes/Parceiros: gestão mínima
 - [x] **Impressão de canhotos de OS** (`RelatoriosPage` vira hub de ferramentas em `/relatorios`; a impressão em si mora em `CanhotosPage`, `/relatorios/canhotos`): lista de OS com busca/filtro por status/mês, seleção por checkbox e campo de **vias por OS**; botão "Imprimir canhotos" gera um único PDF com um canhoto por via numa grade fixa 2×3 por página A4 com borda tracejada de recorte — grade sempre fixa com altura/overflow travados, nunca corta uma OS entre colunas/linhas ou entre páginas. Cada canhoto traz serviços com valor, total, observações e datas.
 - [x] **Ajustes soltos pedidos junto**: CSV no Catálogo de Serviços e na Tabela de Preços (+ busca nesse pop-up); exclusão de despesa (admin); inversão das colunas do formulário de OS (dados gerais à esquerda, serviços à direita).
 
+## Fase 4.2 — KPIs em OS + Cliente novo herda preços ✅ concluída em 2026-08-13 (v0.11.0)
+
+- [x] **3 cards de KPI em Ordens de Serviço** (Em Produção, Total a Receber, Entregue), respeitando o filtro de período já existente na tela.
+- [x] **Cliente novo copia a tabela de preços da GRS Lab** (`preco_padrao` do catálogo) automaticamente ao cadastrar — via trigger no banco (`0009_copia_precos_cliente.sql`, precisa rodar a migration). Parceiro continua nascendo sem tabela de preços.
+
 ## Fase 5 — Deploy final e polish
 
 - [ ] Domínio próprio (se o cliente quiser).

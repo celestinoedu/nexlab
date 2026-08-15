@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { format, parseISO } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
-import { LayoutGrid, List, Plus, Search, Loader2 } from 'lucide-react'
+import { LayoutGrid, List, Plus, Search, Loader2, Wrench, Wallet, PackageCheck } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -11,7 +11,12 @@ import { useOrdensServico } from './hooks/useOrdensServico'
 import { KanbanBoard } from './components/KanbanBoard'
 import { ListaOrdensServico } from './components/ListaOrdensServico'
 import { OrdemServicoFormDialog } from './components/OrdemServicoFormDialog'
-import { STATUS_OS_LABEL, type OrdemServicoComRelacoes, type StatusOS } from '@/types/domain'
+import {
+  STATUS_OS_LABEL,
+  valorTotalOrdem,
+  type OrdemServicoComRelacoes,
+  type StatusOS,
+} from '@/types/domain'
 
 type Visao = 'kanban' | 'lista'
 type FiltroStatus = 'todos' | StatusOS
@@ -64,6 +69,18 @@ export function OrdensServicoPage() {
     [filtradosBase, statusFiltro],
   )
 
+  // KPIs sempre pelo período (mês) filtrado, independente da busca ou do
+  // chip de status da lista — dão uma visão geral do período, não da busca atual.
+  const ordensDoPeriodo = React.useMemo(
+    () => (ordens ?? []).filter((o) => mesFiltro === 'todos' || o.mes_referencia === mesFiltro),
+    [ordens, mesFiltro],
+  )
+  const kpiEmProducao = ordensDoPeriodo.filter((o) => o.status === 'em_producao').length
+  const kpiEntregue = ordensDoPeriodo.filter((o) => o.status === 'entregue').length
+  const kpiAReceber = ordensDoPeriodo
+    .filter((o) => o.status !== 'cancelado' && o.status_pagamento === 'pendente')
+    .reduce((acc, o) => acc + valorTotalOrdem(o), 0)
+
   function abrirNovaOrdem() {
     setOrdemEditando(null)
     setDialogAberto(true)
@@ -93,6 +110,27 @@ export function OrdensServicoPage() {
           <Plus size={18} />
           Nova OS
         </Button>
+      </div>
+
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <KpiCard
+          icon={Wrench}
+          label="Em Produção"
+          value={String(kpiEmProducao)}
+          colorClass="bg-warning-100 text-warning-700"
+        />
+        <KpiCard
+          icon={Wallet}
+          label="Total a Receber"
+          value={kpiAReceber.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+          colorClass="bg-brand-100 text-brand-700"
+        />
+        <KpiCard
+          icon={PackageCheck}
+          label="Entregue"
+          value={String(kpiEntregue)}
+          colorClass="bg-success-100 text-success-700"
+        />
       </div>
 
       <div className="flex flex-wrap items-center gap-3">
@@ -186,4 +224,28 @@ function ToggleButton({
 
 function capitalizar(texto: string) {
   return texto.charAt(0).toUpperCase() + texto.slice(1)
+}
+
+function KpiCard({
+  icon: Icon,
+  label,
+  value,
+  colorClass,
+}: {
+  icon: typeof Wrench
+  label: string
+  value: string
+  colorClass: string
+}) {
+  return (
+    <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-4">
+      <div className={cn('flex size-10 shrink-0 items-center justify-center rounded-lg', colorClass)}>
+        <Icon size={18} strokeWidth={1.75} />
+      </div>
+      <div className="min-w-0">
+        <span className="block truncate text-xs font-medium text-slate-500">{label}</span>
+        <span className="block truncate text-xl font-semibold text-slate-900">{value}</span>
+      </div>
+    </div>
+  )
 }
