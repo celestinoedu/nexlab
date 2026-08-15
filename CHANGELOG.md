@@ -2,6 +2,11 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), versionamento [SemVer](https://semver.org/lang/pt-BR/).
 
+## [0.11.2] - 2026-08-13 — Ajusta layout dos KPIs de OS
+
+### Alterado
+- Cards de KPI em Ordens de Serviço voltam a ocupar a largura toda em 3 colunas iguais (a v0.11.1 tinha deixado "Total a Receber" separado/estreito à direita) — mantém a ordem Em Produção → Entregue → Total a Receber.
+
 ## [0.11.1] - 2026-08-13 — Reorganiza layout dos KPIs de OS
 
 ### Alterado

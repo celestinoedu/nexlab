@@ -112,27 +112,24 @@ export function OrdensServicoPage() {
         </Button>
       </div>
 
-      <div className="flex flex-wrap items-stretch gap-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         <KpiCard
           icon={Wrench}
           label="Em Produção"
           value={String(kpiEmProducao)}
           colorClass="bg-warning-100 text-warning-700"
-          className="sm:w-56"
         />
         <KpiCard
           icon={PackageCheck}
           label="Entregue"
           value={String(kpiEntregue)}
           colorClass="bg-success-100 text-success-700"
-          className="sm:w-56"
         />
         <KpiCard
           icon={Wallet}
           label="Total a Receber"
           value={kpiAReceber.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
           colorClass="bg-brand-100 text-brand-700"
-          className="sm:ml-auto sm:w-64"
         />
       </div>
 
