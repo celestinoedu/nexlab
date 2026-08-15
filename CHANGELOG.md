@@ -2,6 +2,13 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), versionamento [SemVer](https://semver.org/lang/pt-BR/).
 
+## [0.16.2] - 2026-08-15 — Corrige alinhamento de verdade na Lista de OS
+
+### Corrigido
+- O `align-top` da v0.16.0 tinha sido aplicado no `<tr>`, mas `vertical-align` só tem efeito em célula (`<td>`) — na prática não fazia nada, por isso o alinhamento continuava inconsistente. Aplicado corretamente em cada `<td>` agora.
+- Tabela passa a usar `table-fixed` + `<colgroup>` com largura fixa por coluna — as colunas não mudam mais de largura de acordo com o conteúdo de cada OS, então nunca mais desalinham entre linhas.
+- **Status da OS e Status de Pagamento viram duas colunas de verdade** ("Status OS" e "Pagamento"), cada uma com seu próprio cabeçalho — antes eram duas badges dentro de uma coluna só.
+
 ## [0.16.1] - 2026-08-15 — Remove menções fixas a "GRS Lab" da interface
 
 ### Alterado

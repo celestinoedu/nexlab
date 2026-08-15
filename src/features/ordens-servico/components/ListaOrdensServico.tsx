@@ -26,7 +26,17 @@ const STATUS_BADGE_VARIANT: Record<StatusOS, NonNullable<VariantProps<typeof bad
   cancelado: 'danger',
 }
 
-const COLUNAS_TABELA = 10
+const COLUNAS_TABELA = 11
+
+/** Célula do corpo — sempre `align-top` (não em `<tr>`: `vertical-align` só
+ * tem efeito em célula, nunca surtiu efeito no elemento da linha) e
+ * `whitespace-nowrap` como padrão, pra nenhum conteúdo quebrar linha e
+ * empurrar badge/texto pra baixo — só as duas colunas de texto mais longo
+ * (Cliente final/Paciente, Serviços) recebem quebra controlada à parte. Com
+ * a tabela em `table-fixed` + `<colgroup>`, cada coluna tem sempre a mesma
+ * largura em toda linha, então nada disso varia de uma OS pra outra.
+ */
+const TD_BASE = 'px-3 py-3 align-top'
 
 function formatarData(data: string | null) {
   return data ? format(parseISO(data), 'dd/MM/yyyy') : '—'
@@ -58,19 +68,33 @@ export function ListaOrdensServico({ ordens, onEditOrdem, onImprimirOrdem }: Lis
 
   return (
     <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white">
-      <table className="w-full text-left text-sm">
+      <table className="w-full min-w-[1080px] table-fixed text-left text-sm">
+        <colgroup>
+          <col className="w-[3.5%]" />
+          <col className="w-[5.5%]" />
+          <col className="w-[15%]" />
+          <col className="w-[13%]" />
+          <col className="w-[13%]" />
+          <col className="w-[9%]" />
+          <col className="w-[8.5%]" />
+          <col className="w-[8%]" />
+          <col className="w-[8%]" />
+          <col className="w-[9.5%]" />
+          <col className="w-[7%]" />
+        </colgroup>
         <thead className="border-b border-slate-100 text-xs font-medium text-slate-400">
           <tr>
-            <th className="w-8 px-2 py-3" />
-            <th className="px-4 py-3">Nº OS</th>
-            <th className="px-4 py-3">Cliente / Parceiro</th>
-            <th className="px-4 py-3">Serviços</th>
-            <th className="px-4 py-3">Cliente final / Paciente</th>
-            <th className="px-4 py-3">Status</th>
-            <th className="px-4 py-3">Recebimento</th>
-            <th className="px-4 py-3">Previsão</th>
-            <th className="px-4 py-3 text-right">Valor</th>
-            <th className="px-4 py-3" />
+            <th className="px-2 py-3" />
+            <th className="px-3 py-3">Nº OS</th>
+            <th className="px-3 py-3">Cliente / Parceiro</th>
+            <th className="px-3 py-3">Serviços</th>
+            <th className="px-3 py-3">Cliente final / Paciente</th>
+            <th className="px-3 py-3">Status OS</th>
+            <th className="px-3 py-3">Pagamento</th>
+            <th className="px-3 py-3">Recebimento</th>
+            <th className="px-3 py-3">Previsão</th>
+            <th className="px-3 py-3 text-right">Valor</th>
+            <th className="px-3 py-3" />
           </tr>
         </thead>
         <tbody>
@@ -80,9 +104,9 @@ export function ListaOrdensServico({ ordens, onEditOrdem, onImprimirOrdem }: Lis
               <React.Fragment key={ordem.id}>
                 <tr
                   onClick={() => onEditOrdem(ordem)}
-                  className="cursor-pointer border-b border-slate-50 align-top transition-colors last:border-0 hover:bg-slate-50"
+                  className="cursor-pointer border-b border-slate-50 transition-colors last:border-0 hover:bg-slate-50"
                 >
-                  <td className="px-2 py-3" onClick={(e) => e.stopPropagation()}>
+                  <td className="px-2 py-3 align-top" onClick={(e) => e.stopPropagation()}>
                     <button
                       type="button"
                       onClick={() => alternarExpandida(ordem.id)}
@@ -93,54 +117,52 @@ export function ListaOrdensServico({ ordens, onEditOrdem, onImprimirOrdem }: Lis
                       {expandida ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
                     </button>
                   </td>
-                  <td className="px-4 py-3 text-slate-400">#{ordem.numero_os}</td>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-1.5">
-                      <span className="max-w-[14rem] truncate font-medium text-slate-800">{ordem.entidade.nome}</span>
+                  <td className={`${TD_BASE} whitespace-nowrap text-slate-400`}>#{ordem.numero_os}</td>
+                  <td className={TD_BASE}>
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <span className="max-w-full truncate font-medium text-slate-800">{ordem.entidade.nome}</span>
                       <Badge variant={ordem.entidade.tipo === 'parceiro' ? 'brand' : 'neutral'} className="shrink-0">
                         {ordem.entidade.tipo === 'parceiro' ? 'Parceiro' : 'Cliente'}
                       </Badge>
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-slate-600">
+                  <td className={`${TD_BASE} text-slate-600`}>
                     {ordem.itens.length === 1 ? (
-                      ordem.itens[0].servico.nome
+                      <span className="block truncate" title={ordem.itens[0].servico.nome}>
+                        {ordem.itens[0].servico.nome}
+                      </span>
                     ) : (
                       <span title={ordem.itens.map((i) => i.servico.nome).join(', ')}>
                         {ordem.itens.length} serviços
                       </span>
                     )}
                   </td>
-                  <td className="px-4 py-3 text-slate-500">
+                  <td className={`${TD_BASE} text-slate-500`}>
                     {ordem.cliente_final || ordem.nome_paciente ? (
                       <div className="flex flex-col">
-                        {ordem.cliente_final && <span>{ordem.cliente_final}</span>}
+                        {ordem.cliente_final && <span className="truncate">{ordem.cliente_final}</span>}
                         {ordem.nome_paciente && (
-                          <span className="text-xs text-slate-400">{ordem.nome_paciente}</span>
+                          <span className="truncate text-xs text-slate-400">{ordem.nome_paciente}</span>
                         )}
                       </div>
                     ) : (
                       '—'
                     )}
                   </td>
-                  <td className="px-4 py-3">
-                    {/* Duas tags sempre separadas (Status da OS × Status de Pagamento), empilhadas
-                        numa coluna com espaçamento fixo — não depende da largura disponível pra
-                        decidir se ficam lado a lado ou não, então a posição nunca varia de linha
-                        pra linha mesmo quando outra célula da mesma linha quebra em 2 linhas. */}
-                    <div className="flex flex-col items-start gap-1">
-                      <Badge variant={STATUS_BADGE_VARIANT[ordem.status]}>{STATUS_OS_LABEL[ordem.status]}</Badge>
-                      <Badge variant={ordem.status_pagamento === 'pago' ? 'success' : 'warning'}>
-                        {ordem.status_pagamento === 'pago' ? 'Pago' : 'Pendente'}
-                      </Badge>
-                    </div>
+                  <td className={TD_BASE}>
+                    <Badge variant={STATUS_BADGE_VARIANT[ordem.status]}>{STATUS_OS_LABEL[ordem.status]}</Badge>
                   </td>
-                  <td className="px-4 py-3 text-slate-500">{formatarData(ordem.data_recebimento)}</td>
-                  <td className="px-4 py-3 text-slate-500">{formatarData(ordem.data_prevista)}</td>
-                  <td className="px-4 py-3 text-right font-medium text-slate-800">
+                  <td className={TD_BASE}>
+                    <Badge variant={ordem.status_pagamento === 'pago' ? 'success' : 'warning'}>
+                      {ordem.status_pagamento === 'pago' ? 'Pago' : 'Pendente'}
+                    </Badge>
+                  </td>
+                  <td className={`${TD_BASE} whitespace-nowrap text-slate-500`}>{formatarData(ordem.data_recebimento)}</td>
+                  <td className={`${TD_BASE} whitespace-nowrap text-slate-500`}>{formatarData(ordem.data_prevista)}</td>
+                  <td className={`${TD_BASE} whitespace-nowrap text-right font-medium text-slate-800`}>
                     {formatarMoeda(valorTotalOrdem(ordem))}
                   </td>
-                  <td className="px-4 py-3">
+                  <td className={TD_BASE}>
                     {ordem.status === 'entregue' && (
                       <button
                         type="button"
