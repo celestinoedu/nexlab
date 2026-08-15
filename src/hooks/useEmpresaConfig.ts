@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 
 export interface EmpresaConfig {
-  id: number
+  id: string
   nome_fantasia: string
   razao_social: string | null
   documento: string | null
@@ -16,12 +16,16 @@ export interface EmpresaConfig {
   mostrar_logo: boolean
 }
 
-/** Dados do GRS Lab (singleton) usados nos cabeçalhos de PDF e na tela de Configurações. */
+/**
+ * Dados do cliente (empresa/tenant) do usuário logado, usados nos cabeçalhos
+ * de PDF e na tela de Configurações — sem filtro explícito porque a RLS já
+ * devolve só a linha da própria empresa (ver docs/database-schema.md § Multi-tenant).
+ */
 export function useEmpresaConfig() {
   return useQuery({
     queryKey: ['empresa_config'],
     queryFn: async () => {
-      const { data, error } = await supabase.from('empresa_config').select('*').eq('id', 1).single()
+      const { data, error } = await supabase.from('empresas').select('*').single()
       if (error) throw error
       return data as EmpresaConfig
     },

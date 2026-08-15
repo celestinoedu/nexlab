@@ -13,12 +13,14 @@ export interface EmpresaConfigFormInput {
   mostrar_logo: boolean
 }
 
-export function useEmpresaConfigMutations() {
+/** `empresaId` é o `id` da própria empresa (vem de `useEmpresaConfig`) — precisa pra filtrar o update e isolar o upload do logo por tenant no bucket. */
+export function useEmpresaConfigMutations(empresaId: string | undefined) {
   const queryClient = useQueryClient()
 
   const salvar = useMutation({
     mutationFn: async (input: EmpresaConfigFormInput) => {
-      const { error } = await supabase.from('empresa_config').update(input).eq('id', 1)
+      if (!empresaId) throw new Error('Empresa não carregada ainda. Tente novamente em instantes.')
+      const { error } = await supabase.from('empresas').update(input).eq('id', empresaId)
       if (error) throw new Error('Não foi possível salvar as informações do negócio agora. Tente novamente.')
     },
     onSuccess: () => {
@@ -26,11 +28,12 @@ export function useEmpresaConfigMutations() {
     },
   })
 
-  /** Sobe o arquivo pro bucket público "logos" e devolve a URL pública. */
+  /** Sobe o arquivo pro bucket público "logos" (numa pasta por empresa) e devolve a URL pública. */
   const enviarLogo = useMutation({
     mutationFn: async (arquivo: File) => {
+      if (!empresaId) throw new Error('Empresa não carregada ainda. Tente novamente em instantes.')
       const extensao = arquivo.name.split('.').pop() ?? 'png'
-      const caminho = `logo-${Date.now()}.${extensao}`
+      const caminho = `${empresaId}/logo-${Date.now()}.${extensao}`
       const { error: uploadErr } = await supabase.storage
         .from('logos')
         .upload(caminho, arquivo, { upsert: true, cacheControl: '3600' })

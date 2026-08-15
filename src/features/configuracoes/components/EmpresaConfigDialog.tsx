@@ -53,7 +53,7 @@ const ESTADO_VAZIO: CampoState = {
 export function EmpresaConfigDialog({ open, onOpenChange }: EmpresaConfigDialogProps) {
   const { data: empresa, isLoading: carregando } = useEmpresaConfig()
   const { data: profile } = useProfile()
-  const { salvar, enviarLogo } = useEmpresaConfigMutations()
+  const { salvar, enviarLogo } = useEmpresaConfigMutations(empresa?.id)
   const podeEditar = profile?.role === 'admin'
 
   const [estado, setEstado] = React.useState<CampoState>(ESTADO_VAZIO)

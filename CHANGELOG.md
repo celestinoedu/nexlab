@@ -2,6 +2,16 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), versionamento [SemVer](https://semver.org/lang/pt-BR/).
 
+## [0.14.0] - 2026-08-15 — Multi-tenant: NexLab passa a atender vários clientes
+
+### Adicionado
+- **Isolamento de dados por empresa (tenant)**: `empresa_config` (singleton) vira `empresas` (multi-linha, uma por cliente); toda tabela de negócio ganha `empresa_id`, preenchido automaticamente por trigger no banco (nunca pelo payload do frontend) e travado contra alteração posterior — a RLS passa a exigir `empresa_id = current_empresa_id()` em toda policy, além das checagens de papel que já existiam (`0010_multi_tenant.sql`). O dado real do GRS Lab foi convertido em "tenant #1" pela própria migration, sem perda.
+- **Runbook de provisionamento de cliente novo** (`SETUP.md` § "Provisionar uma empresa nova"): passo a passo manual via SQL Editor do Supabase pra quando uma assinatura for confirmada na landing page da Lotus — continua um único projeto Supabase compartilhado por todos os clientes, não um projeto por cliente.
+
+### Alterado
+- **`numero_os` deixa de ser sequência global** e vira contador por empresa (`empresas.proximo_numero_os`) — cada cliente numera suas OS a partir do 1; a numeração do GRS Lab continua de onde estava, sem reiniciar.
+- **Upload do logo do negócio** passa a gravar num caminho prefixado por empresa dentro do bucket `logos` (`${empresaId}/logo-*`).
+
 ## [0.13.0] - 2026-08-15 — Módulo Configurações: Usuários e Termos/LGPD
 
 ### Adicionado

@@ -4,7 +4,9 @@ Este arquivo orienta qualquer sessão futura (IA ou humana) trabalhando neste re
 
 ## O que é o NexLab
 
-ERP simples para o **GRS Lab**, laboratório de próteses dentárias. Dois módulos centrais: **Ordens de Serviço (OS)** (Kanban/Lista, uma OS pode ter vários serviços/itens) e **Financeiro** (Contas a Receber, fechamento mensal, comissões de Parceiros). Usuário final é leigo em tecnologia — **prioridade #1 é sempre simplicidade de uso**, não sofisticação técnica.
+ERP simples para laboratórios de próteses dentárias, desenvolvido pela **Lotus Negócios LTDA** e vendido por assinatura através da landing page da Lotus (repositório separado, `github.com/celestinoedu/lotus`). O **GRS Lab** foi o primeiro cliente (piloto) e segue em produção; desde a v0.14.0 (migration `0010_multi_tenant.sql`) o sistema é **multi-tenant**: um único projeto Supabase compartilhado atende vários clientes, cada um isolado dos demais por `empresa_id` + RLS (ver `docs/database-schema.md` § Multi-tenant) — nunca um projeto Supabase por cliente (esbarraria no limite de projetos gratuitos do plano Free, violando a restrição #1 abaixo). Provisionar um cliente novo, quando uma assinatura é confirmada na Lotus, é manual (`SETUP.md` § "Provisionar uma empresa nova").
+
+Dois módulos centrais: **Ordens de Serviço (OS)** (Kanban/Lista, uma OS pode ter vários serviços/itens) e **Financeiro** (Contas a Receber, fechamento mensal, comissões de Parceiros). Usuário final é leigo em tecnologia — **prioridade #1 é sempre simplicidade de uso**, não sofisticação técnica.
 
 ## Restrições inegociáveis (não reabrir sem o usuário pedir)
 

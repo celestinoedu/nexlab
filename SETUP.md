@@ -44,6 +44,28 @@ Ainda não existe tela de "criar conta" no NexLab (por segurança — só quem j
 
 Pronto — esse e-mail/senha já funcionam para logar no NexLab.
 
+> Isso configura a **primeira empresa** (tenant) do sistema. Desde a migration `0010_multi_tenant.sql`, o NexLab atende vários clientes dentro do **mesmo** projeto Supabase — para o próximo cliente que assinar pela Lotus, não repita os passos 1-4 (não crie um projeto novo), use o passo abaixo.
+
+## Provisionar uma empresa (cliente) nova
+
+Sempre que uma assinatura for confirmada na landing page da Lotus, o NexLab **não** ganha um projeto Supabase novo — o cliente novo vira só mais uma linha em `empresas` dentro do mesmo projeto (isolada das demais por RLS, ver `docs/database-schema.md` § Multi-tenant). Passo a passo manual, via **SQL Editor** do painel Supabase:
+
+1. Criar a empresa:
+   ```sql
+   insert into empresas (nome_fantasia, documento, telefone, email)
+   values ('Nome do laboratório', '00.000.000/0001-00', '(00) 00000-0000', 'contato@exemplo.com')
+   returning id;
+   ```
+   Guarde o `id` (uuid) retornado.
+2. Criar o primeiro usuário desse cliente: **Authentication → Users → Add user → Create new user** (mesmo processo do passo 4 acima). Copie o UUID gerado.
+3. Vincular esse usuário à empresa criada no passo 1, como `admin`:
+   ```sql
+   insert into profiles (id, nome, role, empresa_id)
+   values ('COLE-O-UUID-DO-USUARIO', 'Nome do responsável', 'admin', 'COLE-O-ID-DA-EMPRESA-DO-PASSO-1');
+   ```
+
+Só o **primeiro** usuário de cada empresa precisa desse passo manual — os próximos usuários daquele mesmo cliente podem ser criados normalmente pela tela **Configurações → Usuários** do próprio NexLab (o admin logado já vincula ao `empresa_id` certo automaticamente).
+
 ## 5. Configurar as variáveis de ambiente
 
 ### Para rodar localmente

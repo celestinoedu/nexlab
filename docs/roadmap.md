@@ -92,6 +92,16 @@ Pedido do usuário após testar o módulo de Clientes/Parceiros: gestão mínima
 - [ ] Testes manuais end-to-end com o dono do GRS Lab e ajustes de usabilidade a partir do feedback real.
 - [ ] `.github/workflows/release.yml` (opcional): gerar GitHub Release automaticamente a partir de tag + `CHANGELOG.md`.
 
+## Fase 7 — Multi-tenant ✅ concluída em 2026-08-15 (v0.14.0)
+
+Preparação pra vender o NexLab como assinatura pela landing page da Lotus, atendendo outros laboratórios além do GRS Lab.
+
+- [x] **Isolamento de dados por empresa (tenant)**: `empresa_config` (singleton) vira `empresas` (multi-linha); toda tabela de negócio ganha `empresa_id`, preenchido automaticamente por trigger (nunca pelo payload do frontend) e travado contra alteração — RLS passa a exigir `empresa_id = current_empresa_id()` além das checagens de papel que já existiam (`0010_multi_tenant.sql`). Dado real do GRS Lab convertido em "tenant #1", sem perda.
+- [x] **`numero_os` vira contador por empresa** (era sequência global) — cada cliente numera OS a partir do 1, sem vazar quantas OS os outros clientes têm.
+- [x] **Runbook de provisionamento manual** (`SETUP.md` § "Provisionar uma empresa nova"): quando uma assinatura é confirmada na Lotus, criar a empresa + primeiro usuário admin via SQL Editor do Supabase — mesmo projeto Supabase compartilhado pra todos os clientes (decisão: não criar um projeto novo por cliente, esbarraria no limite de projetos gratuitos do Supabase Free).
+- [ ] Landing page da Lotus com assinatura + formulário de qualificação de lead — fora deste repositório (`github.com/celestinoedu/lotus`), tratado à parte.
+- [ ] Automatizar o provisionamento (ex.: Edge Function reagindo a um webhook de pagamento) — avaliado e adiado por ora, mantém "sem backend próprio".
+
 ## Ideias para avaliar depois (fora do escopo atual, não implementar sem pedir)
 
 - App mobile nativo/PWA instalável.
