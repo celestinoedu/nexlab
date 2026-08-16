@@ -4,8 +4,19 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="%BASE_URL%favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="NexLab — sistema de gestão de demandas e financeiro do GRS Lab" />
-    <title>NexLab · GRS Lab</title>
+    <meta name="description" content="NexLab — sistema de gestão de Ordens de Serviço e Financeiro para laboratórios de próteses dentárias." />
+    <title>NexLab</title>
+
+    <!-- PWA: ícone e comportamento de app instalado no iOS/Safari, que não
+    lê o manifest.webmanifest (injetado automaticamente pelo
+    vite-plugin-pwa no build) tão bem quanto Android/Chrome — precisa
+    dessas tags à parte pra "Adicionar à Tela de Início" funcionar direito. -->
+    <meta name="theme-color" content="#0e7c79" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="NexLab" />
+    <link rel="apple-touch-icon" href="%BASE_URL%apple-touch-icon-180x180.png" />
     <script>
       // GitHub Pages guarda o index.html em cache por 10 min (Cache-Control:
       // max-age=600). A cada novo deploy, os nomes dos arquivos .js/.css

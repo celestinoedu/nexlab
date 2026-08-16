@@ -44,6 +44,18 @@ O GitHub Pages serve `index.html` com `Cache-Control: max-age=600` (10 min), sem
 
 Mitigado com um script inline em `index.html` (antes da tag do módulo, preservado pelo Vite no build): ele escuta falha de carregamento de `<script>` e recarrega a página com uma query string nova (`?v=<timestamp>`), que nunca está em cache — nunca mais que uma vez por sessão de aba (guard via `sessionStorage`, limpo em `main.tsx` assim que o app monta com sucesso). Não elimina o cache de 10 min do GitHub Pages, mas faz o app se recuperar sozinho em vez de precisar o usuário saber que tem que dar Ctrl+Shift+R.
 
+Esse bug de cache é diferente do que motivou o `ErrorBoundary` (`src/components/shared/ErrorBoundary.tsx`, v0.16.4): aquele é sobre a **tela de login nem carregar**; o `ErrorBoundary` cobre uma exceção de render depois do login já ter funcionado — outra causa, mesmo sintoma (tela branca), tratada à parte.
+
+## PWA — app instalável sem loja (v0.17.0)
+
+`vite-plugin-pwa` gera `manifest.webmanifest` + service worker no build (`vite.config.ts`), permitindo "Adicionar à Tela de Início" no Android e iOS/Safari — ícone próprio, abre em tela cheia sem barra do navegador. Decisão registrada: **PWA em vez de app nativo em loja** (Google Play/App Store via Capacitor) — o modelo de vendas do NexLab guia o cliente direto pro link pela Lotus, então não há ganho de descoberta em estar listado numa loja, só o custo recorrente (US$99/ano só de taxa da Apple) e a barreira de precisar de um Mac/Xcode pra build iOS. Ver `docs/roadmap.md` § Fase 10.
+
+Dois pontos importantes na configuração:
+- **`registerType: 'prompt'`**: o service worker novo nunca assume sozinho — o app mostra um toast ("Nova versão do NexLab disponível") via `src/lib/pwa.ts` e só troca quando o usuário clicar em "Atualizar". Evita recarregar a página no meio de alguém preenchendo uma OS.
+- **Nenhum `runtimeCaching`** é configurado pro domínio do Supabase — o service worker só pré-cacheia o "esqueleto" estático do app (JS/CSS/HTML/ícones/fontes, `globPatterns` em `vite.config.ts`). Toda chamada ao Supabase (outra origem) passa direto pela rede, nunca pelo cache — dado sempre fresco, como já era antes do PWA.
+
+Os ícones (`public/pwa-*.png`, `apple-touch-icon-180x180.png`, `maskable-icon-512x512.png`, `favicon.ico`) foram gerados a partir do `favicon.svg` já existente via `@vite-pwa/assets-generator` (config em `pwa-assets.config.ts`, raiz do projeto). Essa ferramenta não é dependência permanente do projeto — só `vite-plugin-pwa` fica no `package.json`; pra gerar os ícones de novo (se o `favicon.svg` mudar), rodar `npm install -D @vite-pwa/assets-generator && npx pwa-assets-generator` e desinstalar de novo depois.
+
 ## Por que Supabase client direto do frontend (sem proxy)
 
 A `anon key` do Supabase é **pública por design** (é enviada ao navegador de qualquer forma) — a segurança real está nas policies de RLS no Postgres, não em esconder a key. Isso é o modelo recomendado pelo próprio Supabase para SPAs sem backend. Ver `docs/database-schema.md` § RLS para as regras aplicadas.

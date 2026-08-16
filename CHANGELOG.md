@@ -2,6 +2,15 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), versionamento [SemVer](https://semver.org/lang/pt-BR/).
 
+## [0.17.0] - 2026-08-16 — NexLab instalável como PWA (ícone na tela, sem loja de apps)
+
+### Adicionado
+- **`vite-plugin-pwa`**: gera `manifest.webmanifest` + service worker no build (`npm run build`), permitindo "Adicionar à Tela de Início" no Android e no iOS/Safari — abre em tela cheia, com ícone próprio, sem barra do navegador. Sem loja de apps, sem custo, mesmo código e mesmo deploy no GitHub Pages (decisão registrada na conversa: objetivo era só "ícone + funcionar bem no celular", não presença em loja — ver `docs/roadmap.md`).
+- Ícones do app (`pwa-192x192.png`, `pwa-512x512.png`, ícone maskable, `apple-touch-icon-180x180.png`, `favicon.ico`) gerados a partir do `favicon.svg` já existente via `@vite-pwa/assets-generator` (`pwa-assets.config.ts` — reexecutar `npx pwa-assets-generator` se o favicon mudar; a ferramenta não fica instalada permanentemente, só `vite-plugin-pwa` é dependência real do projeto).
+- Tags de iOS em `index.html` (`apple-mobile-web-app-capable`, `apple-touch-icon`, `theme-color`) — o Safari não lê o `manifest.webmanifest` tão bem quanto o Chrome/Android pra "Adicionar à Tela de Início".
+- `src/lib/pwa.ts`: registra o service worker com `registerType: 'prompt'` — quando há uma versão nova, mostra um toast ("Nova versão do NexLab disponível") em vez de trocar sozinho no meio de uma tela aberta; só atualiza quando o usuário clicar em "Atualizar".
+- O service worker só cacheia o "esqueleto" do app (JS/CSS/HTML/ícones/fontes) — chamadas ao Supabase (outra origem) nunca passam pelo cache do service worker, sempre buscam dado fresco do banco.
+
 ## [0.16.4] - 2026-08-16 — Error Boundary global (evita tela em branco em erro de render)
 
 ### Adicionado

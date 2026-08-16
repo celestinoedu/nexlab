@@ -117,8 +117,16 @@ Preparação pra vender o NexLab como assinatura pela landing page da Lotus, ate
 - [ ] Rodar `seed_demo.sql` atualizado (com os insumos fictícios da seção 5) e concluir o provisionamento do usuário `teste@teste.com` — pendente do lado do responsável do projeto (fora deste repositório/sessão).
 - [x] **v0.16.1**: interface para de citar "GRS Lab" como se fosse o único cliente (login, Sidebar, Topbar, PDFs, Termos) — passa a usar o nome da própria empresa logada ou redação genérica, coerente com o multi-tenant da v0.14.0.
 
+## Fase 10 — Error Boundary e PWA instalável ✅ concluída em 2026-08-16 (v0.16.4 / v0.17.0)
+
+Motivado por relatos de tela em branco após login no Safari/iOS em alguns aparelhos (mais frequente após a v0.16.0) e pela dúvida de como levar o NexLab pro celular — avaliado presença em loja (Google Play/App Store) vs. PWA instalável; decisão: PWA, porque o objetivo real era só "ícone na tela + funcionar bem no celular", não descoberta via loja (usuário é sempre guiado direto pro link pela Lotus) — loja custaria US$99/ano (Apple) + US$25 único (Google) e exigiria Mac/Xcode pra build iOS, sem ganho real pro modelo de vendas atual.
+
+- [x] **`ErrorBoundary`** (`src/components/shared/ErrorBoundary.tsx`, v0.16.4): captura erro de render não tratado, mostra tela de recuperação em vez de branco — não corrige a causa raiz do bug do Safari (ainda não reproduzida com o erro real em mãos), mas evita a tela branca silenciosa e expõe a mensagem do erro pra diagnóstico.
+- [x] **PWA instalável** (v0.17.0, `vite-plugin-pwa`): manifest + service worker gerados no build, ícones a partir do `favicon.svg`, "Adicionar à Tela de Início" no Android e iOS/Safari, atualização por toast (nunca troca sozinho no meio de uma tela aberta). Sem loja de apps, sem custo, mesmo deploy no GitHub Pages.
+- [ ] Reproduzir a causa raiz do bug do Safari com o Web Inspector (precisa de um Mac disponível) e corrigir de verdade — o Error Boundary só evita a tela branca, não resolve a exceção em si.
+
 ## Ideias para avaliar depois (fora do escopo atual, não implementar sem pedir)
 
-- App mobile nativo/PWA instalável.
+- App nativo em loja (Play Store/App Store) via Capacitor, caso o modelo de vendas mude e passe a depender de descoberta pela loja — custo recorrente de US$99/ano (Apple) + build iOS exige Mac/Xcode.
 - Notificações automáticas (e-mail/WhatsApp) de prazo próximo.
 - Exportação de relatórios em Excel além de PDF.
