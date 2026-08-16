@@ -20,14 +20,14 @@ export default defineConfig({
       registerType: 'prompt',
       includeAssets: ['favicon.ico', 'favicon.svg', 'apple-touch-icon-180x180.png'],
       manifest: {
-        name: 'NexLab',
+        name: 'NexLab — Gestão que conecta',
         short_name: 'NexLab',
-        description: 'Gestão de Ordens de Serviço e Financeiro para laboratórios de próteses dentárias.',
+        description: 'Gestão que conecta operação, clientes e financeiro para laboratórios de próteses dentárias.',
         lang: 'pt-BR',
         start_url: '.',
         scope: '.',
         display: 'standalone',
-        background_color: '#ffffff',
+        background_color: '#f5f7f8',
         theme_color: '#0e7c79', // brand-600 (src/index.css)
         icons: [
           { src: 'pwa-64x64.png', sizes: '64x64', type: 'image/png' },

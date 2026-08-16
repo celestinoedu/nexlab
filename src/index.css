@@ -47,6 +47,10 @@
   --color-brand-800: #0a4f4d;
   --color-brand-900: #0a403f;
 
+  /* Neutro proprietário do wordmark e de títulos institucionais */
+  --color-ink: #172033;
+  --color-mist: #f5f7f8;
+
   /* Acento — amber (calor humano / ação principal) */
   --color-amber-50: #fff7eb;
   --color-amber-100: #ffebc7;
@@ -73,6 +77,35 @@
 }
 
 body {
-  @apply bg-slate-50 text-slate-800 antialiased;
+  @apply bg-mist text-slate-800 antialiased;
   font-variant-numeric: tabular-nums;
+}
+
+::selection {
+  background: #a7e7e3;
+  color: #0a403f;
+}
+
+.auth-brand-panel {
+  background-color: #0a403f;
+  background-image:
+    radial-gradient(circle at 78% 12%, rgb(113 211 206 / 12%), transparent 26%),
+    radial-gradient(circle at 12% 78%, rgb(238 149 36 / 9%), transparent 24%);
+}
+
+.auth-brand-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.16;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240' viewBox='0 0 240 240'%3E%3Cg fill='none' stroke='%2371D3CE' stroke-width='2'%3E%3Cpath d='M-20 60 30 110V60M145 35l50 50V35M160 180l50 50v-50'/%3E%3C/g%3E%3Cpath d='m60 155 8 12-12 8 12 8-8 12' fill='none' stroke='%23F5A93F' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E");
+}
+
+.brand-scrollbar {
+  scrollbar-width: none;
+}
+
+.brand-scrollbar::-webkit-scrollbar {
+  display: none;
 }

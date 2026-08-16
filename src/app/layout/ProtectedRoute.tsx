@@ -9,8 +9,11 @@ export function ProtectedRoute() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-50">
-        <Loader2 className="animate-spin text-brand-600" size={28} />
+      <div className="flex min-h-screen flex-col items-center justify-center gap-3 bg-mist">
+        <div className="grid size-12 place-items-center rounded-2xl bg-brand-50">
+          <Loader2 className="animate-spin text-brand-600" size={24} />
+        </div>
+        <p className="text-xs font-medium text-slate-400">Preparando o NexLab…</p>
       </div>
     )
   }

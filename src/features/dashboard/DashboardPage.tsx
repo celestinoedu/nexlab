@@ -119,9 +119,20 @@ export function DashboardPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="text-2xl font-semibold text-slate-900">Olá{nome ? `, ${nome}` : ''} 👋</h1>
-        <p className="text-sm text-slate-500">Aqui está um resumo do negócio.</p>
+      <div className="auth-brand-panel relative overflow-hidden rounded-3xl px-6 py-7 text-white md:px-8">
+        <div className="relative z-10 flex flex-col justify-between gap-6 sm:flex-row sm:items-end">
+          <div>
+            <p className="mb-2 flex items-center gap-2 text-xs font-bold tracking-[0.11em] text-brand-200 uppercase">
+              <span className="size-1.5 rounded-full bg-amber-400" />
+              Visão geral
+            </p>
+            <h1 className="text-3xl font-bold tracking-[-0.04em]">Olá{nome ? `, ${nome}` : ''}.</h1>
+            <p className="mt-2 text-sm text-brand-100">Clareza para decidir o próximo passo do laboratório.</p>
+          </div>
+          <span className="w-fit rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-medium text-brand-100 backdrop-blur-sm">
+            Atualizado hoje
+          </span>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">

@@ -26,11 +26,14 @@ export function Topbar() {
   const sinalizados = (insumos ?? []).filter((i) => i.sinalizar_compra)
 
   return (
-    <header className="flex h-16 items-center justify-between border-b border-slate-200 bg-white px-4 md:px-6">
+    <header className="flex h-16 items-center justify-between border-b border-slate-200/80 bg-white/95 px-4 backdrop-blur md:px-7">
       <div className="flex items-center gap-2 md:hidden">
         <Logo />
       </div>
-      <div className="hidden md:block" />
+      <div className="hidden items-center gap-2 text-sm md:flex">
+        <span className="size-1.5 rounded-full bg-brand-400" />
+        <span className="font-medium text-slate-500">Gestão que conecta</span>
+      </div>
 
       <div className="flex items-center gap-2">
         <button

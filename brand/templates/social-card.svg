@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs><pattern id="p" width="320" height="320" patternUnits="userSpaceOnUse"><path d="M-30 82 35 147V82M190 54l65 65V54" fill="none" stroke="#71D3CE" stroke-width="2" opacity=".13"/><path d="m45 38 9 14-14 9 14 9-9 14" fill="none" stroke="#F5A93F" stroke-width="4" stroke-linecap="round" opacity=".35"/></pattern></defs>
+  <rect width="1200" height="630" fill="#0A403F"/><rect width="1200" height="630" fill="url(#p)"/>
+  <rect x="76" y="74" width="88" height="88" rx="27" fill="#189A96"/><path d="M99 136V100l34 34v-34" fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><path d="m145 101 5 8-8 5 8 5-5 8 5 8" fill="none" stroke="#F5A93F" stroke-width="6" stroke-linecap="round"/>
+  <text x="185" y="141" font-family="Inter,Arial,sans-serif" font-size="62" font-weight="750" fill="#fff">NexLab</text>
+  <text x="76" y="350" font-family="Inter,Arial,sans-serif" font-size="74" font-weight="720" fill="#fff">Gestão que conecta.</text>
+  <text x="76" y="421" font-family="Inter,Arial,sans-serif" font-size="34" font-weight="450" fill="#A7E7E3">Clareza para o seu laboratório avançar.</text>
+  <rect x="76" y="492" width="270" height="56" rx="28" fill="#EE9524"/><text x="112" y="529" font-family="Inter,Arial,sans-serif" font-size="24" font-weight="700" fill="#172033">Conheça a NexLab</text>
+</svg>

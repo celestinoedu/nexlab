@@ -110,9 +110,11 @@ Números monetários sempre com `font-variant-numeric: tabular-nums` (alinhament
 - Estados vazios (nenhuma OS ainda, nenhum cliente cadastrado) sempre com uma frase amigável + botão de ação, nunca uma tela em branco.
 - Confirmações de ações destrutivas (excluir cliente, cancelar OS) sempre em modal explícito, nunca ação de um clique só.
 
-## 7. Logo / wordmark (v1)
+## 7. Logo / wordmark oficial
 
-Ainda não há um designer dedicado ao projeto. Para a Fase 1, o "logo" é um **wordmark tipográfico**: texto "**Nex**Lab" em Inter 700, onde "Nex" usa `brand-600` e "Lab" usa `slate-800`, acompanhado (opcional) de um ícone simples de losango/hexágono estilizado em `brand-600` (representando "elo entre laboratórios"). Está implementado em `src/components/shared/Logo.tsx`. Quando houver um logo definitivo do GRS Lab/NexLab, substituir apenas esse componente — o resto do sistema não deve depender de um arquivo de imagem fixo.
+O logo oficial combina o monograma “N” contínuo em um quadrado arredondado teal com três impulsos âmbar e o wordmark **NexLab** em Inter. O símbolo representa a conexão entre laboratório, clínica e operação; os impulsos representam fluxo, avanço e integração.
+
+O pacote completo, com versões principal, reversa, monocromáticas, símbolo, favicon, regras de aplicação e templates, está em [`brand/`](../brand/README.md). O manual navegável é [`brand/index.html`](../brand/index.html). A implementação do produto permanece centralizada em `src/components/shared/Logo.tsx`.
 
 ## 8. Tokens no código
 

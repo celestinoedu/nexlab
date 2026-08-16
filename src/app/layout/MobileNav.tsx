@@ -38,7 +38,7 @@ const NAV_ITEMS = [
  */
 export function MobileNav() {
   return (
-    <nav className="flex gap-1 overflow-x-auto border-b border-slate-200 bg-white px-2 py-2 md:hidden">
+    <nav className="brand-scrollbar flex gap-1 overflow-x-auto border-b border-slate-200/80 bg-white px-2 py-2 md:hidden">
       {NAV_ITEMS.map((item) => (
         <NavLink
           key={item.to}
@@ -46,8 +46,8 @@ export function MobileNav() {
           end={item.end}
           className={({ isActive }) =>
             cn(
-              'flex shrink-0 flex-col items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-medium',
-              isActive ? 'bg-brand-50 text-brand-800' : 'text-slate-500',
+              'flex shrink-0 flex-col items-center gap-1 rounded-xl px-3 py-1.5 text-xs font-medium transition-colors',
+              isActive ? 'bg-brand-50 text-brand-800 ring-1 ring-brand-100' : 'text-slate-500',
             )
           }
         >

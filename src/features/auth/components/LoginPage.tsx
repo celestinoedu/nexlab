@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Logo } from '@/components/shared/Logo'
+import { AuthBrandPanel } from './AuthBrandPanel'
 
 const schema = z.object({
   email: z.string().min(1, 'Informe seu e-mail').email('Digite um e-mail válido'),
@@ -36,7 +37,7 @@ export function LoginPage() {
   } = useForm<FormValues>({ resolver: zodResolver(schema) })
 
   if (!loading && session) {
-    const from = (location.state as { from?: string } | null)?.from ?? '#/'
+    const from = (location.state as { from?: string } | null)?.from ?? '/'
     return <Navigate to={from} replace />
   }
 
@@ -57,21 +58,30 @@ export function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
-      <div className="w-full max-w-sm">
-        <div className="mb-8 flex justify-center">
-          <Logo className="scale-125" />
-        </div>
+    <div className="min-h-screen lg:grid lg:grid-cols-[minmax(0,1.05fr)_minmax(480px,0.95fr)]">
+      <AuthBrandPanel />
+      <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-mist px-5 py-10">
+        <div className="pointer-events-none absolute -right-24 -top-24 size-72 rounded-full border border-brand-200/50" />
+        <div className="relative w-full max-w-md">
+          <div className="mb-10 flex justify-center lg:hidden">
+            <Logo size="md" />
+          </div>
 
-        <Card>
-          <CardHeader>
-            <h1 className="text-xl font-semibold text-slate-900">Entrar</h1>
-            <p className="text-sm text-slate-500">
-              Acesse o sistema com seu e-mail e senha.
+          <div className="mb-7">
+            <p className="mb-2 text-xs font-bold tracking-[0.12em] text-brand-600 uppercase">Bem-vindo</p>
+            <h1 className="text-3xl font-bold tracking-[-0.04em] text-ink">Acesse o seu laboratório</h1>
+            <p className="mt-2 text-sm leading-relaxed text-slate-500">
+              Entre com suas credenciais para continuar no NexLab.
             </p>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4" noValidate>
+          </div>
+
+          <Card className="shadow-[0_18px_50px_rgba(23,32,51,0.08)]">
+            <CardHeader className="border-b border-slate-100 pb-4">
+              <h2 className="text-base font-semibold text-ink">Dados de acesso</h2>
+              <p className="text-sm text-slate-500">Suas informações ficam protegidas.</p>
+            </CardHeader>
+            <CardContent className="pt-5">
+              <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4" noValidate>
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="email">E-mail</Label>
                 <Input
@@ -122,26 +132,27 @@ export function LoginPage() {
 
               <Button type="submit" disabled={isSubmitting} className="mt-2 w-full">
                 {isSubmitting && <Loader2 className="animate-spin" size={16} />}
-                Entrar
+                Entrar no NexLab
               </Button>
-            </form>
-          </CardContent>
-        </Card>
+              </form>
+            </CardContent>
+          </Card>
 
-        <button
-          type="button"
-          onClick={acessarDemonstracao}
-          disabled={entrandoDemo}
-          className="mx-auto mt-4 flex items-center gap-1.5 text-sm font-medium text-brand-600 hover:text-brand-700 disabled:opacity-60"
-        >
-          {entrandoDemo ? <Loader2 className="animate-spin" size={15} /> : <FlaskConical size={15} />}
-          Ver demonstração
-        </button>
+          <button
+            type="button"
+            onClick={acessarDemonstracao}
+            disabled={entrandoDemo}
+            className="mx-auto mt-5 flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold text-brand-700 transition-colors hover:bg-brand-50 disabled:opacity-60"
+          >
+            {entrandoDemo ? <Loader2 className="animate-spin" size={15} /> : <FlaskConical size={15} />}
+            Explorar demonstração
+          </button>
 
-        <p className="mt-6 text-center text-xs text-slate-400">
-          NexLab · Sistema de gestão para laboratórios de prótese dentária
-        </p>
-      </div>
+          <p className="mt-7 text-center text-xs text-slate-400">
+            NexLab · Gestão que conecta
+          </p>
+        </div>
+      </main>
     </div>
   )
 }

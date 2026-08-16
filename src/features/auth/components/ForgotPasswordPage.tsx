@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Logo } from '@/components/shared/Logo'
+import { AuthBrandPanel } from './AuthBrandPanel'
 
 const schema = z.object({
   email: z.string().min(1, 'Informe seu e-mail').email('Digite um e-mail válido'),
@@ -33,20 +34,28 @@ export function ForgotPasswordPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
-      <div className="w-full max-w-sm">
-        <div className="mb-8 flex justify-center">
-          <Logo className="scale-125" />
-        </div>
-
-        <Card>
-          <CardHeader>
-            <h1 className="text-xl font-semibold text-slate-900">Redefinir senha</h1>
-            <p className="text-sm text-slate-500">
-              Informe seu e-mail e enviaremos um link para você criar uma nova senha.
+    <div className="min-h-screen lg:grid lg:grid-cols-[minmax(0,1.05fr)_minmax(480px,0.95fr)]">
+      <AuthBrandPanel />
+      <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-mist px-5 py-10">
+        <div className="pointer-events-none absolute -right-24 -top-24 size-72 rounded-full border border-brand-200/50" />
+        <div className="relative w-full max-w-md">
+          <div className="mb-10 flex justify-center lg:hidden">
+            <Logo size="md" />
+          </div>
+          <div className="mb-7">
+            <p className="mb-2 text-xs font-bold tracking-[0.12em] text-brand-600 uppercase">Segurança</p>
+            <h1 className="text-3xl font-bold tracking-[-0.04em] text-ink">Recupere o seu acesso</h1>
+            <p className="mt-2 text-sm leading-relaxed text-slate-500">
+              Enviaremos um link seguro para você criar uma nova senha.
             </p>
-          </CardHeader>
-          <CardContent>
+          </div>
+
+          <Card className="shadow-[0_18px_50px_rgba(23,32,51,0.08)]">
+            <CardHeader className="border-b border-slate-100 pb-4">
+              <h2 className="text-base font-semibold text-ink">Redefinir senha</h2>
+              <p className="text-sm text-slate-500">Informe o e-mail usado no NexLab.</p>
+            </CardHeader>
+            <CardContent className="pt-5">
             {sent ? (
               <div className="flex flex-col items-center gap-3 py-4 text-center">
                 <div className="flex h-12 w-12 items-center justify-center rounded-full bg-success-100">
@@ -88,9 +97,10 @@ export function ForgotPasswordPage() {
               <ArrowLeft size={15} />
               Voltar para o login
             </Link>
-          </CardContent>
-        </Card>
-      </div>
+            </CardContent>
+          </Card>
+        </div>
+      </main>
     </div>
   )
 }

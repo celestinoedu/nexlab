@@ -39,3 +39,8 @@ Supabase Credentials/
 *.njsproj
 *.sln
 *.sw?
+
+# Artefatos locais de validação visual e pacote compactado para entrega.
+.playwright-cli/
+output/
+NexLab-Brand-Pack-*.zip

@@ -1,0 +1,19 @@
+:root {
+  --nexlab-teal-50: #eefbfa;
+  --nexlab-teal-100: #d3f3f1;
+  --nexlab-teal-300: #71d3ce;
+  --nexlab-teal-500: #189a96;
+  --nexlab-teal-600: #0e7c79;
+  --nexlab-teal-800: #0a4f4d;
+  --nexlab-teal-900: #0a403f;
+  --nexlab-amber-400: #f5a93f;
+  --nexlab-amber-500: #ee9524;
+  --nexlab-ink: #172033;
+  --nexlab-slate: #667085;
+  --nexlab-mist: #f5f7f8;
+  --nexlab-white: #ffffff;
+  --nexlab-radius-sm: 12px;
+  --nexlab-radius-md: 20px;
+  --nexlab-radius-lg: 32px;
+  --nexlab-font: "Inter Variable", Inter, ui-sans-serif, system-ui, sans-serif;
+}

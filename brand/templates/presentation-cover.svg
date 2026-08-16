@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080">
+  <rect width="1920" height="1080" fill="#F5F7F8"/><rect x="0" y="0" width="540" height="1080" fill="#0A403F"/>
+  <path d="M-80 270 175 525V270M160 820l255 255V820" fill="none" stroke="#71D3CE" stroke-width="8" opacity=".18"/>
+  <rect x="760" y="210" width="140" height="140" rx="42" fill="#0E7C79"/><path d="M798 309v-58l55 55v-55" fill="none" stroke="#fff" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/><path d="m872 252 8 13-13 8 13 8-8 13 8 13" fill="none" stroke="#EE9524" stroke-width="10" stroke-linecap="round"/>
+  <text x="940" y="310" font-family="Inter,Arial,sans-serif" font-size="80" font-weight="750"><tspan fill="#0E7C79">Nex</tspan><tspan fill="#172033">Lab</tspan></text>
+  <text x="760" y="560" font-family="Inter,Arial,sans-serif" font-size="92" font-weight="720" fill="#172033">Título da apresentação</text><text x="764" y="640" font-family="Inter,Arial,sans-serif" font-size="34" fill="#667085">Subtítulo ou contexto da reunião</text>
+  <text x="764" y="892" font-family="Inter,Arial,sans-serif" font-size="28" font-weight="600" fill="#0E7C79">MÊS  •  ANO</text>
+</svg>
