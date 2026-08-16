@@ -2,5 +2,5 @@
  * Metadados do app mostrados no rodapé da Sidebar (`Sidebar.tsx`).
  * Atualizar junto com o bump de versão em `package.json` + `CHANGELOG.md`.
  */
-export const APP_VERSION = '0.16.3'
-export const APP_ATUALIZADO_EM = '2026-08-15'
+export const APP_VERSION = '0.16.4'
+export const APP_ATUALIZADO_EM = '2026-08-16'

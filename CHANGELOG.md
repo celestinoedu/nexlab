@@ -2,6 +2,12 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), versionamento [SemVer](https://semver.org/lang/pt-BR/).
 
+## [0.16.4] - 2026-08-16 — Error Boundary global (evita tela em branco em erro de render)
+
+### Adicionado
+- **`ErrorBoundary`** (`src/components/shared/ErrorBoundary.tsx`), montado no ponto mais alto da árvore (`main.tsx`, envolvendo `<App />`): captura qualquer erro não tratado durante o render e mostra uma tela amigável ("Algo deu errado nesta tela", com botões "Tentar novamente" e "Recarregar página" e os detalhes técnicos do erro em um `<details>`) em vez de deixar o React desmontar tudo e sobrar uma tela em branco sem nenhum aviso.
+- Motivado por relatos de tela em branco após o login no Safari/iOS (em alguns aparelhos, piorou na v0.16.0) — investigação descartou o problema de cache do `index.html` do GitHub Pages já corrigido na v0.7.5 (a tela de login carregava normalmente; o branco só aparecia depois, ao renderizar a área logada), apontando para uma exceção de render não capturada. O Error Boundary não corrige a causa raiz (ainda não reproduzida com o erro real em mãos), mas elimina a experiência de tela branca e expõe a mensagem do erro pra diagnóstico, inclusive em aparelhos sem acesso a DevTools.
+
 ## [0.16.3] - 2026-08-15 — Corrige número de versão exibido no rodapé da Sidebar
 
 ### Corrigido
