@@ -1,8 +1,10 @@
 import { NavLink } from 'react-router-dom'
 import {
+  LayoutDashboard,
   ClipboardList,
   Users,
   Package,
+  Boxes,
   Wallet,
   Receipt,
   Landmark,
@@ -11,10 +13,17 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
+// "/" é o Dashboard no celular (ver `HomeRoute` em `routes.tsx`) — por
+// isso a aba de Ordens de Serviço aqui aponta pro alias fixo
+// `/ordens-servico`, nunca pra "/": senão a aba "OS" mostraria o
+// Dashboard, não a lista de OS. Mantém as mesmas 10 telas da Sidebar
+// (`Sidebar.tsx`) — nenhuma fica de fora só por estar no celular.
 const NAV_ITEMS = [
-  { to: '/', label: 'OS', icon: ClipboardList, end: true },
+  { to: '/', label: 'Dashboard', icon: LayoutDashboard, end: true },
+  { to: '/ordens-servico', label: 'OS', icon: ClipboardList },
   { to: '/clientes-parceiros', label: 'Clientes', icon: Users },
   { to: '/servicos', label: 'Serviços', icon: Package },
+  { to: '/estoque', label: 'Estoque', icon: Boxes },
   { to: '/financeiro', label: 'Receber', icon: Wallet },
   { to: '/despesas', label: 'Despesas', icon: Receipt },
   { to: '/fechamento', label: 'Fechamento', icon: Landmark },

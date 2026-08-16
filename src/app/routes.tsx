@@ -1,6 +1,7 @@
 import { HashRouter, Routes, Route } from 'react-router-dom'
 import { AppShell } from '@/app/layout/AppShell'
 import { ProtectedRoute } from '@/app/layout/ProtectedRoute'
+import { useIsMobile } from '@/hooks/useIsMobile'
 import { LoginPage } from '@/features/auth/components/LoginPage'
 import { ForgotPasswordPage } from '@/features/auth/components/ForgotPasswordPage'
 import { OrdensServicoPage } from '@/features/ordens-servico/OrdensServicoPage'
@@ -18,6 +19,20 @@ import { ConfiguracoesPage } from '@/features/configuracoes/ConfiguracoesPage'
 import { UsuariosPage } from '@/features/configuracoes/UsuariosPage'
 import { TermosPage } from '@/features/configuracoes/TermosPage'
 
+/**
+ * Tela inicial ("/") depende do tamanho de tela: no computador continua
+ * Ordens de Serviço (uso operacional no balcão do laboratório); no
+ * celular vira o Dashboard (visão geral rápida — o uso mais comum fora do
+ * balcão, e também o que abre ao tocar o ícone do PWA na tela inicial).
+ * Ordens de Serviço nunca some do celular: fica disponível em
+ * `/ordens-servico`, com aba própria e estável na navegação mobile
+ * (`MobileNav`) — só a rota "/" muda de conteúdo, nunca a de OS.
+ */
+function HomeRoute() {
+  const isMobile = useIsMobile()
+  return isMobile ? <DashboardPage /> : <OrdensServicoPage />
+}
+
 export function AppRoutes() {
   return (
     <HashRouter>
@@ -27,8 +42,10 @@ export function AppRoutes() {
 
         <Route element={<ProtectedRoute />}>
           <Route element={<AppShell />}>
-            {/* Ordens de Serviço é a tela inicial — módulo prioritário do sistema. */}
-            <Route path="/" element={<OrdensServicoPage />} />
+            {/* Ordens de Serviço é a tela inicial no computador — módulo
+            prioritário do sistema (ver `HomeRoute` acima pro celular). */}
+            <Route path="/" element={<HomeRoute />} />
+            <Route path="/ordens-servico" element={<OrdensServicoPage />} />
             <Route path="/clientes-parceiros" element={<EntidadesPage />} />
             <Route path="/clientes-parceiros/:id" element={<EntidadeExtratoPage />} />
             <Route path="/servicos" element={<ServicosPage />} />

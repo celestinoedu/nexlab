@@ -2,6 +2,14 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), versionamento [SemVer](https://semver.org/lang/pt-BR/).
 
+## [0.17.1] - 2026-08-16 — Navegação mobile completa + Dashboard como tela inicial no celular
+
+### Corrigido
+- **`MobileNav` estava desatualizado desde a v0.16.0**: "Estoque" e "Dashboard" tinham sido adicionados à Sidebar do computador, mas nunca à navegação mobile — ficavam inacessíveis por toque, só chegando lá por URL direta. As 10 telas do sistema agora existem nas duas navegações.
+
+### Adicionado
+- **Dashboard vira a tela inicial ("/") só no celular** — no computador continua Ordens de Serviço, sem mudança (`HomeRoute` em `src/app/routes.tsx`, decide por `useIsMobile`, mesmo breakpoint `md` do Tailwind já usado no layout). É também o que abre ao tocar o ícone do PWA instalado. Ordens de Serviço nunca sai do celular: ganhou um endereço fixo, `/ordens-servico`, com aba própria e estável na navegação mobile — só o conteúdo de "/" muda por tamanho de tela, a lista de OS em si não.
+
 ## [0.17.0] - 2026-08-16 — NexLab instalável como PWA (ícone na tela, sem loja de apps)
 
 ### Adicionado

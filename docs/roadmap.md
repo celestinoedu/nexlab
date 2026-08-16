@@ -123,6 +123,7 @@ Motivado por relatos de tela em branco após login no Safari/iOS em alguns apare
 
 - [x] **`ErrorBoundary`** (`src/components/shared/ErrorBoundary.tsx`, v0.16.4): captura erro de render não tratado, mostra tela de recuperação em vez de branco — não corrige a causa raiz do bug do Safari (ainda não reproduzida com o erro real em mãos), mas evita a tela branca silenciosa e expõe a mensagem do erro pra diagnóstico.
 - [x] **PWA instalável** (v0.17.0, `vite-plugin-pwa`): manifest + service worker gerados no build, ícones a partir do `favicon.svg`, "Adicionar à Tela de Início" no Android e iOS/Safari, atualização por toast (nunca troca sozinho no meio de uma tela aberta). Sem loja de apps, sem custo, mesmo deploy no GitHub Pages.
+- [x] **Navegação mobile completa + Dashboard como tela inicial no celular** (v0.17.1): `MobileNav` estava sem Estoque/Dashboard desde a v0.16.0 (adicionados só na Sidebar do computador) — corrigido, e a rota "/" agora mostra o Dashboard no celular (Ordens de Serviço continua tela inicial no computador; ganhou endereço fixo `/ordens-servico` pra nunca ficar ambígua na navegação mobile).
 - [ ] Reproduzir a causa raiz do bug do Safari com o Web Inspector (precisa de um Mac disponível) e corrigir de verdade — o Error Boundary só evita a tela branca, não resolve a exceção em si.
 
 ## Ideias para avaliar depois (fora do escopo atual, não implementar sem pedir)
