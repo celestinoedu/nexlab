@@ -3,10 +3,10 @@ import { format, parseISO } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import {
   STATUS_OS_LABEL,
-  valorTotalOrdem,
   type OrdemServicoComRelacoes,
 } from '@/types/domain'
 import type { EmpresaConfig } from '@/hooks/useEmpresaConfig'
+import { itensDoRelatorio, valorOrdemNoRelatorio } from '../relatorioPersonalizado'
 
 interface FiltrosRelatorioPersonalizado {
   periodo: string
@@ -54,6 +54,7 @@ const styles = StyleSheet.create({
 interface RelatorioPersonalizadoPdfDocumentProps {
   ordens: OrdemServicoComRelacoes[]
   filtros: FiltrosRelatorioPersonalizado
+  servicoId: string | null
   empresa: EmpresaConfig | undefined
 }
 
@@ -64,9 +65,10 @@ function formatarMoeda(valor: number) {
 export function RelatorioPersonalizadoPdfDocument({
   ordens,
   filtros,
+  servicoId,
   empresa,
 }: RelatorioPersonalizadoPdfDocumentProps) {
-  const total = ordens.reduce((soma, ordem) => soma + valorTotalOrdem(ordem), 0)
+  const total = ordens.reduce((soma, ordem) => soma + valorOrdemNoRelatorio(ordem, servicoId), 0)
 
   return (
     <Document>
@@ -111,7 +113,9 @@ export function RelatorioPersonalizadoPdfDocument({
             <Text style={styles.resumoValor}>{ordens.length}</Text>
           </View>
           <View style={styles.resumoCard}>
-            <Text style={styles.resumoLabel}>Valor total</Text>
+            <Text style={styles.resumoLabel}>
+              {servicoId ? 'Valor total do serviço selecionado' : 'Valor total das OS'}
+            </Text>
             <Text style={styles.resumoValor}>{formatarMoeda(total)}</Text>
           </View>
         </View>
@@ -134,9 +138,13 @@ export function RelatorioPersonalizadoPdfDocument({
               <Text style={[styles.td, styles.colPaciente]}>
                 {[ordem.cliente_final, ordem.nome_paciente].filter(Boolean).join(' — ') || '—'}
               </Text>
-              <Text style={[styles.td, styles.colServicos]}>{ordem.itens.map((item) => item.servico.nome).join(', ')}</Text>
+              <Text style={[styles.td, styles.colServicos]}>
+                {itensDoRelatorio(ordem, servicoId)
+                  .map((item) => `${item.servico.nome}${item.quantidade > 1 ? ` ×${item.quantidade}` : ''}`)
+                  .join(', ')}
+              </Text>
               <Text style={[styles.td, styles.colStatus]}>{STATUS_OS_LABEL[ordem.status]}</Text>
-              <Text style={[styles.td, styles.colValor]}>{formatarMoeda(valorTotalOrdem(ordem))}</Text>
+              <Text style={[styles.td, styles.colValor]}>{formatarMoeda(valorOrdemNoRelatorio(ordem, servicoId))}</Text>
             </View>
           ))}
         </View>
@@ -158,10 +166,16 @@ export function RelatorioPersonalizadoPdfDocument({
 export async function baixarRelatorioPersonalizado(
   ordens: OrdemServicoComRelacoes[],
   filtros: FiltrosRelatorioPersonalizado,
+  servicoId: string | null,
   empresa: EmpresaConfig | undefined,
 ) {
   const blob = await pdf(
-    <RelatorioPersonalizadoPdfDocument ordens={ordens} filtros={filtros} empresa={empresa} />,
+    <RelatorioPersonalizadoPdfDocument
+      ordens={ordens}
+      filtros={filtros}
+      servicoId={servicoId}
+      empresa={empresa}
+    />,
   ).toBlob()
   const url = URL.createObjectURL(blob)
   const link = document.createElement('a')

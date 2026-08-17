@@ -12,6 +12,8 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), 
 
 ### Corrigido
 - **Canhotos de impressão com dimensão fixa**: a folha A4 agora usa uma grade de 4 posições (2×2), com largura, altura e tipografia fixas. Imprimir apenas uma OS não expande mais o canhoto para ocupar a folha inteira.
+- **Valor do relatório personalizado por serviço**: ao filtrar um serviço, os valores por linha e o total do extrato agora somam exclusivamente os itens daquele serviço (considerando suas quantidades), em vez do valor integral das OS que o contêm. A mesma regra é usada na prévia e no PDF.
+- **“A receber” do Dashboard alinhado às OS**: o indicador agora soma todas as OS com pagamento pendente e não canceladas, inclusive as ainda em produção, usando a mesma regra do KPI “Total a Receber” da Lista de OS. Antes ele consultava apenas contas já geradas por OS entregues e mostrava um valor artificialmente menor.
 
 ## [0.17.1] - 2026-08-16 — Navegação mobile completa + Dashboard como tela inicial no celular
 

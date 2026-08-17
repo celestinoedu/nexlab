@@ -12,9 +12,9 @@ import { useEmpresaConfig } from '@/hooks/useEmpresaConfig'
 import { useOrdensServico } from '@/features/ordens-servico/hooks/useOrdensServico'
 import {
   STATUS_OS_LABEL,
-  valorTotalOrdem,
   type OrdemServicoComRelacoes,
 } from '@/types/domain'
+import { itensDoRelatorio, valorOrdemNoRelatorio } from './relatorioPersonalizado'
 
 const TODOS = 'todos'
 
@@ -82,8 +82,11 @@ export function RelatoriosPersonalizadosPage() {
   }, [listaOrdens, dataInicio, dataFim, entidadeId, servicoId, filtrosInvalidos])
 
   const valorTotal = React.useMemo(
-    () => ordensFiltradas.reduce((total, ordem) => total + valorTotalOrdem(ordem), 0),
-    [ordensFiltradas],
+    () => ordensFiltradas.reduce(
+      (total, ordem) => total + valorOrdemNoRelatorio(ordem, servicoId === TODOS ? null : servicoId),
+      0,
+    ),
+    [ordensFiltradas, servicoId],
   )
 
   const filtrosDescricao = React.useMemo(() => ({
@@ -109,7 +112,12 @@ export function RelatoriosPersonalizadosPage() {
     setGerando(true)
     try {
       const { baixarRelatorioPersonalizado } = await import('./components/RelatorioPersonalizadoPdf')
-      await baixarRelatorioPersonalizado(ordensFiltradas, filtrosDescricao, empresaConfig)
+      await baixarRelatorioPersonalizado(
+        ordensFiltradas,
+        filtrosDescricao,
+        servicoId === TODOS ? null : servicoId,
+        empresaConfig,
+      )
     } catch {
       toast.error('Não foi possível gerar o relatório agora. Tente novamente.')
     } finally {
@@ -191,7 +199,9 @@ export function RelatoriosPersonalizadosPage() {
         <Card>
           <CardContent className="flex items-center justify-between gap-3 p-5">
             <div>
-              <p className="text-xs font-medium text-slate-500">Valor total das OS listadas</p>
+              <p className="text-xs font-medium text-slate-500">
+                {servicoId === TODOS ? 'Valor total das OS listadas' : 'Valor total do serviço selecionado'}
+              </p>
               <p className="text-xl font-semibold text-brand-800">{formatarMoeda(valorTotal)}</p>
             </div>
             <Button variant="accent" size="sm" onClick={baixarRelatorio} disabled={gerando || ordensFiltradas.length === 0 || filtrosInvalidos}>
@@ -233,9 +243,15 @@ export function RelatoriosPersonalizadosPage() {
                   <td className="px-4 py-3 text-slate-500">
                     {[ordem.cliente_final, ordem.nome_paciente].filter(Boolean).join(' — ') || '—'}
                   </td>
-                  <td className="max-w-64 px-4 py-3 text-slate-600">{ordem.itens.map((item) => item.servico.nome).join(', ')}</td>
+                  <td className="max-w-64 px-4 py-3 text-slate-600">
+                    {itensDoRelatorio(ordem, servicoId === TODOS ? null : servicoId)
+                      .map((item) => `${item.servico.nome}${item.quantidade > 1 ? ` ×${item.quantidade}` : ''}`)
+                      .join(', ')}
+                  </td>
                   <td className="px-4 py-3"><Badge variant="neutral">{STATUS_OS_LABEL[ordem.status]}</Badge></td>
-                  <td className="whitespace-nowrap px-4 py-3 text-right font-medium text-slate-800">{formatarMoeda(valorTotalOrdem(ordem))}</td>
+                  <td className="whitespace-nowrap px-4 py-3 text-right font-medium text-slate-800">
+                    {formatarMoeda(valorOrdemNoRelatorio(ordem, servicoId === TODOS ? null : servicoId))}
+                  </td>
                 </tr>
               ))}
             </tbody>

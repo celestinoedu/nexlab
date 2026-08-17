@@ -90,7 +90,7 @@ Cadastro simples, mesmo padrão visual do Catálogo de Serviços: busca, chips d
 ### Relatórios personalizados (`RelatoriosPersonalizadosPage`, `/relatorios/personalizados`)
 
 - Filtros combináveis e opcionais pela **data de recebimento** (data inicial/final), por serviço presente nos itens da OS e por Cliente/Parceiro. As opções vêm das próprias OS e, por isso, continuam incluindo cadastros históricos inativos.
-- A tela apresenta uma prévia exata das OS filtradas, com número, recebimento, Cliente/Parceiro, Cliente final/Paciente, serviços, status e valor, além dos indicadores de **quantidade de OS** e **valor total em R$**.
+- A tela apresenta uma prévia exata das OS filtradas, com número, recebimento, Cliente/Parceiro, Cliente final/Paciente, serviços, status e valor, além dos indicadores de **quantidade de OS** e **valor total em R$**. Quando há filtro de serviço, cada linha exibe e soma somente os itens do serviço escolhido (vezes sua quantidade), nunca o valor integral da OS; sem esse filtro, mantém o total normal da ordem.
 - "Baixar PDF" gera o extrato `relatorio-os-<data-hora>.pdf`, com dados da empresa, filtros aplicados, os dois totais, tabela paginada e numeração de páginas.
 
 ## Módulo Configurações (`ConfiguracoesPage`, `/configuracoes`)

@@ -47,6 +47,7 @@ Todo fechamento financeiro considera o mês **completo**: do dia 1 ao último di
 
 ## Contas a Receber
 
+- O indicador **“A receber” do Dashboard** é operacional e segue o KPI da Lista de OS: soma todas as OS não canceladas com `status_pagamento = pendente`, inclusive antes da entrega. Já a tela Contas a Receber é o ledger de cobrança e só recebe linhas quando a OS é entregue; por isso são visões diferentes do mesmo fluxo.
 - **Cada OS entregue vira automaticamente uma linha de Contas a Receber** (`contas_receber`) — não é preciso lançar nada manualmente. A linha nasce com o valor calculado no momento da entrega (mesma lógica de "valor efetivo" descrita acima) e **não muda sozinha** se a OS for editada depois (mesma filosofia de "travar o valor" do fechamento mensal).
 - Uma conta a receber tem três estados: `aberto` (default, aguardando) → `pago` (com data e forma de pagamento) ou `cancelado`.
 - **"Excluir" uma conta a receber é sempre um cancelamento com justificativa**, nunca uma exclusão de verdade: exige que o usuário explique o motivo, a linha some da visão padrão da tela mas continua no banco com `status = cancelado` e só reaparece se o usuário marcar "Mostrar cancelados". Ação restrita a `admin`.
