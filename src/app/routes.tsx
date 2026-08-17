@@ -14,6 +14,7 @@ import { DespesasPage } from '@/features/despesas/DespesasPage'
 import { FechamentoFinanceiroPage } from '@/features/fechamento/FechamentoFinanceiroPage'
 import { RelatoriosPage } from '@/features/relatorios/RelatoriosPage'
 import { CanhotosPage } from '@/features/relatorios/CanhotosPage'
+import { RelatoriosPersonalizadosPage } from '@/features/relatorios/RelatoriosPersonalizadosPage'
 import { DashboardPage } from '@/features/dashboard/DashboardPage'
 import { ConfiguracoesPage } from '@/features/configuracoes/ConfiguracoesPage'
 import { UsuariosPage } from '@/features/configuracoes/UsuariosPage'
@@ -55,6 +56,7 @@ export function AppRoutes() {
             <Route path="/fechamento" element={<FechamentoFinanceiroPage />} />
             <Route path="/relatorios" element={<RelatoriosPage />} />
             <Route path="/relatorios/canhotos" element={<CanhotosPage />} />
+            <Route path="/relatorios/personalizados" element={<RelatoriosPersonalizadosPage />} />
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/configuracoes" element={<ConfiguracoesPage />} />
             <Route path="/configuracoes/usuarios" element={<UsuariosPage />} />

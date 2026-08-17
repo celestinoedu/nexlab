@@ -48,7 +48,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
     if (!erro) return this.props.children
 
     return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
+      <div className="app-min-screen flex items-center justify-center bg-slate-50 px-4">
         <div className="flex w-full max-w-md flex-col items-center gap-6">
           <Logo />
           <Card className="w-full">

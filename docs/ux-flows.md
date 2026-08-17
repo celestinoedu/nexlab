@@ -78,14 +78,20 @@ Cadastro simples, mesmo padrão visual do Catálogo de Serviços: busca, chips d
 
 ## Módulo Relatórios (`RelatoriosPage`, `/relatorios`)
 
-**Hub de ferramentas** (`RelatoriosPage`): uma grade de cartões clicáveis, um por ferramenta — hoje só "Imprimir canhotos", mas o módulo existe pra crescer (novas ferramentas de apoio ao negócio entram só adicionando um cartão, sem mudar a estrutura da tela).
+**Hub de ferramentas** (`RelatoriosPage`): uma grade de cartões clicáveis, um por ferramenta — atualmente "Imprimir canhotos" e "Relatórios personalizados". Novas ferramentas de apoio ao negócio entram só adicionando um cartão, sem mudar a estrutura da tela.
 
 ### Imprimir canhotos (`CanhotosPage`, `/relatorios/canhotos`)
 
 - Lista de todas as OS (busca por nº/cliente/serviço, filtro por status e por mês), cada linha com checkbox + checkbox "selecionar todas" no cabeçalho da tabela, e uma coluna **"Vias"** — um campo numérico por OS (padrão = soma das quantidades dos serviços da OS, mínimo 1, editável) pra controlar quantas cópias do canhoto daquela OS entram no PDF.
 - Ao selecionar 1+ OS, aparece uma barra de ação com "Imprimir canhotos", que gera e baixa um PDF único (`canhotos-os-<data-hora>.pdf`) — uma via por canhoto, na quantidade escolhida por OS (mostrando "Via X de Y" quando é mais de uma).
 - Cada canhoto traz: nº da OS, Cliente/Parceiro, Cliente final/Paciente, **itens de serviço com valor de cada um** (cor/arco entre parênteses, comissão em vez de valor quando é Parceiro), Total (com desconto se houver), **Observações** (truncadas se muito longas) e as datas de **Recebimento** e **Entrega** — sem o status da OS (não faz sentido num papel impresso pra ser cortado e guardado). Se a empresa tiver logo cadastrada e "Mostrar no cabeçalho" ligado (`Configurações do negócio`), ela aparece como **marca d'água** centralizada e discreta atrás do conteúdo de cada canhoto.
-- Grade fixa de 2 colunas × 3 linhas por página A4, borda tracejada fazendo a marcação de recorte. A grade é sempre fixa e cada canhoto ocupa uma célula inteira com altura e overflow travados — nunca uma OS fica cortada entre duas colunas/linhas nem "vaza" pra uma página solta, mesmo com muitos serviços ou uma observação longa.
+- Grade fixa de 2 colunas × 2 linhas (4 canhotos) por página A4, borda tracejada fazendo a marcação de recorte. A grade é sempre fixa e cada canhoto ocupa uma célula inteira com largura, altura e overflow travados — não expande quando há poucas OS, nunca fica cortado entre duas colunas/linhas nem "vaza" pra uma página solta.
+
+### Relatórios personalizados (`RelatoriosPersonalizadosPage`, `/relatorios/personalizados`)
+
+- Filtros combináveis e opcionais pela **data de recebimento** (data inicial/final), por serviço presente nos itens da OS e por Cliente/Parceiro. As opções vêm das próprias OS e, por isso, continuam incluindo cadastros históricos inativos.
+- A tela apresenta uma prévia exata das OS filtradas, com número, recebimento, Cliente/Parceiro, Cliente final/Paciente, serviços, status e valor, além dos indicadores de **quantidade de OS** e **valor total em R$**.
+- "Baixar PDF" gera o extrato `relatorio-os-<data-hora>.pdf`, com dados da empresa, filtros aplicados, os dois totais, tabela paginada e numeração de páginas.
 
 ## Módulo Configurações (`ConfiguracoesPage`, `/configuracoes`)
 
@@ -109,6 +115,7 @@ Texto estático (sem tabela nova no banco) com Termos de Uso + tratamento de dad
 - **Relatório de Fechamento**: baixado a partir do Extrato de um Cliente/Parceiro (`EntidadeExtratoPage`), com as OS do período filtrado — sempre baixa o arquivo (`Fechamento-<nome>.pdf`), pronto para enviar ao próprio Cliente/Parceiro.
 - **Nota de Serviço** (Fase 4, ainda não implementada): acionada a partir de uma OS `entregue` — documento formal numerado, diferente do PDF simples da OS.
 - **Canhotos de OS**: a partir de Relatórios (`/relatorios`), com 1+ OS selecionadas — sempre baixa um único arquivo (`canhotos-os-<data-hora>.pdf`) com um canhoto por OS numa grade impressa, nunca abre só para visualizar.
+- **Relatório personalizado de OS**: a partir de Relatórios (`/relatorios/personalizados`), após aplicar qualquer combinação de período, serviço e Cliente/Parceiro — baixa um extrato (`relatorio-os-<data-hora>.pdf`) com todas as OS listadas e seus totais.
 
 ## Estados vazios e erros
 

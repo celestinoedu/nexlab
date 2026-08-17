@@ -6,8 +6,8 @@ import type { EmpresaConfig } from '@/hooks/useEmpresaConfig'
 /**
  * Grade fixa por página — nunca varia conforme o conteúdo, exatamente para
  * garantir que uma OS nunca fique "cortada" entre duas colunas/linhas: cada
- * canhoto ocupa sempre uma célula inteira de medida fixa da grade (6 por
- * folha A4: 2 colunas × 3 linhas), nunca metade de uma.
+ * canhoto ocupa sempre uma célula inteira de medida fixa da grade (4 por
+ * folha A4: 2 colunas × 2 linhas), nunca metade de uma.
  *
  * Tipografia obrigatória (impressora deixava o texto ilegível quando pequeno
  * demais): título 18pt, corpo 12pt (negrito nos dados importantes), rodapé
@@ -16,8 +16,12 @@ import type { EmpresaConfig } from '@/hooks/useEmpresaConfig'
  * layout anterior de rótulo pequeno numa linha e valor em outra.
  */
 const COLUNAS = 2
-const LINHAS = 3
+const LINHAS = 2
 const POR_PAGINA = COLUNAS * LINHAS
+// A4 = 595,28 × 841,89 pt. Descontando os 18 pt de margem em cada lado,
+// cada posição da grade 2 × 2 mede exatamente metade da área útil.
+const CANHOTO_LARGURA = (595.28 - 18 * 2) / COLUNAS
+const CANHOTO_ALTURA = (841.89 - 18 * 2) / LINHAS
 const MAX_ITENS_LISTADOS = 3
 const MAX_CHARS_OBSERVACAO = 55
 
@@ -29,9 +33,18 @@ const styles = StyleSheet.create({
   // wrap={false}: se uma linha não couber no espaço restante da página,
   // o react-pdf empurra a linha inteira pra próxima página — nunca corta
   // uma OS no meio.
-  linha: { flexDirection: 'row', flex: 1 },
+  linha: {
+    flexDirection: 'row',
+    width: CANHOTO_LARGURA * COLUNAS,
+    height: CANHOTO_ALTURA,
+    flexGrow: 0,
+    flexShrink: 0,
+  },
   canhoto: {
-    width: `${100 / COLUNAS}%`,
+    width: CANHOTO_LARGURA,
+    height: CANHOTO_ALTURA,
+    flexGrow: 0,
+    flexShrink: 0,
     borderWidth: 1,
     borderStyle: 'dashed',
     borderColor: '#94a3b8',

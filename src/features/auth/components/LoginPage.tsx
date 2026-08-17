@@ -58,9 +58,9 @@ export function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen lg:grid lg:grid-cols-[minmax(0,1.05fr)_minmax(480px,0.95fr)]">
+    <div className="app-min-screen lg:grid lg:grid-cols-[minmax(0,1.05fr)_minmax(480px,0.95fr)]">
       <AuthBrandPanel />
-      <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-mist px-5 py-10">
+      <main className="app-min-screen relative flex items-center justify-center overflow-hidden bg-mist px-5 py-10">
         <div className="pointer-events-none absolute -right-24 -top-24 size-72 rounded-full border border-brand-200/50" />
         <div className="relative w-full max-w-md">
           <div className="mb-10 flex justify-center lg:hidden">

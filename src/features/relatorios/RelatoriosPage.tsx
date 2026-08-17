@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Scissors, type LucideIcon } from 'lucide-react'
+import { FileText, Scissors, type LucideIcon } from 'lucide-react'
 import { Card, CardContent, CardTitle, CardDescription } from '@/components/ui/card'
 
 interface Ferramenta {
@@ -11,8 +11,8 @@ interface Ferramenta {
 
 /**
  * Catálogo de ferramentas do módulo Relatórios — cada uma vira um cartão
- * clicável aqui. Hoje só tem "Imprimir canhotos"; novas ferramentas de apoio
- * ao negócio entram só adicionando um item nesta lista.
+ * clicável aqui. Novas ferramentas de apoio ao negócio entram só adicionando
+ * um item nesta lista.
  */
 const FERRAMENTAS: Ferramenta[] = [
   {
@@ -20,6 +20,12 @@ const FERRAMENTAS: Ferramenta[] = [
     titulo: 'Imprimir canhotos',
     descricao: 'Selecione OS e gere um PDF com os canhotos numa grade otimizada, com marcação de recorte.',
     icon: Scissors,
+  },
+  {
+    to: '/relatorios/personalizados',
+    titulo: 'Relatórios personalizados',
+    descricao: 'Filtre OS por período, serviço e cliente e baixe um extrato completo em PDF.',
+    icon: FileText,
   },
 ]
 

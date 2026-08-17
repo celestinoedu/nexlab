@@ -9,7 +9,7 @@ export function AppShell() {
   const isDemo = useIsDemo()
 
   return (
-    <div className="flex h-screen overflow-hidden bg-mist">
+    <div className="app-screen flex overflow-hidden bg-mist">
       <Sidebar />
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         {isDemo && (

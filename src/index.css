@@ -81,6 +81,35 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
+/*
+ * Densidade global do produto. Equivale ao zoom de 80% que era necessário
+ * aplicar manualmente, mas mantém o app ocupando toda a largura e altura do
+ * aparelho. O zoom participa do layout (diferente de transform: scale), então
+ * popovers, diálogos, tabelas e pontos de quebra continuam posicionados pela
+ * viewport real.
+ */
+.app-screen {
+  height: 100dvh;
+}
+
+.app-min-screen {
+  min-height: 100dvh;
+}
+
+@supports (zoom: 0.8) {
+  html {
+    zoom: 0.8;
+  }
+
+  .app-screen {
+    height: 125dvh;
+  }
+
+  .app-min-screen {
+    min-height: 125dvh;
+  }
+}
+
 ::selection {
   background: #a7e7e3;
   color: #0a403f;

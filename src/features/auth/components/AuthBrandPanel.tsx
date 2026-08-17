@@ -5,7 +5,7 @@ const BENEFICIOS = ['Operação em um só fluxo', 'Financeiro sob controle', 'De
 
 export function AuthBrandPanel() {
   return (
-    <section className="auth-brand-panel relative hidden min-h-screen overflow-hidden p-12 text-white lg:flex lg:flex-col lg:justify-between xl:p-16">
+    <section className="auth-brand-panel app-min-screen relative hidden overflow-hidden p-12 text-white lg:flex lg:flex-col lg:justify-between xl:p-16">
       <Logo variant="reverse" size="lg" className="relative z-10" />
 
       <div className="relative z-10 max-w-xl">

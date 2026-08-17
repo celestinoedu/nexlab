@@ -88,6 +88,7 @@ Números monetários sempre com `font-variant-numeric: tabular-nums` (alinhament
 
 ## 4. Espaçamento, raio e sombra
 
+- Densidade global de exibição: `80%`, aplicada em `src/index.css` com `zoom` de layout. As classes `.app-screen` e `.app-min-screen` compensam a altura para que o produto continue preenchendo exatamente `100dvh`; usar essas classes em novos shells de tela cheia, em vez de `h-screen`/`min-h-screen`.
 - Grid de espaçamento: múltiplos de 4px (padrão Tailwind, não alterar).
 - Raio padrão de componentes: `rounded-xl` (12px). Cards de destaque/modais: `rounded-2xl` (16px). Badges/chips: `rounded-full`.
 - Sombra: usar só `shadow-sm` (cards em repouso) e `shadow-md` (elementos flutuantes: modal, dropdown, card sendo arrastado no Kanban). Nunca sombras pesadas — mantém visual leve.

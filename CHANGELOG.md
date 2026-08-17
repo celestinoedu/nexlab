@@ -2,6 +2,17 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), versionamento [SemVer](https://semver.org/lang/pt-BR/).
 
+## [Não publicado]
+
+### Adicionado
+- **Relatórios personalizados de OS**: nova ferramenta no hub de Relatórios com filtros combináveis por período de recebimento, serviço e Cliente/Parceiro, prévia das OS encontradas e download de extrato em PDF. A tela e o documento mostram a quantidade de OS listadas e seu valor total em reais.
+
+### Alterado
+- **Densidade responsiva global em 80%**: o app agora adota nativamente a escala que antes precisava ser aplicada manualmente pelo zoom do navegador, em desktop e mobile. Classes próprias de viewport compensam a escala e mantêm login, carregamento, erros e área autenticada ocupando exatamente 100% da largura e altura disponíveis.
+
+### Corrigido
+- **Canhotos de impressão com dimensão fixa**: a folha A4 agora usa uma grade de 4 posições (2×2), com largura, altura e tipografia fixas. Imprimir apenas uma OS não expande mais o canhoto para ocupar a folha inteira.
+
 ## [0.17.1] - 2026-08-16 — Navegação mobile completa + Dashboard como tela inicial no celular
 
 ### Corrigido

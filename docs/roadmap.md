@@ -65,8 +65,9 @@ Pedido do usuário após testar o módulo de Clientes/Parceiros: gestão mínima
 
 ## Fase 4.1 — Relatórios: impressão de canhotos ✅ concluída em 2026-08-13 (v0.10.0)
 
-- [x] **Impressão de canhotos de OS** (`RelatoriosPage` vira hub de ferramentas em `/relatorios`; a impressão em si mora em `CanhotosPage`, `/relatorios/canhotos`): lista de OS com busca/filtro por status/mês, seleção por checkbox e campo de **vias por OS**; botão "Imprimir canhotos" gera um único PDF com um canhoto por via numa grade fixa 2×3 por página A4 com borda tracejada de recorte — grade sempre fixa com altura/overflow travados, nunca corta uma OS entre colunas/linhas ou entre páginas. Cada canhoto traz serviços com valor, total, observações e datas.
+- [x] **Impressão de canhotos de OS** (`RelatoriosPage` vira hub de ferramentas em `/relatorios`; a impressão em si mora em `CanhotosPage`, `/relatorios/canhotos`): lista de OS com busca/filtro por status/mês, seleção por checkbox e campo de **vias por OS**; botão "Imprimir canhotos" gera um único PDF com um canhoto por via numa grade fixa 2×2 (4 canhotos) por página A4 com borda tracejada de recorte — grade sempre fixa com largura, altura e overflow travados, nunca expande quando há poucas OS nem corta uma OS entre colunas/linhas ou entre páginas. Cada canhoto traz serviços com valor, total, observações e datas.
 - [x] **Ajustes soltos pedidos junto**: CSV no Catálogo de Serviços e na Tabela de Preços (+ busca nesse pop-up); exclusão de despesa (admin); inversão das colunas do formulário de OS (dados gerais à esquerda, serviços à direita).
+- [x] **Relatórios personalizados de OS**: extrato em PDF com filtros combináveis por período de recebimento, serviço e Cliente/Parceiro, prévia em tela, quantidade de OS listadas e valor total em R$.
 
 ## Fase 4.2 — KPIs em OS + Cliente novo herda preços ✅ concluída em 2026-08-13 (v0.11.0)
 
@@ -105,7 +106,7 @@ Preparação pra vender o NexLab como assinatura pela landing page da Lotus, ate
 ## Fase 8 — Empresa Demonstração, canhotos legíveis e catálogo em PDF ✅ concluída em 2026-08-15 (v0.15.0)
 
 - [x] **Empresa Demonstração**: tenant fictício (`is_demo = true`, `0011_empresa_demo.sql` + `supabase/seed_demo.sql`) com ~3 meses de dado inventado, login `teste@teste.com`/`teste123`. Toda mutação das telas operacionais (OS, Entidades, Serviços, Despesas, Contas a Receber, Tabela de Preços, Fechamento) fica só em cache do navegador nessa conta (`src/lib/demoMode.ts`) — nunca grava no banco; some ao logar de novo. Configurações fica bloqueada (toast). Link "Ver demonstração" na tela de login. Runbook em `SETUP.md`.
-- [x] **Canhotos de impressão**: tipografia fixa e legível (título 18pt, corpo 12pt com negrito, rodapé 10pt, sempre preto) — grade de 6 por A4 (2×3) já era fixa.
+- [x] **Canhotos de impressão**: tipografia fixa e legível (título 18pt, corpo 12pt com negrito, rodapé 10pt, sempre preto) — grade de 4 por A4 (2×2), com dimensões físicas fixas mesmo quando há apenas uma OS.
 - [x] **Catálogo de serviços em PDF**: exportação A4 com borda, por categoria, com preço, validade de 20 dias.
 - [ ] Testar o provisionamento da empresa Demonstração de ponta a ponta no Supabase real (migration + seed rodados manualmente pelo responsável do projeto — feito fora deste repositório/sessão).
 
