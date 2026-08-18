@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/react-query'
 import { Toaster } from 'sonner'
-import { AuthProvider } from '@/features/auth/AuthProvider'
+import { AuthProvider, useAuth } from '@/features/auth/AuthProvider'
 import { useIsDemo } from '@/hooks/useEmpresaConfig'
 
 const STALE_TIME_PADRAO = 30_000
@@ -27,7 +27,10 @@ const queryClient = new QueryClient({
  */
 function DemoModeEffect() {
   const queryClient = useQueryClient()
-  const isDemo = useIsDemo()
+  const { user } = useAuth()
+  // Não consulta dados do tenant antes do login; além de desnecessário, isso
+  // gerava uma chamada anônima que a RLS precisava rejeitar.
+  const isDemo = useIsDemo(Boolean(user?.id))
 
   React.useEffect(() => {
     queryClient.setDefaultOptions({

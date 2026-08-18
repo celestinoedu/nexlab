@@ -23,7 +23,7 @@ export interface EmpresaConfig {
  * de PDF e na tela de Configurações — sem filtro explícito porque a RLS já
  * devolve só a linha da própria empresa (ver docs/database-schema.md § Multi-tenant).
  */
-export function useEmpresaConfig() {
+export function useEmpresaConfig(enabled = true) {
   return useQuery({
     queryKey: ['empresa_config'],
     queryFn: async () => {
@@ -31,12 +31,13 @@ export function useEmpresaConfig() {
       if (error) throw error
       return data as EmpresaConfig
     },
+    enabled,
     staleTime: 5 * 60_000,
   })
 }
 
 /** Atalho pra saber se o usuário logado está na empresa Demonstração — ver `src/lib/demoMode.ts`. */
-export function useIsDemo(): boolean {
-  const { data } = useEmpresaConfig()
+export function useIsDemo(enabled = true): boolean {
+  const { data } = useEmpresaConfig(enabled)
   return Boolean(data?.is_demo)
 }
