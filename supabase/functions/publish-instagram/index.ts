@@ -85,6 +85,26 @@ Deno.serve(async (request) => {
       return json({ ok: true, imported: posts.length, status: 'draft' })
     }
 
+    if (body.action === 'activate_campaign') {
+      const startAt = new Date('2026-08-18T19:30:00.000Z')
+      const { data: campaign, error: campaignError } = await supabase
+        .from('instagram_publicacoes')
+        .select('id,slug,status')
+        .order('slug')
+      if (campaignError) throw campaignError
+
+      const eligible = (campaign ?? []).filter((post) => post.status === 'draft' || post.status === 'scheduled')
+      for (const [index, post] of eligible.entries()) {
+        const scheduledAt = new Date(startAt.getTime() + index * 24 * 60 * 60_000).toISOString()
+        const { error } = await supabase
+          .from('instagram_publicacoes')
+          .update({ status: 'scheduled', scheduled_at: scheduledAt, last_error: null })
+          .eq('id', post.id)
+        if (error) throw error
+      }
+      return json({ ok: true, scheduled: eligible.length, startsAt: startAt.toISOString(), cadence: 'daily' })
+    }
+
     const { data, error } = await supabase.rpc('claim_due_instagram_posts', { batch_size: 3 })
     if (error) throw error
 
