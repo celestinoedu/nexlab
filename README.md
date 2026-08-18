@@ -2,7 +2,7 @@
 
 Sistema de gestão de demandas e financeiro para o **GRS Lab** (laboratório de próteses dentárias). SPA em React + Supabase, hospedada no GitHub Pages, 100% em plano gratuito.
 
-> Documentação completa do projeto: [`CLAUDE.md`](./CLAUDE.md) (índice/convenções), [`docs/architecture.md`](./docs/architecture.md), [`docs/database-schema.md`](./docs/database-schema.md), [`docs/business-rules.md`](./docs/business-rules.md), [`docs/design-system.md`](./docs/design-system.md), [`docs/ux-flows.md`](./docs/ux-flows.md), [`docs/roadmap.md`](./docs/roadmap.md).
+> Documentação completa do projeto: [`CLAUDE.md`](./CLAUDE.md) (índice/convenções), [`docs/architecture.md`](./docs/architecture.md), [`docs/database-schema.md`](./docs/database-schema.md), [`docs/business-rules.md`](./docs/business-rules.md), [`docs/design-system.md`](./docs/design-system.md), [`docs/ux-flows.md`](./docs/ux-flows.md), [`docs/roadmap.md`](./docs/roadmap.md) e [`docs/registro-inpi.md`](./docs/registro-inpi.md).
 
 ## Stack
 

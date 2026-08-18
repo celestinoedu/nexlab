@@ -78,6 +78,9 @@ export function Sidebar() {
           </a>{' '}
           — CNPJ 45.537.878/0001-07
         </p>
+        <p className="mt-2 text-[10px] leading-snug text-brand-200/35">
+          © 2026 Lotus Negócios LTDA · Software proprietário · Todos os direitos reservados.
+        </p>
       </div>
     </aside>
   )

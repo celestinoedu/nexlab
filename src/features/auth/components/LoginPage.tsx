@@ -148,9 +148,12 @@ export function LoginPage() {
             Explorar demonstração
           </button>
 
-          <p className="mt-7 text-center text-xs text-slate-400">
-            NexLab · Gestão que conecta
-          </p>
+          <div className="mt-7 space-y-1 text-center text-xs text-slate-400">
+            <p>NexLab · Gestão que conecta</p>
+            <p className="text-[10px]">
+              © 2026 Lotus Negócios LTDA · Software proprietário · Todos os direitos reservados.
+            </p>
+          </div>
         </div>
       </main>
     </div>
