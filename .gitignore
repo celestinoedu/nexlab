@@ -29,6 +29,9 @@ Supabase Credentials/
 # Scripts temporários de setup (podem conter a service_role key inline) — nunca versionar.
 .tmp-*
 
+# Estado local da Supabase CLI (referência do projeto, versões e caches).
+supabase/.temp/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
