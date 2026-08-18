@@ -6,6 +6,10 @@
 
 Nenhum token vai para a landing page, GitHub ou tabela. As credenciais ficam em **Edge Function Secrets**.
 
+As ações administrativas `validate` e `sync_manifest` usam a mesma proteção do
+Cron. A primeira confirma a identidade do perfil sem expor o token; a segunda
+importa o manifesto público da campanha e mantém os novos itens como `draft`.
+
 ## Pré-requisitos na Meta
 
 - Conta profissional do Instagram (Business ou Creator).
@@ -61,4 +65,3 @@ Falhas transitórias são reagendadas para 15 minutos depois, até três tentati
 - Manter a conta protegida por autenticação em dois fatores.
 - Revisar legenda, ordem dos slides e links antes de mudar o status de `draft` para `scheduled`.
 - Pausar o Cron antes de fazer alterações em lote na fila.
-

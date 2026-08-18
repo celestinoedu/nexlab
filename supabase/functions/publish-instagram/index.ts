@@ -27,11 +27,63 @@ Deno.serve(async (request) => {
     const cronSecret = requiredEnv('INSTAGRAM_CRON_SECRET')
     if (request.headers.get('x-cron-secret') !== cronSecret) return json({ error: 'Unauthorized' }, 401)
 
+    const body = await request.json().catch(() => ({})) as { action?: string }
+    if (body.action === 'validate') {
+      const expectedId = requiredEnv('INSTAGRAM_USER_ID')
+      const profile = await graphGet(expectedId, 'id,username')
+      return json({
+        ok: true,
+        userId: String(profile.id),
+        username: profile.username,
+        configuredIdMatches: String(profile.id) === expectedId,
+      })
+    }
+
     const supabase = createClient(
       requiredEnv('SUPABASE_URL'),
       requiredEnv('SUPABASE_SERVICE_ROLE_KEY'),
       { auth: { persistSession: false, autoRefreshToken: false } },
     )
+
+    if (body.action === 'sync_manifest') {
+      const manifestUrl = 'https://lotusnegocios.com/nexlab/social/generated/manifest.json'
+      const response = await fetch(manifestUrl)
+      if (!response.ok) throw new Error(`Manifesto de conteúdo indisponível: HTTP ${response.status}`)
+
+      const manifest = await response.json() as Array<{
+        slug: string
+        scheduledAt: string
+        format: 'image' | 'carousel'
+        caption: string
+        files: string[]
+      }>
+      if (!Array.isArray(manifest) || manifest.length === 0 || manifest.length > 30) {
+        throw new Error('Manifesto de conteúdo inválido.')
+      }
+
+      const mediaBaseUrl = new URL('./', manifestUrl)
+      const posts = manifest.map((item) => {
+        if (!/^[a-z0-9-]+$/.test(item.slug) || !item.caption || !['image', 'carousel'].includes(item.format)) {
+          throw new Error(`Item inválido no manifesto: ${item.slug ?? 'sem slug'}`)
+        }
+        const mediaUrls = item.files.map((file) => new URL(file, mediaBaseUrl).toString())
+        return {
+          slug: item.slug,
+          caption: item.caption,
+          alt_text: null,
+          media_type: item.format,
+          media_urls: mediaUrls,
+          scheduled_at: item.scheduledAt,
+          status: 'draft',
+        }
+      })
+
+      const { error } = await supabase
+        .from('instagram_publicacoes')
+        .upsert(posts, { onConflict: 'slug', ignoreDuplicates: true })
+      if (error) throw error
+      return json({ ok: true, imported: posts.length, status: 'draft' })
+    }
 
     const { data, error } = await supabase.rpc('claim_due_instagram_posts', { batch_size: 3 })
     if (error) throw error
@@ -187,4 +239,3 @@ function json(body: unknown, status = 200) {
     headers: { 'Content-Type': 'application/json; charset=utf-8' },
   })
 }
-
