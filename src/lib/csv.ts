@@ -7,7 +7,10 @@
  */
 export function baixarCsv(nomeArquivo: string, linhas: (string | number)[][]) {
   const escapar = (valor: string | number) => {
-    const texto = String(valor ?? '')
+    const original = String(valor ?? '')
+    // SEC-005: Excel/LibreOffice podem interpretar texto iniciado por estes
+    // caracteres como fórmula, mesmo quando a célula está entre aspas.
+    const texto = typeof valor === 'string' && /^\s*[=+\-@]/.test(original) ? `'${original}` : original
     return /[;"\n]/.test(texto) ? `"${texto.replace(/"/g, '""')}"` : texto
   }
   const conteudo = linhas.map((linha) => linha.map(escapar).join(';')).join('\r\n')
