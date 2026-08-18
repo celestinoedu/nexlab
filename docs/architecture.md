@@ -14,6 +14,8 @@
 
 Não existe backend próprio. O navegador do usuário fala **diretamente** com o Supabase usando a chave pública (`anon key`) via `@supabase/supabase-js`; toda a segurança de acesso a dado fica a cargo do **Row Level Security (RLS)** do Postgres (ver `docs/database-schema.md`), não de um servidor intermediário.
 
+A única função server-side é uma integração operacional da própria marca, fora dos fluxos do ERP: `publish-instagram`, executada no Supabase Edge Functions pelo Cron para publicar conteúdo sem expor o token da Meta. Ela não intermedeia o navegador nem muda a arquitetura do produto; usa infraestrutura já incluída no Supabase.
+
 ## Por que essa arquitetura (restrição: 100% free tier)
 
 O projeto tem uma restrição inegociável: **nenhuma ferramenta paga**. Isso descarta qualquer host com plano "free trial" (Vercel/Netlify continuam gratuitos indefinidamente para este uso, mas o usuário optou por GitHub Pages, que também é gratuito indefinidamente) e qualquer backend gerenciado pago. A combinação SPA estática + Supabase Free cobre 100% dos requisitos sem custo:
@@ -25,6 +27,7 @@ O projeto tem uma restrição inegociável: **nenhuma ferramenta paga**. Isso de
 | Autenticação | Supabase Auth, plano Free (50.000 usuários ativos/mês — o GRS Lab usa poucos usuários internos) |
 | Arquivos (logo, futuros anexos) | Supabase Storage, plano Free (1 GB) |
 | CI/CD | GitHub Actions (2.000 minutos/mês grátis, suficiente para builds de um projeto deste porte) |
+| Automação editorial | Supabase Cron + Edge Functions, dentro das cotas do plano Free |
 
 **Atenção operacional:** o Supabase Free **pausa o projeto após ~1 semana sem nenhuma requisição**. Se o GRS Lab ficar dias sem abrir o sistema, o primeiro acesso pode demorar ~1 minuto para "acordar" o banco, ou pode ser necessário reativar manualmente pelo painel Supabase. Isso está documentado em `SETUP.md` — não é um bug do NexLab.
 

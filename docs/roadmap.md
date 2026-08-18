@@ -127,6 +127,16 @@ Motivado por relatos de tela em branco após login no Safari/iOS em alguns apare
 - [x] **Navegação mobile completa + Dashboard como tela inicial no celular** (v0.17.1): `MobileNav` estava sem Estoque/Dashboard desde a v0.16.0 (adicionados só na Sidebar do computador) — corrigido, e a rota "/" agora mostra o Dashboard no celular (Ordens de Serviço continua tela inicial no computador; ganhou endereço fixo `/ordens-servico` pra nunca ficar ambígua na navegação mobile).
 - [ ] Reproduzir a causa raiz do bug do Safari com o Web Inspector (precisa de um Mac disponível) e corrigir de verdade — o Error Boundary só evita a tela branca, não resolve a exceção em si.
 
+## Fase 11 — Presença da marca no Instagram 🚧 preparada em 2026-08-18
+
+- [x] Estratégia editorial com pilares, voz, cadência e métricas conectadas ao plano de SEO da marca.
+- [x] Pacote inicial com 9 publicações, 31 peças 4:5, legendas e textos alternativos no repositório da landing (`lotus/nexlab/social`).
+- [x] Fila privada no Supabase + Edge Function para publicar imagens e carrosséis pela API oficial do Instagram, com trava contra concorrência, retomada e tentativas controladas (`0013_instagram_automation.sql`).
+- [x] Landing preparada com seção de personalização, FAQ preciso e pontos de entrada para o Instagram.
+- [x] Perfil oficial `@nexlab.br` habilitado nos links da landing e adicionado aos dados estruturados.
+- [ ] Configurar aplicativo/token na Meta, aplicar a migration/seed, publicar a Edge Function e ativar o Cron no projeto real.
+- [ ] Fazer uma publicação controlada de teste antes de liberar as nove datas.
+
 ## Ideias para avaliar depois (fora do escopo atual, não implementar sem pedir)
 
 - App nativo em loja (Play Store/App Store) via Capacitor, caso o modelo de vendas mude e passe a depender de descoberta pela loja — custo recorrente de US$99/ano (Apple) + build iOS exige Mac/Xcode.

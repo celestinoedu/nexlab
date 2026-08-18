@@ -206,6 +206,14 @@ Cadastro simples de Estoque do laboratório — sem controle de movimentação (
 
 RLS: leitura/criação/edição para qualquer usuário ativo da empresa, exclusão só `admin` — mesmo padrão de `despesas`.
 
+### `instagram_publicacoes` (nova na migration `0013`)
+
+Fila operacional da marca NexLab, sem vínculo com um laboratório/tenant. Armazena legenda, texto alternativo, uma ou mais URLs públicas de mídia, agendamento, estado da publicação, tentativas e IDs devolvidos pela Meta.
+
+Estados: `draft` → `scheduled` → `publishing` → `published`; após três erros, `failed`. A função `claim_due_instagram_posts()` reserva itens vencidos com `for update skip locked`, evitando duas execuções simultâneas para o mesmo post, e recupera reservas interrompidas há mais de 30 minutos.
+
+RLS fica habilitada e não existe policy para `anon` ou `authenticated`. Somente a `service_role` da Edge Function pode ler ou alterar esta tabela. O token do Instagram nunca é gravado no banco.
+
 ### `fechamentos_financeiros` (nova na migration `0003`)
 Snapshot do **resultado do laboratório inteiro** por mês (não por entidade): `total_receitas` (soma de `contas_receber.valor` com `status = pago` no mês, por `data_pagamento`) menos `total_despesas` (soma de `despesas.valor` no mês, por `data_despesa`).
 
@@ -233,6 +241,7 @@ Cenário desde a migration `0010`: **vários** laboratórios (tenants) no mesmo 
 - `profiles`: cada usuário vê/edita o próprio registro; `admin` vê e edita todos os perfis **da mesma empresa** (não mais "todos" globalmente — `is_admin_user()` sozinho passou a ser insuficiente, ver `0010_multi_tenant.sql`).
 - **Storage `logos`**: leitura pública (não é dado sensível), escrita (`insert`/`update`/`delete`) só `admin`, restrita ao caminho `${empresaId}/...` da própria empresa (`storage.foldername(name)`).
 - Nenhuma policy libera acesso ao role `anon` a dado de negócio — só usuários autenticados chegam aos dados, e só aos da própria empresa.
+- `instagram_publicacoes` é uma fila interna da marca, fora do escopo dos tenants: não tem policy para usuários do aplicativo e só é acessada pela `service_role` da automação.
 
 ## Convenções para novas migrations
 

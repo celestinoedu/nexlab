@@ -6,6 +6,7 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), 
 
 ### Adicionado
 - **Relatórios personalizados de OS**: nova ferramenta no hub de Relatórios com filtros combináveis por período de recebimento, serviço e Cliente/Parceiro, prévia das OS encontradas e download de extrato em PDF. A tela e o documento mostram a quantidade de OS listadas e seu valor total em reais.
+- **Automação editorial do Instagram da NexLab**: fila privada `instagram_publicacoes`, reserva transacional contra duplicidade, Edge Function para imagens e carrosséis via API oficial do Instagram, três tentativas com retomada e runbook de ativação. Tokens ficam somente nos secrets do Supabase.
 
 ### Alterado
 - **Densidade responsiva global em 80%**: o app agora adota nativamente a escala que antes precisava ser aplicada manualmente pelo zoom do navegador, em desktop e mobile. Classes próprias de viewport compensam a escala e mantêm login, carregamento, erros e área autenticada ocupando exatamente 100% da largura e altura disponíveis.
