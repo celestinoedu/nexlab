@@ -1,3 +1,5 @@
+import { baixarBlob } from './download'
+
 /**
  * Gera um CSV a partir de linhas (array de arrays) e baixa como arquivo —
  * sempre download, nunca abre em nova aba (mesmo padrão dos PDFs). Separador
@@ -17,14 +19,7 @@ export function baixarCsv(nomeArquivo: string, linhas: (string | number)[][]) {
   // BOM UTF-8 no início — sem isso o Excel abre acentos quebrados.
   const bom = String.fromCharCode(0xfeff)
   const blob = new Blob([bom + conteudo], { type: 'text/csv;charset=utf-8;' })
-  const url = URL.createObjectURL(blob)
-  const link = document.createElement('a')
-  link.href = url
-  link.download = nomeArquivo
-  document.body.appendChild(link)
-  link.click()
-  document.body.removeChild(link)
-  URL.revokeObjectURL(url)
+  baixarBlob(blob, nomeArquivo)
 }
 
 /** Formata um número no padrão pt-BR (vírgula decimal), sem símbolo de moeda — pra ficar numérico no CSV. */

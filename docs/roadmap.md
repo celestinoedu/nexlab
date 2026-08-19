@@ -137,6 +137,11 @@ Motivado por relatos de tela em branco após login no Safari/iOS em alguns apare
 - [ ] Configurar aplicativo/token na Meta, aplicar a migration/seed, publicar a Edge Function e ativar o Cron no projeto real.
 - [ ] Fazer uma publicação controlada de teste antes de liberar as nove datas.
 
+## Fase 12 — Manutenção de downloads ✅ concluída em 2026-08-19 (v0.18.1)
+
+- [x] Restaurar todos os PDFs bloqueados pela CSP: catálogo, OS, fechamento, relatório personalizado e canhotos.
+- [x] Unificar downloads de Blob e adiar a liberação da URL temporária para compatibilidade com Firefox e Safari.
+
 ## Ideias para avaliar depois (fora do escopo atual, não implementar sem pedir)
 
 - App nativo em loja (Play Store/App Store) via Capacitor, caso o modelo de vendas mude e passe a depender de descoberta pela loja — custo recorrente de US$99/ano (Apple) + build iOS exige Mac/Xcode.

@@ -3,6 +3,7 @@ import { addDays, format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import type { Servico } from '@/types/domain'
 import type { EmpresaConfig } from '@/hooks/useEmpresaConfig'
+import { baixarBlob } from '@/lib/download'
 
 /** Catálogo tem validade fixa de 20 dias a partir da emissão — regra de negócio pedida pelo cliente. */
 const DIAS_VALIDADE = 20
@@ -142,12 +143,5 @@ export function CatalogoServicosPdfDocument({ servicos, empresa }: CatalogoServi
 /** Gera o catálogo de serviços em PDF (só ativos, agrupados por categoria) e baixa como arquivo. */
 export async function baixarCatalogoServicosPdf(servicos: Servico[], empresa: EmpresaConfig | undefined) {
   const blob = await pdf(<CatalogoServicosPdfDocument servicos={servicos} empresa={empresa} />).toBlob()
-  const url = URL.createObjectURL(blob)
-  const link = document.createElement('a')
-  link.href = url
-  link.download = `catalogo-servicos-${format(new Date(), 'yyyy-MM-dd')}.pdf`
-  document.body.appendChild(link)
-  link.click()
-  document.body.removeChild(link)
-  URL.revokeObjectURL(url)
+  baixarBlob(blob, `catalogo-servicos-${format(new Date(), 'yyyy-MM-dd')}.pdf`)
 }

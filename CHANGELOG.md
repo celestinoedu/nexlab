@@ -4,6 +4,12 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), 
 
 ## [Não publicado]
 
+## [0.18.1] - 2026-08-19 — Downloads de PDF restaurados
+
+### Corrigido
+- **Todos os downloads de PDF**: a política de segurança agora permite somente a execução WebAssembly exigida pelo `@react-pdf/renderer` e a leitura do módulo embarcado em `data:`, restaurando catálogo, PDF da OS, fechamento, relatório personalizado e canhotos.
+- **Downloads em Firefox e Safari**: PDFs e CSVs passam por um utilitário único que só libera a URL temporária depois que o navegador iniciou a transferência, evitando cancelamento por revogação imediata.
+
 ## [0.18.0] - 2026-08-18 — Segurança, relatórios e proteção autoral
 
 ### Adicionado

@@ -1,4 +1,5 @@
 import { Document, Page, View, Text, Image, StyleSheet, pdf } from '@react-pdf/renderer'
+import { baixarBlob } from '@/lib/download'
 import { format, parseISO } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { ARCO_LABEL, STATUS_OS_LABEL, valorEfetivoItem, type OrdemServicoComRelacoes } from '@/types/domain'
@@ -162,12 +163,5 @@ export async function baixarPdfOrdemServico(
   empresa: EmpresaConfig | undefined,
 ) {
   const blob = await pdf(<OrdemServicoPdfDocument ordem={ordem} empresa={empresa} />).toBlob()
-  const url = URL.createObjectURL(blob)
-  const link = document.createElement('a')
-  link.href = url
-  link.download = `OS-${ordem.numero_os}.pdf`
-  document.body.appendChild(link)
-  link.click()
-  document.body.removeChild(link)
-  URL.revokeObjectURL(url)
+  baixarBlob(blob, `OS-${ordem.numero_os}.pdf`)
 }

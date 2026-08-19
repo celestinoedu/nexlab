@@ -1,4 +1,5 @@
 import { Document, Page, View, Text, Image, StyleSheet, pdf } from '@react-pdf/renderer'
+import { baixarBlob } from '@/lib/download'
 import { format, parseISO } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { valorTotalOrdem, type Entidade, type OrdemServicoComRelacoes } from '@/types/domain'
@@ -140,12 +141,5 @@ export async function baixarRelatorioFechamento(
   const blob = await pdf(
     <RelatorioFechamentoPdfDocument entidade={entidade} ordens={ordens} periodoLabel={periodoLabel} empresa={empresa} />,
   ).toBlob()
-  const url = URL.createObjectURL(blob)
-  const link = document.createElement('a')
-  link.href = url
-  link.download = `Fechamento-${entidade.nome.replace(/\s+/g, '-')}.pdf`
-  document.body.appendChild(link)
-  link.click()
-  document.body.removeChild(link)
-  URL.revokeObjectURL(url)
+  baixarBlob(blob, `Fechamento-${entidade.nome.replace(/\s+/g, '-')}.pdf`)
 }
