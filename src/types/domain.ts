@@ -61,6 +61,7 @@ export interface TabelaPreco {
 export interface OrdemServico {
   id: string
   numero_os: number
+  numero_os_cliente: string | null
   entidade_id: string
   cliente_final: string | null
   nome_paciente: string | null

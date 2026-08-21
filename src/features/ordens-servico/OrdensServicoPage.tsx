@@ -74,6 +74,7 @@ export function OrdensServicoPage() {
       if (!buscaLower) return true
       return (
         String(o.numero_os).includes(buscaLower) ||
+        (o.numero_os_cliente ?? '').toLowerCase().includes(buscaLower) ||
         (o.cliente_final ?? '').toLowerCase().includes(buscaLower) ||
         (o.nome_paciente ?? '').toLowerCase().includes(buscaLower) ||
         o.entidade.nome.toLowerCase().includes(buscaLower) ||

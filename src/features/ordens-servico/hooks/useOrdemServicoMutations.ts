@@ -22,7 +22,7 @@ export interface OrdemServicoItemInput {
 }
 
 export interface OrdemServicoFormInput {
-  numero_os: number | null
+  numero_os_cliente: string | null
   entidade_id: string
   cliente_final: string | null
   nome_paciente: string | null
@@ -38,10 +38,7 @@ export interface OrdemServicoFormInput {
   itens: OrdemServicoItemInput[]
 }
 
-function traduzErroSalvar(message: string): string {
-  if (message.toLowerCase().includes('ordens_servico_numero_os_key')) {
-    return 'Esse número de OS já está em uso — escolha outro número ou deixe em branco para gerar automaticamente.'
-  }
+function traduzErroSalvar(_message: string): string {
   return 'Não foi possível salvar a OS agora. Tente novamente.'
 }
 
@@ -88,6 +85,7 @@ function montarOrdemDemo(
   return {
     id,
     numero_os: numeroOs,
+    numero_os_cliente: input.numero_os_cliente,
     entidade_id: input.entidade_id,
     cliente_final: input.cliente_final,
     nome_paciente: input.nome_paciente,
@@ -167,17 +165,17 @@ export function useOrdemServicoMutations() {
     mutationFn: async (input: OrdemServicoFormInput) => {
       if (isDemoAtivo(queryClient)) {
         const id = novoIdDemo()
-        const numeroOs = input.numero_os ?? proximoNumeroOsDemo(queryClient)
+        const numeroOs = proximoNumeroOsDemo(queryClient)
         const ordem = montarOrdemDemo(queryClient, id, input, numeroOs, agoraIso())
         queryClient.setQueryData<OrdemServicoComRelacoes[]>(['ordens_servico'], (old) => [ordem, ...(old ?? [])])
         garantirContaReceberDemo(queryClient, ordem, null)
         return ordem as unknown as OrdemServico
       }
 
-      const { itens, numero_os, ...cabecalho } = input
+      const { itens, ...cabecalho } = input
       const { data: ordem, error: ordemErr } = await supabase
         .from('ordens_servico')
-        .insert({ ...cabecalho, ...(numero_os ? { numero_os } : {}) })
+        .insert(cabecalho)
         .select()
         .single()
       if (ordemErr) throw new Error(traduzErroSalvar(ordemErr.message))
@@ -198,7 +196,7 @@ export function useOrdemServicoMutations() {
     mutationFn: async ({ id, input }: { id: string; input: OrdemServicoFormInput }) => {
       if (isDemoAtivo(queryClient)) {
         const atual = queryClient.getQueryData<OrdemServicoComRelacoes[]>(['ordens_servico'])?.find((o) => o.id === id)
-        const numeroOs = input.numero_os ?? atual?.numero_os ?? proximoNumeroOsDemo(queryClient)
+        const numeroOs = atual?.numero_os ?? proximoNumeroOsDemo(queryClient)
         const ordem = montarOrdemDemo(queryClient, id, input, numeroOs, atual?.created_at ?? agoraIso())
         queryClient.setQueryData<OrdemServicoComRelacoes[]>(['ordens_servico'], (old) =>
           (old ?? []).map((o) => (o.id === id ? ordem : o)),
@@ -207,10 +205,10 @@ export function useOrdemServicoMutations() {
         return
       }
 
-      const { itens, numero_os, ...cabecalho } = input
+      const { itens, ...cabecalho } = input
       const { error: ordemErr } = await supabase
         .from('ordens_servico')
-        .update({ ...cabecalho, ...(numero_os ? { numero_os } : {}) })
+        .update(cabecalho)
         .eq('id', id)
       if (ordemErr) throw new Error(traduzErroSalvar(ordemErr.message))
 

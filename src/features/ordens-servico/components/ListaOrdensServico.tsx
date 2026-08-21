@@ -117,7 +117,14 @@ export function ListaOrdensServico({ ordens, onEditOrdem, onImprimirOrdem }: Lis
                       {expandida ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
                     </button>
                   </td>
-                  <td className={`${TD_BASE} whitespace-nowrap text-slate-400`}>#{ordem.numero_os}</td>
+                  <td className={`${TD_BASE} whitespace-nowrap text-slate-400`}>
+                    <span className="block">#{ordem.numero_os}</span>
+                    {ordem.numero_os_cliente && (
+                      <span className="block text-xs text-slate-500" title="OS do Cliente">
+                        Cliente: {ordem.numero_os_cliente}
+                      </span>
+                    )}
+                  </td>
                   <td className={TD_BASE}>
                     <div className="flex flex-wrap items-center gap-1.5">
                       <span className="max-w-full truncate font-medium text-slate-800">{ordem.entidade.nome}</span>
@@ -222,6 +229,10 @@ export function ListaOrdensServico({ ordens, onEditOrdem, onImprimirOrdem }: Lis
                           <div>
                             <p className="text-xs font-medium uppercase text-slate-400">Forma de pagamento</p>
                             <p className="text-slate-700">{ordem.forma_pagamento || '—'}</p>
+                          </div>
+                          <div>
+                            <p className="text-xs font-medium uppercase text-slate-400">OS do Cliente</p>
+                            <p className="text-slate-700">{ordem.numero_os_cliente || '—'}</p>
                           </div>
                           {ordem.observacoes && (
                             <div className="col-span-2">

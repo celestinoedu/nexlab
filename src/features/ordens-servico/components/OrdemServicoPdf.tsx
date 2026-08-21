@@ -94,6 +94,10 @@ export function OrdemServicoPdfDocument({ ordem, empresa }: OrdemServicoPdfDocum
               <Text style={styles.infoValor}>{ordem.entidade.nome}</Text>
             </View>
             <View style={styles.infoItem}>
+              <Text style={styles.infoLabel}>OS do Cliente</Text>
+              <Text style={styles.infoValor}>{ordem.numero_os_cliente || '—'}</Text>
+            </View>
+            <View style={styles.infoItem}>
               <Text style={styles.infoLabel}>Cliente final</Text>
               <Text style={styles.infoValor}>{ordem.cliente_final || '—'}</Text>
             </View>

@@ -42,7 +42,8 @@ Todo fechamento financeiro considera o mês **completo**: do dia 1 ao último di
 
 ## Numeração
 
-- **Nº OS** (`ordens_servico.numero_os`): sequencial interno do GRS Lab. Sugerido automaticamente ao abrir uma nova OS, mas **editável** — útil para manter uma numeração legada (ex.: migrando de um controle em papel). Continua único; se um número já estiver em uso, o sistema avisa e pede outro (ou deixar em branco para gerar automaticamente). Não é o número de OS do laboratório parceiro (esse, se precisar ser registrado, vai em `observacoes`).
+- **Nº OS NexLab** (`ordens_servico.numero_os`): sequencial interno e imutável, gerado de forma atômica por empresa ao criar uma OS. A regra vale apenas para novas OSs; números históricos são preservados.
+- **OS do Cliente** (`ordens_servico.numero_os_cliente`): identificador opcional informado pelo laboratório cliente. É independente da sequência interna e aceita texto para preservar formatos e zeros à esquerda.
 - **Nota de Serviço** (`notas_servico.numero`): `prefixo_nota_servico` + sequencial, controlado por `empresa_config.proximo_numero_nota`. Documento **sem valor fiscal** — não substitui nota fiscal eletrônica.
 
 ## Contas a Receber

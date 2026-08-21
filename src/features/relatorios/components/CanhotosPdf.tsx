@@ -160,7 +160,10 @@ export function CanhotosPdfDocument({ itens, empresaNome, logoUrl }: CanhotosPdf
                       )}
                       <View>
                         <View style={styles.tituloRow}>
-                          <Text style={styles.numeroOs}>OS Nº {ordem.numero_os}</Text>
+                          <Text style={styles.numeroOs}>
+                            OS Nº {ordem.numero_os}
+                            {ordem.numero_os_cliente ? ` | Cliente: ${ordem.numero_os_cliente}` : ''}
+                          </Text>
                           {totalCopias > 1 && (
                             <Text style={styles.copia}>Via {copia} de {totalCopias}</Text>
                           )}

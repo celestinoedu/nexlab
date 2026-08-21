@@ -29,7 +29,6 @@ import { Combobox, type ComboboxOption } from '@/components/shared/Combobox'
 import { useEntidades } from '@/hooks/useEntidades'
 import { useServicos } from '@/hooks/useServicos'
 import { useTabelaPrecos } from '@/hooks/useTabelaPrecos'
-import { supabase } from '@/lib/supabase'
 import {
   useOrdemServicoMutations,
   type OrdemServicoFormInput,
@@ -49,7 +48,7 @@ const itemSchema = z.object({
 
 const schema = z
   .object({
-    numero_os: z.number().int().positive().nullable().optional(),
+    numero_os_cliente: z.string().max(100, 'Use no máximo 100 caracteres').optional(),
     entidade_id: z.string().min(1, 'Escolha um cliente ou parceiro antes de salvar'),
     cliente_final: z.string().optional(),
     nome_paciente: z.string().optional(),
@@ -122,14 +121,14 @@ export function OrdemServicoFormDialog({ open, onOpenChange, ordem }: OrdemServi
   const skipNextAutoSuggestPrazo = React.useRef(false)
 
   // Reseta o formulário sempre que o modal abre — pré-preenche em modo edição
-  // e sugere o próximo número de OS em modo criação.
+  // e deixa o número interno a cargo da sequência atômica do banco.
   React.useEffect(() => {
     if (!open) return
     skipNextAutoSuggestPrazo.current = isEditing
 
     if (ordem) {
       reset({
-        numero_os: ordem.numero_os,
+        numero_os_cliente: ordem.numero_os_cliente ?? '',
         entidade_id: ordem.entidade_id,
         cliente_final: ordem.cliente_final ?? '',
         nome_paciente: ordem.nome_paciente ?? '',
@@ -153,7 +152,7 @@ export function OrdemServicoFormDialog({ open, onOpenChange, ordem }: OrdemServi
       })
     } else {
       reset({
-        numero_os: null,
+        numero_os_cliente: '',
         entidade_id: '',
         cliente_final: '',
         nome_paciente: '',
@@ -168,15 +167,6 @@ export function OrdemServicoFormDialog({ open, onOpenChange, ordem }: OrdemServi
         data_pagamento: '',
         itens: [ITEM_VAZIO],
       })
-      supabase
-        .from('ordens_servico')
-        .select('numero_os')
-        .order('numero_os', { ascending: false })
-        .limit(1)
-        .then(({ data }) => {
-          const proximo = (data?.[0]?.numero_os ?? 0) + 1
-          setValue('numero_os', proximo)
-        })
     }
   }, [open, ordem, isEditing, reset, setValue])
 
@@ -234,7 +224,7 @@ export function OrdemServicoFormDialog({ open, onOpenChange, ordem }: OrdemServi
 
   const onSubmit = async (values: FormValues) => {
     const input: OrdemServicoFormInput = {
-      numero_os: values.numero_os ?? null,
+      numero_os_cliente: values.numero_os_cliente?.trim() || null,
       entidade_id: values.entidade_id,
       cliente_final: values.cliente_final?.trim() || null,
       nome_paciente: values.nome_paciente?.trim() || null,
@@ -328,15 +318,12 @@ export function OrdemServicoFormDialog({ open, onOpenChange, ordem }: OrdemServi
             <div className="order-1 flex flex-col gap-4">
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                 <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="numero_os">Número da OS</Label>
+                  <Label htmlFor="numero_os">Número da OS NexLab</Label>
                   <Input
                     id="numero_os"
-                    type="number"
-                    min={1}
-                    placeholder="Automático"
-                    {...register('numero_os', {
-                      setValueAs: (v) => (v === '' ? null : Number(v)),
-                    })}
+                    value={ordem ? String(ordem.numero_os) : 'Gerado ao salvar'}
+                    disabled
+                    readOnly
                   />
                 </div>
 
@@ -361,6 +348,19 @@ export function OrdemServicoFormDialog({ open, onOpenChange, ordem }: OrdemServi
                     <p className="text-sm text-danger-500">{errors.entidade_id.message}</p>
                   )}
                 </div>
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="numero_os_cliente">OS do Cliente (opcional)</Label>
+                <Input
+                  id="numero_os_cliente"
+                  maxLength={100}
+                  placeholder="Número informado pelo laboratório cliente"
+                  {...register('numero_os_cliente')}
+                />
+                {errors.numero_os_cliente && (
+                  <p className="text-sm text-danger-500">{errors.numero_os_cliente.message}</p>
+                )}
               </div>
 
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
