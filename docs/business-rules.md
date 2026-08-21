@@ -42,8 +42,8 @@ Todo fechamento financeiro considera o mês **completo**: do dia 1 ao último di
 
 ## Numeração
 
-- **Nº OS NexLab** (`ordens_servico.numero_os`): sequencial interno e imutável, gerado de forma atômica por empresa ao criar uma OS. A regra vale apenas para novas OSs; números históricos são preservados.
-- **OS do Cliente** (`ordens_servico.numero_os_cliente`): identificador opcional informado pelo laboratório cliente. É independente da sequência interna e aceita texto para preservar formatos e zeros à esquerda.
+- **Nº Registro** (`ordens_servico.numero_os`): sequencial interno e imutável do NexLab, gerado de forma atômica por empresa ao criar uma OS. A regra vale apenas para novos registros; números históricos são preservados.
+- **Nº OS** (`ordens_servico.numero_os_cliente`): identificador opcional informado pelo laboratório cliente. É independente do Nº Registro e aceita texto para preservar formatos e zeros à esquerda. Nas telas e documentos, tem prioridade de exibição; quando estiver em branco, o Nº Registro é mostrado como referência.
 - **Nota de Serviço** (`notas_servico.numero`): `prefixo_nota_servico` + sequencial, controlado por `empresa_config.proximo_numero_nota`. Documento **sem valor fiscal** — não substitui nota fiscal eletrônica.
 
 ## Contas a Receber

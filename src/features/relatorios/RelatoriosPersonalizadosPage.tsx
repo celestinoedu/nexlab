@@ -12,6 +12,7 @@ import { useEmpresaConfig } from '@/hooks/useEmpresaConfig'
 import { useOrdensServico } from '@/features/ordens-servico/hooks/useOrdensServico'
 import {
   STATUS_OS_LABEL,
+  referenciaOrdemExibicao,
   type OrdemServicoComRelacoes,
 } from '@/types/domain'
 import { itensDoRelatorio, valorOrdemNoRelatorio } from './relatorioPersonalizado'
@@ -225,7 +226,7 @@ export function RelatoriosPersonalizadosPage() {
           <table className="w-full text-left text-sm">
             <thead className="border-b border-slate-100 text-xs font-medium text-slate-400">
               <tr>
-                <th className="px-4 py-3">Nº OS</th>
+                <th className="px-4 py-3">Nº OS / Registro</th>
                 <th className="px-4 py-3">Recebimento</th>
                 <th className="px-4 py-3">Cliente / Parceiro</th>
                 <th className="px-4 py-3">Cliente final / Paciente</th>
@@ -237,7 +238,7 @@ export function RelatoriosPersonalizadosPage() {
             <tbody>
               {ordensFiltradas.map((ordem) => (
                 <tr key={ordem.id} className="border-b border-slate-50 last:border-0">
-                  <td className="px-4 py-3 text-slate-500">#{ordem.numero_os}</td>
+                  <td className="px-4 py-3 text-slate-500">#{referenciaOrdemExibicao(ordem).numero}</td>
                   <td className="px-4 py-3 text-slate-500">{format(parseISO(ordem.data_recebimento), 'dd/MM/yyyy')}</td>
                   <td className="px-4 py-3 font-medium text-slate-800">{ordem.entidade.nome}</td>
                   <td className="px-4 py-3 text-slate-500">

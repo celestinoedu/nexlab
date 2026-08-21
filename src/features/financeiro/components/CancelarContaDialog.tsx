@@ -10,7 +10,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import type { ContaReceberComRelacoes } from '@/types/domain'
+import { referenciaOrdemExibicao, type ContaReceberComRelacoes } from '@/types/domain'
 
 interface CancelarContaDialogProps {
   open: boolean
@@ -38,7 +38,9 @@ export function CancelarContaDialog({ open, onOpenChange, conta, onConfirm }: Ca
         <DialogHeader>
           <DialogTitle>Cancelar conta a receber</DialogTitle>
           <DialogDescription>
-            {conta?.ordem.numero_os ? `OS #${conta.ordem.numero_os} — e` : 'E'}sta linha some da lista, mas fica
+            {conta
+              ? `${referenciaOrdemExibicao(conta.ordem).rotulo} ${referenciaOrdemExibicao(conta.ordem).numero} — e`
+              : 'E'}sta linha some da lista, mas fica
             registrada no histórico como cancelada. Explique o motivo.
           </DialogDescription>
         </DialogHeader>

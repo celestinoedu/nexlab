@@ -1,7 +1,7 @@
 import { Document, Page, View, Text, Image, StyleSheet, pdf } from '@react-pdf/renderer'
 import { baixarBlob } from '@/lib/download'
 import { format, parseISO } from 'date-fns'
-import { ARCO_LABEL, valorEfetivoItem, type OrdemServicoComRelacoes } from '@/types/domain'
+import { ARCO_LABEL, referenciaOrdemExibicao, valorEfetivoItem, type OrdemServicoComRelacoes } from '@/types/domain'
 import type { EmpresaConfig } from '@/hooks/useEmpresaConfig'
 
 /**
@@ -161,8 +161,7 @@ export function CanhotosPdfDocument({ itens, empresaNome, logoUrl }: CanhotosPdf
                       <View>
                         <View style={styles.tituloRow}>
                           <Text style={styles.numeroOs}>
-                            OS Nº {ordem.numero_os}
-                            {ordem.numero_os_cliente ? ` | Cliente: ${ordem.numero_os_cliente}` : ''}
+                            {referenciaOrdemExibicao(ordem).rotulo} {referenciaOrdemExibicao(ordem).numero}
                           </Text>
                           {totalCopias > 1 && (
                             <Text style={styles.copia}>Via {copia} de {totalCopias}</Text>

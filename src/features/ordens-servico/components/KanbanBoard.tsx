@@ -16,6 +16,7 @@ import { useOrdemServicoMutations } from '@/features/ordens-servico/hooks/useOrd
 import {
   STATUS_OS_LABEL,
   STATUS_KANBAN_ORDEM,
+  referenciaOrdemExibicao,
   type OrdemServicoComRelacoes,
   type StatusOS,
 } from '@/types/domain'
@@ -93,7 +94,9 @@ export function KanbanBoard({ ordens, onEditOrdem, onImprimirOrdem }: KanbanBoar
       <EntregaConfirmDialog
         open={Boolean(pendingEntrega)}
         onOpenChange={(open) => !open && setPendingEntrega(null)}
-        numeroOs={pendingEntrega?.numero_os}
+        referencia={pendingEntrega
+          ? `${referenciaOrdemExibicao(pendingEntrega).rotulo} ${referenciaOrdemExibicao(pendingEntrega).numero}`
+          : undefined}
         onConfirm={(dataEntrega) => {
           if (pendingEntrega) {
             updateStatus.mutate({ id: pendingEntrega.id, status: 'entregue', data_entrega: dataEntrega })

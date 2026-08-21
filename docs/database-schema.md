@@ -121,8 +121,8 @@ Núcleo do sistema: o **cabeçalho** de cada Ordem de Serviço, base do Kanban e
 | Coluna | Tipo | Notas |
 |---|---|---|
 | `id` | uuid PK | |
-| `numero_os` | bigint | numeração interna **por empresa** (migration `0010`: deixou de ser `identity`/sequência global; migration `0015`: passou a ser sempre gerada pelo contador `empresas.proximo_numero_os` e imutável). Os valores históricos foram preservados; único por empresa (`unique (empresa_id, numero_os)`) |
-| `numero_os_cliente` | text | identificador opcional informado pelo laboratório cliente, independente da numeração interna. A migration `0015` recupera os valores históricos anotados no formato `os; número` |
+| `numero_os` | bigint | **Nº Registro** interno por empresa (migration `0010`: deixou de ser `identity`/sequência global; migration `0015`: passou a ser sempre gerado pelo contador `empresas.proximo_numero_os` e imutável). Os valores históricos foram preservados; único por empresa (`unique (empresa_id, numero_os)`) |
+| `numero_os_cliente` | text | **Nº OS** opcional informado pelo laboratório cliente, independente do Nº Registro. A migration `0015` recupera os valores históricos anotados no formato `os; número` |
 | `entidade_id` | uuid FK → `entidades` | quem será cobrado/comissionado |
 | `cliente_final` | text | nome do consultório/cliente final — **texto livre, não é FK** (informativo, como aparece nos relatórios reais dos parceiros) |
 | `nome_paciente` | text | nome do paciente, separado do `cliente_final` (migration `0007`) — texto livre, não é FK |

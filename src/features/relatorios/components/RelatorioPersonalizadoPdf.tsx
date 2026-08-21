@@ -4,6 +4,7 @@ import { format, parseISO } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import {
   STATUS_OS_LABEL,
+  referenciaOrdemExibicao,
   type OrdemServicoComRelacoes,
 } from '@/types/domain'
 import type { EmpresaConfig } from '@/hooks/useEmpresaConfig'
@@ -123,7 +124,7 @@ export function RelatorioPersonalizadoPdfDocument({
 
         <View style={styles.table}>
           <View style={styles.tableHeader} fixed>
-            <Text style={[styles.th, styles.colOs]}>OS</Text>
+            <Text style={[styles.th, styles.colOs]}>OS / Reg.</Text>
             <Text style={[styles.th, styles.colData]}>Recebimento</Text>
             <Text style={[styles.th, styles.colEntidade]}>Cliente / Parceiro</Text>
             <Text style={[styles.th, styles.colPaciente]}>Final / Paciente</Text>
@@ -133,7 +134,7 @@ export function RelatorioPersonalizadoPdfDocument({
           </View>
           {ordens.map((ordem) => (
             <View key={ordem.id} style={styles.tableRow} wrap={false}>
-              <Text style={[styles.td, styles.colOs]}>#{ordem.numero_os}</Text>
+              <Text style={[styles.td, styles.colOs]}>#{referenciaOrdemExibicao(ordem).numero}</Text>
               <Text style={[styles.td, styles.colData]}>{format(parseISO(ordem.data_recebimento), 'dd/MM/yyyy')}</Text>
               <Text style={[styles.td, styles.colEntidade]}>{ordem.entidade.nome}</Text>
               <Text style={[styles.td, styles.colPaciente]}>

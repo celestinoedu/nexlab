@@ -2,7 +2,7 @@ import { Document, Page, View, Text, Image, StyleSheet, pdf } from '@react-pdf/r
 import { baixarBlob } from '@/lib/download'
 import { format, parseISO } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
-import { ARCO_LABEL, STATUS_OS_LABEL, valorEfetivoItem, type OrdemServicoComRelacoes } from '@/types/domain'
+import { ARCO_LABEL, STATUS_OS_LABEL, referenciaOrdemExibicao, valorEfetivoItem, type OrdemServicoComRelacoes } from '@/types/domain'
 import type { EmpresaConfig } from '@/hooks/useEmpresaConfig'
 
 const styles = StyleSheet.create({
@@ -59,6 +59,7 @@ export function OrdemServicoPdfDocument({ ordem, empresa }: OrdemServicoPdfDocum
   const ehParceiro = ordem.entidade.tipo === 'parceiro'
   const subtotal = ordem.itens.reduce((acc, item) => acc + valorEfetivoItem(item, ordem.entidade.tipo), 0)
   const total = subtotal - ordem.desconto
+  const referencia = referenciaOrdemExibicao(ordem)
 
   return (
     <Document>
@@ -82,7 +83,7 @@ export function OrdemServicoPdfDocument({ ordem, empresa }: OrdemServicoPdfDocum
             </View>
           </View>
           <View>
-            <Text style={styles.osTitulo}>Ordem de Serviço #{ordem.numero_os}</Text>
+            <Text style={styles.osTitulo}>{referencia.rotulo} {referencia.numero}</Text>
             <Text style={styles.osData}>Status: {STATUS_OS_LABEL[ordem.status]}</Text>
           </View>
         </View>
@@ -92,10 +93,6 @@ export function OrdemServicoPdfDocument({ ordem, empresa }: OrdemServicoPdfDocum
             <View style={styles.infoItem}>
               <Text style={styles.infoLabel}>{ehParceiro ? 'Parceiro' : 'Cliente'}</Text>
               <Text style={styles.infoValor}>{ordem.entidade.nome}</Text>
-            </View>
-            <View style={styles.infoItem}>
-              <Text style={styles.infoLabel}>OS do Cliente</Text>
-              <Text style={styles.infoValor}>{ordem.numero_os_cliente || '—'}</Text>
             </View>
             <View style={styles.infoItem}>
               <Text style={styles.infoLabel}>Cliente final</Text>
@@ -167,5 +164,7 @@ export async function baixarPdfOrdemServico(
   empresa: EmpresaConfig | undefined,
 ) {
   const blob = await pdf(<OrdemServicoPdfDocument ordem={ordem} empresa={empresa} />).toBlob()
-  baixarBlob(blob, `OS-${ordem.numero_os}.pdf`)
+  const referencia = referenciaOrdemExibicao(ordem)
+  const numeroArquivo = referencia.numero.replace(/[^a-zA-Z0-9_-]+/g, '-')
+  baixarBlob(blob, `${referencia.rotuloCurto}-${numeroArquivo}.pdf`)
 }

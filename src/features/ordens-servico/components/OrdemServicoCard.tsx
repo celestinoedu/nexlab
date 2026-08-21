@@ -3,7 +3,7 @@ import { differenceInCalendarDays, parseISO } from 'date-fns'
 import { Download } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
-import type { OrdemServicoComRelacoes } from '@/types/domain'
+import { referenciaOrdemExibicao, type OrdemServicoComRelacoes } from '@/types/domain'
 
 interface OrdemServicoCardProps {
   ordem: OrdemServicoComRelacoes
@@ -21,6 +21,7 @@ export function OrdemServicoCard({ ordem, onClick, onImprimir, overlay }: OrdemS
   })
 
   const prazo = calcularPrazo(ordem)
+  const referencia = referenciaOrdemExibicao(ordem)
   const descricaoServicos =
     ordem.itens.length === 1
       ? ordem.itens[0].servico.nome
@@ -44,12 +45,9 @@ export function OrdemServicoCard({ ordem, onClick, onImprimir, overlay }: OrdemS
       )}
     >
       <div className="flex items-start justify-between gap-2">
-        <div className="flex flex-col">
-          <span className="text-xs font-medium text-slate-400">#{ordem.numero_os}</span>
-          {ordem.numero_os_cliente && (
-            <span className="text-xs text-slate-500">OS cliente: {ordem.numero_os_cliente}</span>
-          )}
-        </div>
+        <span className="truncate text-xs font-medium text-slate-400">
+          {referencia.rotuloCurto} #{referencia.numero}
+        </span>
         <div className="flex shrink-0 items-center gap-1.5">
           <Badge variant={ordem.status_pagamento === 'pago' ? 'success' : 'warning'}>
             {ordem.status_pagamento === 'pago' ? 'Pago' : 'Pendente'}

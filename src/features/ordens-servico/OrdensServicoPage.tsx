@@ -174,7 +174,7 @@ export function OrdensServicoPage() {
         <div className="relative w-full sm:w-64">
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
           <Input
-            placeholder="Buscar por nº OS, cliente, serviço..."
+            placeholder="Buscar por nº OS, registro, cliente, serviço..."
             value={busca}
             onChange={(e) => setBusca(e.target.value)}
             className="pl-9"

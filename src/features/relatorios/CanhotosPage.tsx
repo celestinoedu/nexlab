@@ -11,7 +11,7 @@ import { cn } from '@/lib/utils'
 import type { VariantProps } from 'class-variance-authority'
 import { useEmpresaConfig } from '@/hooks/useEmpresaConfig'
 import { useOrdensServico } from '../ordens-servico/hooks/useOrdensServico'
-import { STATUS_OS_LABEL, type OrdemServicoComRelacoes, type StatusOS } from '@/types/domain'
+import { STATUS_OS_LABEL, referenciaOrdemExibicao, type OrdemServicoComRelacoes, type StatusOS } from '@/types/domain'
 
 type FiltroStatus = 'todos' | StatusOS
 
@@ -66,6 +66,7 @@ export function CanhotosPage() {
       if (!buscaLower) return true
       return (
         String(o.numero_os).includes(buscaLower) ||
+        (o.numero_os_cliente ?? '').toLowerCase().includes(buscaLower) ||
         (o.cliente_final ?? '').toLowerCase().includes(buscaLower) ||
         (o.nome_paciente ?? '').toLowerCase().includes(buscaLower) ||
         o.entidade.nome.toLowerCase().includes(buscaLower) ||
@@ -132,7 +133,7 @@ export function CanhotosPage() {
         <div className="relative w-full sm:w-64">
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
           <Input
-            placeholder="Buscar por nº OS, cliente, serviço..."
+            placeholder="Buscar por nº OS, registro, cliente, serviço..."
             value={busca}
             onChange={(e) => setBusca(e.target.value)}
             className="pl-9"
@@ -213,7 +214,7 @@ export function CanhotosPage() {
                     aria-label="Selecionar todas"
                   />
                 </th>
-                <th className="px-4 py-3">Nº OS</th>
+                <th className="px-4 py-3">Nº OS / Registro</th>
                 <th className="px-4 py-3">Cliente / Parceiro</th>
                 <th className="px-4 py-3">Cliente final / Paciente</th>
                 <th className="px-4 py-3">Serviços</th>
@@ -235,10 +236,10 @@ export function CanhotosPage() {
                       className="size-4 rounded border-slate-300"
                       checked={selecionadas.has(ordem.id)}
                       onChange={() => alternarSelecao(ordem.id)}
-                      aria-label={`Selecionar OS #${ordem.numero_os}`}
+                      aria-label={`Selecionar ${referenciaOrdemExibicao(ordem).rotulo} ${referenciaOrdemExibicao(ordem).numero}`}
                     />
                   </td>
-                  <td className="px-4 py-3 text-slate-400">#{ordem.numero_os}</td>
+                  <td className="px-4 py-3 text-slate-400">#{referenciaOrdemExibicao(ordem).numero}</td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-1.5">
                       <span className="font-medium text-slate-800">{ordem.entidade.nome}</span>
@@ -285,7 +286,7 @@ export function CanhotosPage() {
                       value={quantidades[ordem.id] ?? quantidadePadrao(ordem)}
                       onChange={(e) => alterarQuantidade(ordem.id, Number(e.target.value))}
                       className="h-8 w-16 rounded-lg border border-slate-200 px-2 text-sm text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40"
-                      aria-label={`Quantidade de canhotos da OS #${ordem.numero_os}`}
+                      aria-label={`Quantidade de canhotos do ${referenciaOrdemExibicao(ordem).rotulo} ${referenciaOrdemExibicao(ordem).numero}`}
                     />
                   </td>
                 </tr>

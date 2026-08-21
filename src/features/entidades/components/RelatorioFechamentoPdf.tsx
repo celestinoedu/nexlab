@@ -2,7 +2,7 @@ import { Document, Page, View, Text, Image, StyleSheet, pdf } from '@react-pdf/r
 import { baixarBlob } from '@/lib/download'
 import { format, parseISO } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
-import { valorTotalOrdem, type Entidade, type OrdemServicoComRelacoes } from '@/types/domain'
+import { referenciaOrdemExibicao, valorTotalOrdem, type Entidade, type OrdemServicoComRelacoes } from '@/types/domain'
 import type { EmpresaConfig } from '@/hooks/useEmpresaConfig'
 
 const styles = StyleSheet.create({
@@ -96,7 +96,7 @@ export function RelatorioFechamentoPdfDocument({
 
         <View style={styles.table}>
           <View style={styles.tableHeader}>
-            <Text style={[styles.th, styles.colOs]}>Nº OS</Text>
+            <Text style={[styles.th, styles.colOs]}>OS / Registro</Text>
             <Text style={[styles.th, styles.colData]}>Data</Text>
             <Text style={[styles.th, styles.colCliente]}>Cliente final / Paciente</Text>
             <Text style={[styles.th, styles.colServico]}>Serviços</Text>
@@ -104,7 +104,7 @@ export function RelatorioFechamentoPdfDocument({
           </View>
           {ordens.map((ordem) => (
             <View key={ordem.id} style={styles.tableRow}>
-              <Text style={[styles.td, styles.colOs]}>#{ordem.numero_os}</Text>
+              <Text style={[styles.td, styles.colOs]}>#{referenciaOrdemExibicao(ordem).numero}</Text>
               <Text style={[styles.td, styles.colData]}>{formatarData(ordem.data_entrega ?? ordem.data_recebimento)}</Text>
               <Text style={[styles.td, styles.colCliente]}>
                 {[ordem.cliente_final, ordem.nome_paciente].filter(Boolean).join(' — ') || '—'}

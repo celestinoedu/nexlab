@@ -116,7 +116,7 @@ export interface ContaReceber {
 
 export interface ContaReceberComRelacoes extends ContaReceber {
   entidade: Pick<Entidade, 'id' | 'nome' | 'tipo'>
-  ordem: Pick<OrdemServico, 'id' | 'numero_os' | 'cliente_final' | 'nome_paciente' | 'data_entrega'>
+  ordem: Pick<OrdemServico, 'id' | 'numero_os' | 'numero_os_cliente' | 'cliente_final' | 'nome_paciente' | 'data_entrega'>
 }
 
 export interface Despesa {
@@ -206,4 +206,14 @@ export function valorEfetivoItem(item: OrdemServicoItem, tipoEntidade: TipoEntid
 export function valorTotalOrdem(ordem: OrdemServicoComRelacoes): number {
   const subtotal = ordem.itens.reduce((acc, item) => acc + valorEfetivoItem(item, ordem.entidade.tipo), 0)
   return subtotal - ordem.desconto
+}
+
+type OrdemComNumeros = Pick<OrdemServico, 'numero_os' | 'numero_os_cliente'>
+
+/** Referência prioritária mostrada ao usuário: Nº OS do cliente ou Nº Registro interno como fallback. */
+export function referenciaOrdemExibicao(ordem: OrdemComNumeros) {
+  const numeroOs = ordem.numero_os_cliente?.trim()
+  return numeroOs
+    ? { numero: numeroOs, rotulo: 'Nº OS' as const, rotuloCurto: 'OS' as const }
+    : { numero: String(ordem.numero_os), rotulo: 'Nº Registro' as const, rotuloCurto: 'Registro' as const }
 }

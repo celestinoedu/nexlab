@@ -16,7 +16,7 @@ interface EntregaConfirmDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   onConfirm: (dataEntrega: string) => void
-  numeroOs?: number
+  referencia?: string
 }
 
 /** Confirma a data de entrega ao mover um card para a coluna "Entregue". */
@@ -24,7 +24,7 @@ export function EntregaConfirmDialog({
   open,
   onOpenChange,
   onConfirm,
-  numeroOs,
+  referencia,
 }: EntregaConfirmDialogProps) {
   const hoje = format(new Date(), 'yyyy-MM-dd')
   const [data, setData] = React.useState(hoje)
@@ -39,7 +39,7 @@ export function EntregaConfirmDialog({
         <DialogHeader>
           <DialogTitle>Marcar como entregue</DialogTitle>
           <DialogDescription>
-            {numeroOs ? `OS #${numeroOs} — c` : 'C'}onfirme a data de entrega.
+            {referencia ? `${referencia} — c` : 'C'}onfirme a data de entrega.
           </DialogDescription>
         </DialogHeader>
 

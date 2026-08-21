@@ -14,7 +14,7 @@ import { useContaReceberMutations } from './hooks/useContaReceberMutations'
 import { MarcarPagoDialog } from './components/MarcarPagoDialog'
 import { MarcarVariasPagoDialog } from './components/MarcarVariasPagoDialog'
 import { CancelarContaDialog } from './components/CancelarContaDialog'
-import { STATUS_CONTA_RECEBER_LABEL, type ContaReceberComRelacoes, type StatusContaReceber } from '@/types/domain'
+import { referenciaOrdemExibicao, STATUS_CONTA_RECEBER_LABEL, type ContaReceberComRelacoes, type StatusContaReceber } from '@/types/domain'
 
 type FiltroStatus = 'todos' | StatusContaReceber
 
@@ -78,7 +78,8 @@ export function ContasReceberPage() {
         c.entidade.nome.toLowerCase().includes(buscaLower) ||
         (c.ordem.cliente_final ?? '').toLowerCase().includes(buscaLower) ||
         (c.ordem.nome_paciente ?? '').toLowerCase().includes(buscaLower) ||
-        String(c.ordem.numero_os).includes(buscaLower)
+        String(c.ordem.numero_os).includes(buscaLower) ||
+        (c.ordem.numero_os_cliente ?? '').toLowerCase().includes(buscaLower)
       )
     })
   }, [contas, busca, statusFiltro, mesFiltro, entidadeFiltro, mostrarCancelados])
@@ -162,7 +163,7 @@ export function ContasReceberPage() {
         <div className="relative w-full sm:w-64">
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
           <Input
-            placeholder="Buscar por cliente final, nº OS..."
+            placeholder="Buscar por cliente final, nº OS ou registro..."
             value={busca}
             onChange={(e) => setBusca(e.target.value)}
             className="pl-9"
@@ -307,7 +308,7 @@ export function ContasReceberPage() {
                         className="size-4 rounded border-slate-300"
                         checked={selecionadas.has(conta.id)}
                         onChange={() => alternarSelecao(conta.id)}
-                        aria-label={`Selecionar OS #${conta.ordem.numero_os}`}
+                        aria-label={`Selecionar ${referenciaOrdemExibicao(conta.ordem).rotulo} ${referenciaOrdemExibicao(conta.ordem).numero}`}
                       />
                     )}
                   </td>
@@ -320,7 +321,7 @@ export function ContasReceberPage() {
                     </div>
                   </td>
                   <td className="px-4 py-3 text-slate-500">
-                    #{conta.ordem.numero_os}
+                    #{referenciaOrdemExibicao(conta.ordem).numero}
                     {[conta.ordem.cliente_final, conta.ordem.nome_paciente].filter(Boolean).length > 0
                       ? ` — ${[conta.ordem.cliente_final, conta.ordem.nome_paciente].filter(Boolean).join(' — ')}`
                       : ''}

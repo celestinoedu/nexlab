@@ -11,7 +11,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import type { ContaReceberComRelacoes } from '@/types/domain'
+import { referenciaOrdemExibicao, type ContaReceberComRelacoes } from '@/types/domain'
 
 interface MarcarPagoDialogProps {
   open: boolean
@@ -39,7 +39,9 @@ export function MarcarPagoDialog({ open, onOpenChange, conta, onConfirm }: Marca
         <DialogHeader>
           <DialogTitle>Marcar como pago</DialogTitle>
           <DialogDescription>
-            {conta?.ordem.numero_os ? `OS #${conta.ordem.numero_os} — c` : 'C'}onfirme os dados do pagamento.
+            {conta
+              ? `${referenciaOrdemExibicao(conta.ordem).rotulo} ${referenciaOrdemExibicao(conta.ordem).numero} — c`
+              : 'C'}onfirme os dados do pagamento.
           </DialogDescription>
         </DialogHeader>
 

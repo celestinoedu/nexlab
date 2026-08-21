@@ -144,6 +144,7 @@ function garantirContaReceberDemo(
       ordem: {
         id: ordem.id,
         numero_os: ordem.numero_os,
+        numero_os_cliente: ordem.numero_os_cliente,
         cliente_final: ordem.cliente_final,
         nome_paciente: ordem.nome_paciente,
         data_entrega: ordem.data_entrega,

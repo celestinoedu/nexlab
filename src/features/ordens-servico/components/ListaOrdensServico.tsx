@@ -5,6 +5,7 @@ import { Badge, type badgeVariants } from '@/components/ui/badge'
 import type { VariantProps } from 'class-variance-authority'
 import {
   ARCO_LABEL,
+  referenciaOrdemExibicao,
   STATUS_OS_LABEL,
   valorEfetivoItem,
   valorTotalOrdem,
@@ -85,7 +86,7 @@ export function ListaOrdensServico({ ordens, onEditOrdem, onImprimirOrdem }: Lis
         <thead className="border-b border-slate-100 text-xs font-medium text-slate-400">
           <tr>
             <th className="px-2 py-3" />
-            <th className="px-3 py-3">Nº OS</th>
+            <th className="px-3 py-3">Nº OS / Registro</th>
             <th className="px-3 py-3">Cliente / Parceiro</th>
             <th className="px-3 py-3">Serviços</th>
             <th className="px-3 py-3">Cliente final / Paciente</th>
@@ -117,13 +118,11 @@ export function ListaOrdensServico({ ordens, onEditOrdem, onImprimirOrdem }: Lis
                       {expandida ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
                     </button>
                   </td>
-                  <td className={`${TD_BASE} whitespace-nowrap text-slate-400`}>
-                    <span className="block">#{ordem.numero_os}</span>
-                    {ordem.numero_os_cliente && (
-                      <span className="block text-xs text-slate-500" title="OS do Cliente">
-                        Cliente: {ordem.numero_os_cliente}
-                      </span>
-                    )}
+                  <td
+                    className={`${TD_BASE} truncate whitespace-nowrap text-slate-400`}
+                    title={`${referenciaOrdemExibicao(ordem).rotulo} ${referenciaOrdemExibicao(ordem).numero}`}
+                  >
+                    #{referenciaOrdemExibicao(ordem).numero}
                   </td>
                   <td className={TD_BASE}>
                     <div className="flex flex-wrap items-center gap-1.5">
@@ -229,10 +228,6 @@ export function ListaOrdensServico({ ordens, onEditOrdem, onImprimirOrdem }: Lis
                           <div>
                             <p className="text-xs font-medium uppercase text-slate-400">Forma de pagamento</p>
                             <p className="text-slate-700">{ordem.forma_pagamento || '—'}</p>
-                          </div>
-                          <div>
-                            <p className="text-xs font-medium uppercase text-slate-400">OS do Cliente</p>
-                            <p className="text-slate-700">{ordem.numero_os_cliente || '—'}</p>
                           </div>
                           {ordem.observacoes && (
                             <div className="col-span-2">

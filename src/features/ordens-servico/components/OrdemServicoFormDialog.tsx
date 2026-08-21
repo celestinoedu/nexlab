@@ -33,7 +33,7 @@ import {
   useOrdemServicoMutations,
   type OrdemServicoFormInput,
 } from '@/features/ordens-servico/hooks/useOrdemServicoMutations'
-import { STATUS_OS_LABEL, type OrdemServicoComRelacoes, type StatusOS } from '@/types/domain'
+import { STATUS_OS_LABEL, referenciaOrdemExibicao, type OrdemServicoComRelacoes, type StatusOS } from '@/types/domain'
 import { cn } from '@/lib/utils'
 import { InfoFinanceiraDialog } from './InfoFinanceiraDialog'
 
@@ -265,7 +265,11 @@ export function OrdemServicoFormDialog({ open, onOpenChange, ordem }: OrdemServi
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl lg:max-w-5xl">
         <DialogHeader>
-          <DialogTitle>{isEditing ? `Editar OS #${ordem?.numero_os}` : 'Nova Ordem de Serviço'}</DialogTitle>
+          <DialogTitle>
+            {ordem
+              ? `Editar ${referenciaOrdemExibicao(ordem).rotulo} ${referenciaOrdemExibicao(ordem).numero}`
+              : 'Nova Ordem de Serviço'}
+          </DialogTitle>
           <DialogDescription>
             {isEditing
               ? 'Altere os dados e salve.'
@@ -318,7 +322,7 @@ export function OrdemServicoFormDialog({ open, onOpenChange, ordem }: OrdemServi
             <div className="order-1 flex flex-col gap-4">
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                 <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="numero_os">Número da OS NexLab</Label>
+                  <Label htmlFor="numero_os">Nº Registro</Label>
                   <Input
                     id="numero_os"
                     value={ordem ? String(ordem.numero_os) : 'Gerado ao salvar'}
@@ -351,11 +355,11 @@ export function OrdemServicoFormDialog({ open, onOpenChange, ordem }: OrdemServi
               </div>
 
               <div className="flex flex-col gap-1.5">
-                <Label htmlFor="numero_os_cliente">OS do Cliente (opcional)</Label>
+                <Label htmlFor="numero_os_cliente">Nº OS (opcional)</Label>
                 <Input
                   id="numero_os_cliente"
                   maxLength={100}
-                  placeholder="Número informado pelo laboratório cliente"
+                  placeholder="Número da OS informado pelo cliente"
                   {...register('numero_os_cliente')}
                 />
                 {errors.numero_os_cliente && (

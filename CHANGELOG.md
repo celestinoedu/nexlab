@@ -5,10 +5,11 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), 
 ## [Não publicado]
 
 ### Adicionado
-- **OS do Cliente**: campo opcional próprio na Ordem de Serviço, disponível no cadastro, busca, listas, Kanban, PDF da OS e canhotos. Nove números históricos anotados no formato `os; número` foram recuperados das observações.
+- **Nº OS**: campo opcional próprio para o número informado pelo cliente, disponível no cadastro e na busca. Nove números históricos anotados no formato `os; número` foram recuperados das observações.
 
 ### Alterado
-- **Numeração interna de OS sequencial e imutável**: novas OSs recebem o próximo número de forma atômica pelo contador da empresa. Os números já existentes foram mantidos, e a interface não permite mais editar o identificador interno.
+- **Nº Registro sequencial e imutável**: novos registros recebem o próximo número de forma atômica pelo contador da empresa. Os números já existentes foram mantidos, e a interface não permite mais editar o identificador interno.
+- **Referência única nas telas e documentos**: listas, Kanban, PDFs, relatórios e canhotos mostram somente o Nº OS quando informado; sem ele, mostram o Nº Registro interno.
 
 ## [0.18.1] - 2026-08-19 — Downloads de PDF restaurados
 
