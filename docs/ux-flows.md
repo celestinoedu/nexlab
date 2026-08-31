@@ -103,7 +103,7 @@ Abre o mesmo `EmpresaConfigDialog` do atalho no Topbar (ícone de prédio, ao la
 ### Usuários (`UsuariosPage`, `/configuracoes/usuarios`)
 Lista todo mundo com login no NexLab (tabela `profiles`) — nome, papel (badge Administrador/Operador) e status (Ativo/Inativo). RLS já limita quem vê o quê: `admin` vê todos, qualquer outro usuário só vê a si mesmo (mesma regra desde a v0.1.0, sem mudança).
 
-- **Criar um usuário é sempre 2 passos**, porque o NexLab não tem backend próprio e nunca expõe a chave `service_role` no navegador (ver `CLAUDE.md` § restrições): **1.** o admin cria o acesso (e-mail/senha) direto no painel do Supabase (Authentication → Users → Add user) — isso não tem como sair do painel; **2.** volta no NexLab, clica em "Novo usuário" e cola o UUID gerado lá, junto com nome e papel — isso grava a linha em `profiles`, substituindo o `insert` manual via SQL Editor que antes era o único jeito (documentado no `SETUP.md`).
+- **Criar um usuário é uma única ação** em `Configurações → Usuários → Novo usuário`: o administrador informa nome, e-mail e papel. A Edge Function autenticada cria o acesso e o perfil no mesmo tenant, e envia o kit de boas-vindas. A pessoa convidada cria a própria senha antes de acessar as telas internas. A chave `service_role` nunca chega ao navegador (ver `docs/kit-boas-vindas.md`).
 - **Editar** (só `admin`): nome, papel (Administrador/Operador) e ativo/inativo — desativar bloqueia o acesso sem apagar o cadastro nem o histórico de OS/ações daquele usuário. Um admin não consegue alterar o próprio papel nem se autodesativar por essa tela (trava de segurança, evita se trancar fora do sistema sem querer).
 
 ### Termos e Condições (`TermosPage`, `/configuracoes/termos`)

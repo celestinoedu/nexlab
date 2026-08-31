@@ -48,6 +48,8 @@ Pronto — esse e-mail/senha já funcionam para logar no NexLab.
 
 ## Provisionar uma empresa (cliente) nova
 
+O fluxo atual cria a empresa, o primeiro administrador e envia o kit de boas-vindas em uma única operação interna pela Edge Function `provision-client`. Siga [`docs/kit-boas-vindas.md`](./docs/kit-boas-vindas.md). O procedimento SQL abaixo fica mantido somente como contingência operacional caso a função esteja indisponível.
+
 Sempre que uma assinatura for confirmada na landing page da Lotus, o NexLab **não** ganha um projeto Supabase novo — o cliente novo vira só mais uma linha em `empresas` dentro do mesmo projeto (isolada das demais por RLS, ver `docs/database-schema.md` § Multi-tenant). Passo a passo manual, via **SQL Editor** do painel Supabase:
 
 1. Criar a empresa:
@@ -64,7 +66,7 @@ Sempre que uma assinatura for confirmada na landing page da Lotus, o NexLab **n�
    values ('COLE-O-UUID-DO-USUARIO', 'Nome do responsável', 'admin', 'COLE-O-ID-DA-EMPRESA-DO-PASSO-1');
    ```
 
-Só o **primeiro** usuário de cada empresa precisa desse passo manual — os próximos usuários daquele mesmo cliente podem ser criados normalmente pela tela **Configurações → Usuários** do próprio NexLab (o admin logado já vincula ao `empresa_id` certo automaticamente).
+Só o **primeiro** usuário de cada empresa precisa desse passo manual — os próximos usuários daquele mesmo cliente são convidados pela tela **Configurações → Usuários**. Para ativar o envio automático, publique a Edge Function e o template de e-mail seguindo [`docs/kit-boas-vindas.md`](./docs/kit-boas-vindas.md).
 
 ## Provisionar a empresa Demonstração
 

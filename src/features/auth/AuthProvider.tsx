@@ -8,9 +8,11 @@ interface AuthContextValue {
   user: User | null
   /** true enquanto ainda não sabemos se há sessão salva (evita "piscar" tela de login) */
   loading: boolean
+  passwordRecovery: boolean
   signInWithPassword: (email: string, password: string) => Promise<{ error: string | null }>
   signOut: () => Promise<void>
   requestPasswordReset: (email: string) => Promise<{ error: string | null }>
+  updatePassword: (password: string) => Promise<{ error: string | null }>
 }
 
 const AuthContext = React.createContext<AuthContextValue | undefined>(undefined)
@@ -18,6 +20,7 @@ const AuthContext = React.createContext<AuthContextValue | undefined>(undefined)
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = React.useState<Session | null>(null)
   const [loading, setLoading] = React.useState(true)
+  const [passwordRecovery, setPasswordRecovery] = React.useState(false)
   const queryClient = useQueryClient()
   // undefined = ainda não resolvido; null = deslogado.
   const usuarioAnteriorRef = React.useRef<string | null | undefined>(undefined)
@@ -29,7 +32,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setLoading(false)
     })
 
-    const { data: subscription } = supabase.auth.onAuthStateChange((_event, newSession) => {
+    const { data: subscription } = supabase.auth.onAuthStateChange((event, newSession) => {
       const novoUsuarioId = newSession?.user.id ?? null
       // Limpa todo o cache do TanStack Query sempre que o usuário logado muda
       // (login, logout, ou troca de conta no mesmo navegador) — evita
@@ -41,6 +44,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         usuarioAnteriorRef.current = novoUsuarioId
       }
       setSession(newSession)
+      if (event === 'PASSWORD_RECOVERY') setPasswordRecovery(true)
+      if (event === 'SIGNED_OUT') setPasswordRecovery(false)
       setLoading(false)
     })
 
@@ -61,11 +66,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const requestPasswordReset = React.useCallback(async (email: string) => {
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}${window.location.pathname}#/redefinir-senha`,
+      // O token do Supabase usa o fragmento da URL. Por isso o retorno cai
+      // na raiz e o evento PASSWORD_RECOVERY leva à tela certa, sem disputar
+      // o mesmo `#` usado pelo HashRouter do GitHub Pages.
+      redirectTo: `${window.location.origin}${window.location.pathname}`,
     })
     if (error) {
       return { error: 'Não foi possível enviar o e-mail agora. Tente novamente em instantes.' }
     }
+    return { error: null }
+  }, [])
+
+  const updatePassword = React.useCallback(async (password: string) => {
+    const { error } = await supabase.auth.updateUser({
+      password,
+      data: { must_change_password: false },
+    })
+    if (error) return { error: 'Não foi possível salvar a nova senha. Tente novamente.' }
+    setPasswordRecovery(false)
     return { error: null }
   }, [])
 
@@ -74,11 +92,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       session,
       user: session?.user ?? null,
       loading,
+      passwordRecovery,
       signInWithPassword,
       signOut,
       requestPasswordReset,
+      updatePassword,
     }),
-    [session, loading, signInWithPassword, signOut, requestPasswordReset],
+    [session, loading, passwordRecovery, signInWithPassword, signOut, requestPasswordReset, updatePassword],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

@@ -142,6 +142,16 @@ Motivado por relatos de tela em branco após login no Safari/iOS em alguns apare
 - [x] Restaurar todos os PDFs bloqueados pela CSP: catálogo, OS, fechamento, relatório personalizado e canhotos.
 - [x] Unificar downloads de Blob e adiar a liberação da URL temporária para compatibilidade com Firefox e Safari.
 
+## Fase 13 — Onboarding e primeiro acesso ✅ preparada em 2026-08-31 (v0.19.0)
+
+- [x] Provisionamento interno do primeiro administrador (`provision-client`) e convite de usuários seguintes em uma única ação (`invite-user`), ambos com isolamento por empresa e segredos fora do navegador.
+- [x] Kit de boas-vindas por e-mail com identidade NexLab, hiperlinks, cinco passos iniciais e instruções para instalar o PWA no Android e iPhone.
+- [x] Troca obrigatória de senha no primeiro acesso e tela funcional de redefinição para o fluxo “Esqueci minha senha”.
+- [x] Publicar `invite-user` e `provision-client` no projeto Supabase e cadastrar `NEXLAB_APP_URL`.
+- [x] Ativar o template condicional do NexLab no Supabase sem alterar os convites do OmniX e preservar as URLs autorizadas existentes.
+- [ ] Cadastrar `NEXLAB_PROVISION_SECRET` e publicar o frontend v0.19.0 conforme `docs/kit-boas-vindas.md`.
+- [ ] Enviar o convite da nova cliente após receber nome, e-mail e empresa/tenant corretos.
+
 ## Ideias para avaliar depois (fora do escopo atual, não implementar sem pedir)
 
 - App nativo em loja (Play Store/App Store) via Capacitor, caso o modelo de vendas mude e passe a depender de descoberta pela loja — custo recorrente de US$99/ano (Apple) + build iOS exige Mac/Xcode.

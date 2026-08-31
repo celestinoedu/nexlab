@@ -4,6 +4,7 @@ import { ProtectedRoute } from '@/app/layout/ProtectedRoute'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { LoginPage } from '@/features/auth/components/LoginPage'
 import { ForgotPasswordPage } from '@/features/auth/components/ForgotPasswordPage'
+import { UpdatePasswordPage } from '@/features/auth/components/UpdatePasswordPage'
 import { OrdensServicoPage } from '@/features/ordens-servico/OrdensServicoPage'
 import { EntidadesPage } from '@/features/entidades/EntidadesPage'
 import { EntidadeExtratoPage } from '@/features/entidades/EntidadeExtratoPage'
@@ -40,6 +41,7 @@ export function AppRoutes() {
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/esqueci-senha" element={<ForgotPasswordPage />} />
+        <Route path="/redefinir-senha" element={<UpdatePasswordPage />} />
 
         <Route element={<ProtectedRoute />}>
           <Route element={<AppShell />}>

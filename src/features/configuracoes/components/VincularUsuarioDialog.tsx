@@ -19,10 +19,8 @@ import { cn } from '@/lib/utils'
 import { useUsuarioMutations } from '../hooks/useUsuarioMutations'
 import { ROLE_USUARIO_LABEL, type RoleUsuario } from '@/types/domain'
 
-const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
-
 const schema = z.object({
-  id: z.string().regex(UUID_REGEX, 'Cole o UUID exatamente como aparece no Supabase'),
+  email: z.string().min(1, 'Informe o e-mail').email('Digite um e-mail válido'),
   nome: z.string().min(1, 'Informe o nome'),
   role: z.enum(['admin', 'operador']),
 })
@@ -35,14 +33,11 @@ interface VincularUsuarioDialogProps {
 }
 
 /**
- * "Finaliza" o cadastro de alguém que já foi criado no painel do Supabase
- * (Authentication → Users) — substitui o passo manual de SQL do SETUP.md.
- * Não cria o acesso em si (e-mail/senha): isso continua exigindo o painel do
- * Supabase, porque criar um usuário de verdade precisa da chave `service_role`,
- * que nunca pode ir para o navegador (ver CLAUDE.md § restrições).
+ * Cria o acesso por uma Edge Function autenticada e envia o convite. A chave
+ * privilegiada fica somente nos secrets do Supabase, nunca no navegador.
  */
 export function VincularUsuarioDialog({ open, onOpenChange }: VincularUsuarioDialogProps) {
-  const { vincularUsuario } = useUsuarioMutations()
+  const { convidarUsuario } = useUsuarioMutations()
 
   const {
     register,
@@ -53,19 +48,19 @@ export function VincularUsuarioDialog({ open, onOpenChange }: VincularUsuarioDia
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { id: '', nome: '', role: 'operador' },
+    defaultValues: { email: '', nome: '', role: 'operador' },
   })
 
   const role = watch('role')
 
   React.useEffect(() => {
-    if (open) reset({ id: '', nome: '', role: 'operador' })
+    if (open) reset({ email: '', nome: '', role: 'operador' })
   }, [open, reset])
 
   const onSubmit = async (values: FormValues) => {
     try {
-      await vincularUsuario.mutateAsync({ id: values.id.trim(), nome: values.nome.trim(), role: values.role })
-      toast.success('Usuário vinculado.')
+      await convidarUsuario.mutateAsync({ email: values.email.trim().toLowerCase(), nome: values.nome.trim(), role: values.role })
+      toast.success('Convite enviado com o kit de boas-vindas.')
       onOpenChange(false)
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Não foi possível salvar agora.')
@@ -78,17 +73,15 @@ export function VincularUsuarioDialog({ open, onOpenChange }: VincularUsuarioDia
         <DialogHeader>
           <DialogTitle>Novo usuário</DialogTitle>
           <DialogDescription>
-            1. Crie o acesso em{' '}
-            <span className="font-medium text-slate-600">Supabase → Authentication → Users → Add user</span>{' '}
-            (e-mail e senha). 2. Copie o UUID gerado e cole abaixo.
+            A pessoa receberá por e-mail o acesso e um passo a passo para começar a usar o NexLab.
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4" noValidate>
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="id">UUID do usuário (Supabase)</Label>
-            <Input id="id" placeholder="ex.: 3fa85f64-5717-4562-b3fc-2c963f66afa6" {...register('id')} />
-            {errors.id && <p className="text-sm text-danger-500">{errors.id.message}</p>}
+            <Label htmlFor="email">E-mail</Label>
+            <Input id="email" type="email" autoComplete="email" placeholder="pessoa@laboratorio.com.br" {...register('email')} />
+            {errors.email && <p className="text-sm text-danger-500">{errors.email.message}</p>}
           </div>
 
           <div className="flex flex-col gap-1.5">
@@ -128,7 +121,7 @@ export function VincularUsuarioDialog({ open, onOpenChange }: VincularUsuarioDia
             </Button>
             <Button type="submit" disabled={isSubmitting}>
               {isSubmitting && <Loader2 className="animate-spin" size={16} />}
-              Vincular usuário
+              Enviar convite
             </Button>
           </DialogFooter>
         </form>

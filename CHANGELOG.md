@@ -6,6 +6,10 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), 
 
 ### Adicionado
 - **Nº OS**: campo opcional próprio para o número informado pelo cliente, disponível no cadastro e na busca. Nove números históricos anotados no formato `os; número` foram recuperados das observações.
+- **Kit de boas-vindas**: novos usuários recebem um convite com identidade NexLab, hiperlinks, cinco passos iniciais e instruções de instalação no celular para Android e iPhone.
+- **Senha no primeiro acesso**: o convite obriga cada pessoa a criar sua própria senha antes de liberar as telas internas; a mesma tela conclui a recuperação de senha.
+- **Convite em uma ação**: administradores cadastram nome, e-mail e papel em Configurações; uma Edge Function autenticada cria o acesso e o perfil na empresa correta sem expor a chave privilegiada.
+- **Primeiro administrador do cliente**: provisionamento interno protegido por segredo cria o tenant, vincula a pessoa responsável e envia o mesmo kit de boas-vindas desde o primeiro acesso.
 
 ### Alterado
 - **Nº Registro sequencial e imutável**: novos registros recebem o próximo número de forma atômica pelo contador da empresa. Os números já existentes foram mantidos, e a interface não permite mais editar o identificador interno.

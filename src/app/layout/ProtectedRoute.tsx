@@ -4,7 +4,7 @@ import { useAuth } from '@/features/auth/AuthProvider'
 
 /** Bloqueia acesso a quem não está logado, preservando a rota de origem. */
 export function ProtectedRoute() {
-  const { session, loading } = useAuth()
+  const { session, loading, passwordRecovery } = useAuth()
   const location = useLocation()
 
   if (loading) {
@@ -20,6 +20,10 @@ export function ProtectedRoute() {
 
   if (!session) {
     return <Navigate to="/login" replace state={{ from: location.pathname }} />
+  }
+
+  if (passwordRecovery || session.user.user_metadata.must_change_password === true) {
+    return <Navigate to="/redefinir-senha" replace />
   }
 
   return <Outlet />

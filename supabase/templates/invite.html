@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Boas-vindas ao NexLab</title>
+  </head>
+  <body style="margin:0;background:#f5f7f8;font-family:Inter,Arial,sans-serif;color:#172033">
+    {{ if eq .Data.product "nexlab" }}
+    <div style="display:none;max-height:0;overflow:hidden">Seu acesso está pronto. Veja os 5 primeiros passos para começar.</div>
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#f5f7f8;padding:28px 12px">
+      <tr><td align="center">
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:620px;background:#fff;border-radius:20px;overflow:hidden;border:1px solid #d3f3f1">
+          <tr>
+            <td style="padding:28px 34px;background:#0e7c79;color:#fff">
+              <div style="font-size:28px;font-weight:800;letter-spacing:-1px">Nex<span style="color:#f5a93f">Lab</span></div>
+              <div style="margin-top:5px;font-size:13px;color:#d3f3f1">Gestão que conecta</div>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:34px">
+              <p style="margin:0 0 8px;color:#0e7c79;font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase">Boas-vindas</p>
+              <h1 style="margin:0 0 14px;font-size:27px;line-height:1.2">Olá, {{ .Data.nome }}! Seu acesso está pronto.</h1>
+              <p style="margin:0 0 22px;color:#667085;font-size:15px;line-height:1.6">Preparamos um caminho simples para você começar a organizar o laboratório no NexLab.</p>
+              <a href="{{ .ConfirmationURL }}" style="display:inline-block;background:#0e7c79;color:#fff;text-decoration:none;font-size:15px;font-weight:700;padding:14px 22px;border-radius:12px">Criar minha senha e acessar</a>
+              <p style="margin:12px 0 28px;color:#667085;font-size:12px;line-height:1.5">Este link é pessoal. Não encaminhe este e-mail para outras pessoas.</p>
+
+              <h2 style="margin:0 0 18px;font-size:19px">Comece em 5 passos</h2>
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+                <tr><td valign="top" style="width:36px;padding-bottom:18px"><div style="width:28px;height:28px;line-height:28px;text-align:center;border-radius:9px;background:#eefbfa;color:#0e7c79;font-weight:800">1</div></td><td style="padding-bottom:18px"><strong>Crie sua senha</strong><br><span style="color:#667085;font-size:14px;line-height:1.55">Use o botão acima. No primeiro acesso, escolha uma senha pessoal com pelo menos 8 caracteres.</span></td></tr>
+                <tr><td valign="top" style="padding-bottom:18px"><div style="width:28px;height:28px;line-height:28px;text-align:center;border-radius:9px;background:#eefbfa;color:#0e7c79;font-weight:800">2</div></td><td style="padding-bottom:18px"><strong>Confira os dados do laboratório</strong><br><span style="color:#667085;font-size:14px;line-height:1.55">Em <a href="https://nexlab.lotusnegocios.com/#/configuracoes" style="color:#0e7c79;font-weight:600">Configurações</a>, revise nome, contato, endereço e logotipo.</span></td></tr>
+                <tr><td valign="top" style="padding-bottom:18px"><div style="width:28px;height:28px;line-height:28px;text-align:center;border-radius:9px;background:#eefbfa;color:#0e7c79;font-weight:800">3</div></td><td style="padding-bottom:18px"><strong>Organize seus serviços e preços</strong><br><span style="color:#667085;font-size:14px;line-height:1.55">Abra o <a href="https://nexlab.lotusnegocios.com/#/servicos" style="color:#0e7c79;font-weight:600">Catálogo de Serviços</a> e deixe preços e prazos do seu jeito.</span></td></tr>
+                <tr><td valign="top" style="padding-bottom:18px"><div style="width:28px;height:28px;line-height:28px;text-align:center;border-radius:9px;background:#eefbfa;color:#0e7c79;font-weight:800">4</div></td><td style="padding-bottom:18px"><strong>Cadastre um cliente e crie a primeira OS</strong><br><span style="color:#667085;font-size:14px;line-height:1.55">Comece em <a href="https://nexlab.lotusnegocios.com/#/clientes-parceiros" style="color:#0e7c79;font-weight:600">Clientes e Parceiros</a> e depois registre a primeira <a href="https://nexlab.lotusnegocios.com/#/ordens-servico" style="color:#0e7c79;font-weight:600">Ordem de Serviço</a>.</span></td></tr>
+                <tr><td valign="top"><div style="width:28px;height:28px;line-height:28px;text-align:center;border-radius:9px;background:#fff3df;color:#b8670b;font-weight:800">5</div></td><td><strong>Instale o NexLab no celular</strong><br><span style="color:#667085;font-size:14px;line-height:1.55"><b>Android:</b> abra o NexLab no Chrome, toque no menu ⋮ e em “Adicionar à tela inicial” ou “Instalar app”.<br><b>iPhone:</b> abra no Safari, toque em Compartilhar ⎙ e depois em “Adicionar à Tela de Início”. O ícone do NexLab aparecerá junto dos seus aplicativos.</span></td></tr>
+              </table>
+
+              <div style="margin-top:28px;padding:18px;border-radius:14px;background:#eefbfa;color:#0a4f4d;font-size:14px;line-height:1.55"><strong>Dica:</strong> guarde este e-mail. Os links levam você direto a cada área do sistema.</div>
+            </td>
+          </tr>
+          <tr><td style="padding:20px 34px;border-top:1px solid #eef2f4;color:#667085;font-size:11px;line-height:1.5">NexLab · Gestão para laboratórios de próteses dentárias<br>© 2026 Lotus Negócios LTDA</td></tr>
+        </table>
+      </td></tr>
+    </table>
+    {{ else }}
+    <h2>You have been invited</h2>
+    <p>You have been invited to create an account. Follow this link to accept the invite:</p>
+    <p><a href="{{ .ConfirmationURL }}">Accept the invite</a></p>
+    {{ end }}
+  </body>
+</html>

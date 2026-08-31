@@ -49,10 +49,9 @@ export function UsuariosPage() {
       )}
 
       {podeGerenciar && (
-        <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 p-4 text-sm text-slate-500">
-          Criar um usuário novo tem 2 passos: <strong>1.</strong> crie o acesso (e-mail/senha) em{' '}
-          <strong>Supabase → Authentication → Users → Add user</strong> — isso continua manual, o NexLab
-          não guarda senhas. <strong>2.</strong> clique em "Novo usuário" aqui e cole o UUID gerado lá.
+        <div className="rounded-xl border border-brand-100 bg-brand-50 p-4 text-sm text-brand-800">
+          Ao cadastrar, o NexLab envia um kit de boas-vindas com 5 passos, instruções para instalar no
+          celular e um link seguro para a pessoa criar a própria senha no primeiro acesso.
         </div>
       )}
 

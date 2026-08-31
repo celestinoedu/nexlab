@@ -3,8 +3,8 @@ import { supabase } from '@/lib/supabase'
 import { isDemoAtivo, ERRO_INDISPONIVEL_DEMO } from '@/lib/demoMode'
 import type { RoleUsuario } from '@/types/domain'
 
-export interface VincularUsuarioInput {
-  id: string
+export interface ConvidarUsuarioInput {
+  email: string
   nome: string
   role: RoleUsuario
 }
@@ -15,24 +15,30 @@ export interface AtualizarUsuarioInput {
   ativo: boolean
 }
 
-function traduzErro(error: { code?: string; message: string }): string {
-  if (error.code === '23503') {
-    return 'Esse UUID não existe em Authentication → Users no Supabase. Confira se copiou certo.'
-  }
-  if (error.code === '23505') {
-    return 'Já existe um usuário vinculado com esse UUID.'
-  }
+function traduzErro(): string {
   return 'Não foi possível salvar agora. Tente novamente.'
+}
+
+function traduzErroConvite(error: { message: string }): string {
+  const message = error.message.toLowerCase()
+  if (message.includes('already') || message.includes('cadastrado')) {
+    return 'Este e-mail já está cadastrado. Confira a lista de usuários.'
+  }
+  if (message.includes('edge function') || message.includes('failed to send')) {
+    return 'O serviço de convites ainda não está disponível. Confira a publicação da função no Supabase.'
+  }
+  return error.message || 'Não foi possível enviar o convite agora. Tente novamente.'
 }
 
 export function useUsuarioMutations() {
   const queryClient = useQueryClient()
 
-  const vincularUsuario = useMutation({
-    mutationFn: async (input: VincularUsuarioInput) => {
+  const convidarUsuario = useMutation({
+    mutationFn: async (input: ConvidarUsuarioInput) => {
       if (isDemoAtivo(queryClient)) throw new Error(ERRO_INDISPONIVEL_DEMO)
-      const { error } = await supabase.from('profiles').insert(input)
-      if (error) throw new Error(traduzErro(error))
+      const { data, error } = await supabase.functions.invoke('invite-user', { body: input })
+      if (error) throw new Error(traduzErroConvite(error))
+      if (data?.error) throw new Error(traduzErroConvite({ message: data.error }))
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['usuarios'] })
@@ -43,7 +49,7 @@ export function useUsuarioMutations() {
     mutationFn: async ({ id, input }: { id: string; input: AtualizarUsuarioInput }) => {
       if (isDemoAtivo(queryClient)) throw new Error(ERRO_INDISPONIVEL_DEMO)
       const { error } = await supabase.from('profiles').update(input).eq('id', id)
-      if (error) throw new Error(traduzErro(error))
+      if (error) throw new Error(traduzErro())
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['usuarios'] })
@@ -51,5 +57,5 @@ export function useUsuarioMutations() {
     },
   })
 
-  return { vincularUsuario, atualizarUsuario }
+  return { convidarUsuario, atualizarUsuario }
 }
