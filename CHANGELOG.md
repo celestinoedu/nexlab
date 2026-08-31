@@ -15,6 +15,7 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), 
 - **Nº Registro sequencial e imutável**: novos registros recebem o próximo número de forma atômica pelo contador da empresa. Os números já existentes foram mantidos, e a interface não permite mais editar o identificador interno.
 - **Referência única nas telas e documentos**: listas, Kanban, PDFs, relatórios e canhotos mostram somente o Nº OS quando informado; sem ele, mostram o Nº Registro interno.
 - **Convites sempre em português**: assunto e conteúdo alternativo do template deixam de usar textos padrão em inglês. O kit de boas-vindas só pode ser testado por um convite real para uma identidade inédita, nunca pelo fluxo “Reset your password”.
+- **Remetente oficial**: mensagens de autenticação passam pelo SMTP autenticado da GoDaddy como `Lotus Negócios <lotus@lotusnegocios.com>`, compartilhado de forma neutra com os produtos que usam o mesmo projeto Supabase.
 
 ## [0.18.1] - 2026-08-19 — Downloads de PDF restaurados
 

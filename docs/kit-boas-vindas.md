@@ -17,7 +17,8 @@ O cadastro de usuários é feito em **Configurações → Usuários → Novo usu
    `SUPABASE_URL` e `SUPABASE_SERVICE_ROLE_KEY` já são disponibilizados automaticamente às Edge Functions hospedadas.
 3. Em **Authentication → URL Configuration**, use `https://nexlab.lotusnegocios.com` como Site URL e inclua `https://nexlab.lotusnegocios.com/` nas Redirect URLs.
 4. Em **Authentication → Email Templates → Invite user**, use o assunto `Boas-vindas ao NexLab — seu acesso está pronto` e cole o conteúdo de [`supabase/templates/invite.html`](../supabase/templates/invite.html).
-5. Em **Authentication → Emails → SMTP Settings**, habilite o SMTP da caixa oficial e configure o remetente como `contato@lotusnegocios.com` e o nome como `NexLab · Lotus Negócios`. O SMTP padrão do Supabase é apenas para testes e aparece como remetente Supabase; produção exige credenciais SMTP próprias.
+5. Em **Authentication → Emails → SMTP Settings**, use o SMTP autenticado da GoDaddy (`smtpout.secureserver.net`, porta `465`), remetente `lotus@lotusnegocios.com` e nome `Lotus Negócios`. O nome é neutro porque NexLab e OmniX compartilham o mesmo Supabase Auth. O SMTP padrão do Supabase é apenas para testes e aparece como remetente Supabase.
+6. Guarde as credenciais localmente no Gerenciador de Credenciais do Windows (`NexLabSMTP` e `NexLabProvision`), nunca em arquivo versionado nem em mensagens.
 
 O template contém hiperlinks, a identidade visual do NexLab, cinco passos iniciais e instruções específicas para instalar o PWA no Android e no iPhone.
 
