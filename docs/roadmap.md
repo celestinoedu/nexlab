@@ -149,7 +149,7 @@ Motivado por relatos de tela em branco após login no Safari/iOS em alguns apare
 - [x] Troca obrigatória de senha no primeiro acesso e tela funcional de redefinição para o fluxo “Esqueci minha senha”.
 - [x] Publicar `invite-user` e `provision-client` no projeto Supabase e cadastrar `NEXLAB_APP_URL`.
 - [x] Ativar o template condicional do NexLab no Supabase sem alterar os convites do OmniX e preservar as URLs autorizadas existentes.
-- [ ] Cadastrar `NEXLAB_PROVISION_SECRET` e publicar o frontend v0.19.0 conforme `docs/kit-boas-vindas.md`.
+- [x] Cadastrar `NEXLAB_PROVISION_SECRET`, publicar o frontend v0.19.0 e validar o kit com um envio real para a conta existente do responsável.
 - [ ] Enviar o convite da nova cliente após receber nome, e-mail e empresa/tenant corretos.
 
 ## Ideias para avaliar depois (fora do escopo atual, não implementar sem pedir)
