@@ -17,6 +17,7 @@ O cadastro de usuários é feito em **Configurações → Usuários → Novo usu
    `SUPABASE_URL` e `SUPABASE_SERVICE_ROLE_KEY` já são disponibilizados automaticamente às Edge Functions hospedadas.
 3. Em **Authentication → URL Configuration**, use `https://nexlab.lotusnegocios.com` como Site URL e inclua `https://nexlab.lotusnegocios.com/` nas Redirect URLs.
 4. Em **Authentication → Email Templates → Invite user**, use o assunto `Boas-vindas ao NexLab — seu acesso está pronto` e cole o conteúdo de [`supabase/templates/invite.html`](../supabase/templates/invite.html).
+5. Em **Authentication → Emails → SMTP Settings**, habilite o SMTP da caixa oficial e configure o remetente como `contato@lotusnegocios.com` e o nome como `NexLab · Lotus Negócios`. O SMTP padrão do Supabase é apenas para testes e aparece como remetente Supabase; produção exige credenciais SMTP próprias.
 
 O template contém hiperlinks, a identidade visual do NexLab, cinco passos iniciais e instruções específicas para instalar o PWA no Android e no iPhone.
 
@@ -27,6 +28,7 @@ O convite leva ao NexLab com uma sessão temporária. O metadado `must_change_pa
 ## Operação
 
 - Convites seguintes são feitos inteiramente no NexLab; não é necessário copiar UUID nem cadastrar senha temporária.
+- O kit é enviado exclusivamente pelo fluxo de **convite** e somente para um e-mail ainda inexistente no Supabase Auth. Recuperação de senha nunca é usada para simular boas-vindas.
 - O primeiro administrador é provisionado internamente pela Lotus com a função `provision-client`, que cria o tenant, vincula o responsável como `admin` e envia o mesmo kit. Exemplo em PowerShell (substitua os valores e não salve o segredo no repositório):
   ```powershell
   $headers = @{ 'x-provision-secret' = 'SEU_SEGREDO' }
