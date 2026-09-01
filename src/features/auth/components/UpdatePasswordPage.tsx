@@ -45,7 +45,7 @@ export function UpdatePasswordPage() {
     const { error } = await updatePassword(values.password)
     if (error) return toast.error(error)
     toast.success(firstAccess ? 'Senha criada. Boas-vindas ao NexLab!' : 'Senha atualizada com sucesso.')
-    navigate('/', { replace: true })
+    navigate(firstAccess ? '/primeiros-passos' : '/', { replace: true })
   }
 
   return (

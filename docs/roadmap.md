@@ -154,6 +154,12 @@ Motivado por relatos de tela em branco após login no Safari/iOS em alguns apare
 - [x] Substituir o wordmark textual do convite pela arte reversa oficial do NexLab, publicada em PNG no domínio da aplicação.
 - [ ] Enviar o convite da nova cliente após receber nome, e-mail e empresa/tenant corretos.
 
+## Fase 14 — Experiência do primeiro uso ✅ concluída em 2026-09-01 (v0.20.0)
+
+- [x] Solicitar os dados essenciais do laboratório e do responsável depois da criação da senha e antes de liberar as telas internas.
+- [x] Salvar perfil pessoal e configuração do tenant em uma operação protegida e atômica.
+- [x] Tornar “Meu perfil” funcional, com edição segura do nome, consulta do acesso e atalho para alterar a senha.
+
 ## Ideias para avaliar depois (fora do escopo atual, não implementar sem pedir)
 
 - App nativo em loja (Play Store/App Store) via Capacitor, caso o modelo de vendas mude e passe a depender de descoberta pela loja — custo recorrente de US$99/ano (Apple) + build iOS exige Mac/Xcode.

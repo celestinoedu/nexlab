@@ -4,12 +4,16 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), 
 
 ## [Não publicado]
 
+## [0.20.0] - 2026-09-01 — Primeiro acesso guiado
+
 ### Adicionado
 - **Nº OS**: campo opcional próprio para o número informado pelo cliente, disponível no cadastro e na busca. Nove números históricos anotados no formato `os; número` foram recuperados das observações.
 - **Kit de boas-vindas**: novos usuários recebem um convite com identidade NexLab, hiperlinks, cinco passos iniciais e instruções de instalação no celular para Android e iPhone.
 - **Senha no primeiro acesso**: o convite obriga cada pessoa a criar sua própria senha antes de liberar as telas internas; a mesma tela conclui a recuperação de senha.
 - **Convite em uma ação**: administradores cadastram nome, e-mail e papel em Configurações; uma Edge Function autenticada cria o acesso e o perfil na empresa correta sem expor a chave privilegiada.
 - **Primeiro administrador do cliente**: provisionamento interno protegido por segredo cria o tenant, vincula a pessoa responsável e envia o mesmo kit de boas-vindas desde o primeiro acesso.
+- **Configuração no primeiro acesso**: após criar a senha, o administrador confirma nome do laboratório, responsável, telefone, e-mail, documento e endereço antes de acessar as áreas internas.
+- **Meu perfil funcional**: o menu do avatar permite alterar o nome pessoal, consultar e-mail e nível de acesso e seguir para a troca de senha.
 
 ### Alterado
 - **Logo oficial no e-mail de boas-vindas**: o cabeçalho agora usa a arte reversa oficial do NexLab, servida pelo próprio domínio em PNG para maior compatibilidade com clientes de e-mail.

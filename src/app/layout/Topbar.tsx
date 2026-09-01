@@ -16,13 +16,17 @@ import {
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover'
 import { Logo } from '@/components/shared/Logo'
 import { EmpresaConfigDialog } from '@/features/configuracoes/components/EmpresaConfigDialog'
+import { MeuPerfilDialog } from '@/features/configuracoes/components/MeuPerfilDialog'
+import { useProfile } from '@/hooks/useProfile'
 
 export function Topbar() {
   const { user, signOut } = useAuth()
   const { data: empresa } = useEmpresaConfig()
+  const { data: profile } = useProfile()
   const { data: insumos } = useInsumos()
-  const iniciais = getIniciais(user?.email)
+  const iniciais = getIniciais(profile?.nome ?? user?.email)
   const [configAberta, setConfigAberta] = React.useState(false)
+  const [perfilAberto, setPerfilAberto] = React.useState(false)
   const sinalizados = (insumos ?? []).filter((i) => i.sinalizar_compra)
 
   return (
@@ -101,7 +105,7 @@ export function Topbar() {
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>{user?.email}</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem disabled>
+            <DropdownMenuItem onSelect={() => setPerfilAberto(true)}>
               <UserIcon size={16} />
               Meu perfil
             </DropdownMenuItem>
@@ -114,11 +118,14 @@ export function Topbar() {
       </div>
 
       <EmpresaConfigDialog open={configAberta} onOpenChange={setConfigAberta} />
+      <MeuPerfilDialog open={perfilAberto} onOpenChange={setPerfilAberto} />
     </header>
   )
 }
 
-function getIniciais(email?: string | null): string {
-  if (!email) return '?'
-  return email.slice(0, 2).toUpperCase()
+function getIniciais(nomeOuEmail?: string | null): string {
+  if (!nomeOuEmail) return '?'
+  const partes = nomeOuEmail.trim().split(/\s+/)
+  if (partes.length > 1) return `${partes[0][0]}${partes.at(-1)?.[0] ?? ''}`.toUpperCase()
+  return nomeOuEmail.slice(0, 2).toUpperCase()
 }

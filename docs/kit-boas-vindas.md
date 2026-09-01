@@ -24,7 +24,7 @@ O template contém hiperlinks, a identidade visual do NexLab, cinco passos inici
 
 ## Primeiro acesso
 
-O convite leva ao NexLab com uma sessão temporária. O metadado `must_change_password` bloqueia todas as telas internas até a pessoa criar uma senha própria em `/redefinir-senha`. Ao salvar, o bloqueio é removido. A mesma tela atende o fluxo “Esqueci minha senha”.
+O convite leva ao NexLab com uma sessão temporária. O metadado `must_change_password` bloqueia todas as telas internas até a pessoa criar uma senha própria em `/redefinir-senha`. Para o primeiro administrador de uma empresa nova, a etapa seguinte solicita nome do laboratório, responsável, telefone, e-mail, documento e endereço; só depois libera as áreas internas. A mesma tela de senha também atende o fluxo “Esqueci minha senha”.
 
 ## Operação
 

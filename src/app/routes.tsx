@@ -1,6 +1,7 @@
 import { HashRouter, Routes, Route } from 'react-router-dom'
 import { AppShell } from '@/app/layout/AppShell'
 import { ProtectedRoute } from '@/app/layout/ProtectedRoute'
+import { OnboardingGate } from '@/app/layout/OnboardingGate'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { LoginPage } from '@/features/auth/components/LoginPage'
 import { ForgotPasswordPage } from '@/features/auth/components/ForgotPasswordPage'
@@ -20,6 +21,7 @@ import { DashboardPage } from '@/features/dashboard/DashboardPage'
 import { ConfiguracoesPage } from '@/features/configuracoes/ConfiguracoesPage'
 import { UsuariosPage } from '@/features/configuracoes/UsuariosPage'
 import { TermosPage } from '@/features/configuracoes/TermosPage'
+import { OnboardingPage } from '@/features/onboarding/OnboardingPage'
 
 /**
  * Tela inicial ("/") depende do tamanho de tela: no computador continua
@@ -44,25 +46,28 @@ export function AppRoutes() {
         <Route path="/redefinir-senha" element={<UpdatePasswordPage />} />
 
         <Route element={<ProtectedRoute />}>
-          <Route element={<AppShell />}>
-            {/* Ordens de Serviço é a tela inicial no computador — módulo
-            prioritário do sistema (ver `HomeRoute` acima pro celular). */}
-            <Route path="/" element={<HomeRoute />} />
-            <Route path="/ordens-servico" element={<OrdensServicoPage />} />
-            <Route path="/clientes-parceiros" element={<EntidadesPage />} />
-            <Route path="/clientes-parceiros/:id" element={<EntidadeExtratoPage />} />
-            <Route path="/servicos" element={<ServicosPage />} />
-            <Route path="/estoque" element={<EstoquePage />} />
-            <Route path="/financeiro" element={<ContasReceberPage />} />
-            <Route path="/despesas" element={<DespesasPage />} />
-            <Route path="/fechamento" element={<FechamentoFinanceiroPage />} />
-            <Route path="/relatorios" element={<RelatoriosPage />} />
-            <Route path="/relatorios/canhotos" element={<CanhotosPage />} />
-            <Route path="/relatorios/personalizados" element={<RelatoriosPersonalizadosPage />} />
-            <Route path="/dashboard" element={<DashboardPage />} />
-            <Route path="/configuracoes" element={<ConfiguracoesPage />} />
-            <Route path="/configuracoes/usuarios" element={<UsuariosPage />} />
-            <Route path="/configuracoes/termos" element={<TermosPage />} />
+          <Route path="/primeiros-passos" element={<OnboardingPage />} />
+          <Route element={<OnboardingGate />}>
+            <Route element={<AppShell />}>
+              {/* Ordens de Serviço é a tela inicial no computador — módulo
+              prioritário do sistema (ver `HomeRoute` acima pro celular). */}
+              <Route path="/" element={<HomeRoute />} />
+              <Route path="/ordens-servico" element={<OrdensServicoPage />} />
+              <Route path="/clientes-parceiros" element={<EntidadesPage />} />
+              <Route path="/clientes-parceiros/:id" element={<EntidadeExtratoPage />} />
+              <Route path="/servicos" element={<ServicosPage />} />
+              <Route path="/estoque" element={<EstoquePage />} />
+              <Route path="/financeiro" element={<ContasReceberPage />} />
+              <Route path="/despesas" element={<DespesasPage />} />
+              <Route path="/fechamento" element={<FechamentoFinanceiroPage />} />
+              <Route path="/relatorios" element={<RelatoriosPage />} />
+              <Route path="/relatorios/canhotos" element={<CanhotosPage />} />
+              <Route path="/relatorios/personalizados" element={<RelatoriosPersonalizadosPage />} />
+              <Route path="/dashboard" element={<DashboardPage />} />
+              <Route path="/configuracoes" element={<ConfiguracoesPage />} />
+              <Route path="/configuracoes/usuarios" element={<UsuariosPage />} />
+              <Route path="/configuracoes/termos" element={<TermosPage />} />
+            </Route>
           </Route>
         </Route>
       </Routes>
