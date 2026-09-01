@@ -151,6 +151,7 @@ Motivado por relatos de tela em branco após login no Safari/iOS em alguns apare
 - [x] Ativar o template condicional do NexLab no Supabase sem alterar os convites do OmniX e preservar as URLs autorizadas existentes.
 - [x] Cadastrar `NEXLAB_PROVISION_SECRET` e publicar o frontend v0.19.0.
 - [x] Configurar SMTP autenticado da GoDaddy com remetente `lotus@lotusnegocios.com` e validar um convite real para essa identidade inédita; o teste anterior por recuperação de senha foi descartado.
+- [x] Substituir o wordmark textual do convite pela arte reversa oficial do NexLab, publicada em PNG no domínio da aplicação.
 - [ ] Enviar o convite da nova cliente após receber nome, e-mail e empresa/tenant corretos.
 
 ## Ideias para avaliar depois (fora do escopo atual, não implementar sem pedir)

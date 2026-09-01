@@ -6,8 +6,10 @@ import { fileURLToPath } from 'node:url'
 const root = dirname(fileURLToPath(import.meta.url))
 const assets = join(root, 'assets')
 const templates = join(root, 'templates')
+const publicEmail = join(root, '..', 'public', 'email')
 
 await mkdir(assets, { recursive: true })
+await mkdir(publicEmail, { recursive: true })
 
 for (const size of [64, 128, 256, 512]) {
   await sharp(join(assets, 'symbol-primary.svg')).resize(size, size).png().toFile(join(assets, `symbol-primary-${size}.png`))
@@ -24,6 +26,10 @@ for (const [source, target, width] of [
 
 await sharp(join(templates, 'social-card.svg')).png().toFile(join(templates, 'social-card.png'))
 await sharp(join(templates, 'presentation-cover.svg')).png().toFile(join(templates, 'presentation-cover.png'))
+await sharp(join(assets, 'logo-nexlab-reverse.svg'))
+  .resize({ width: 400 })
+  .png()
+  .toFile(join(publicEmail, 'logo-nexlab-reverse.png'))
 await copyFile(join(root, '..', 'public', 'favicon.svg'), join(assets, 'favicon.svg'))
 await copyFile(join(root, '..', 'public', 'favicon.ico'), join(assets, 'favicon.ico'))
 

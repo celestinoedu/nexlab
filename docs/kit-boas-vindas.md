@@ -20,7 +20,7 @@ O cadastro de usuários é feito em **Configurações → Usuários → Novo usu
 5. Em **Authentication → Emails → SMTP Settings**, use o SMTP autenticado da GoDaddy (`smtpout.secureserver.net`, porta `465`), remetente `lotus@lotusnegocios.com` e nome `Lotus Negócios`. O nome é neutro porque NexLab e OmniX compartilham o mesmo Supabase Auth. O SMTP padrão do Supabase é apenas para testes e aparece como remetente Supabase.
 6. Guarde as credenciais localmente no Gerenciador de Credenciais do Windows (`NexLabSMTP` e `NexLabProvision`), nunca em arquivo versionado nem em mensagens.
 
-O template contém hiperlinks, a identidade visual do NexLab, cinco passos iniciais e instruções específicas para instalar o PWA no Android e no iPhone.
+O template contém hiperlinks, a identidade visual do NexLab, cinco passos iniciais e instruções específicas para instalar o PWA no Android e no iPhone. O cabeçalho usa a versão reversa oficial do logo em `https://nexlab.lotusnegocios.com/email/logo-nexlab-reverse.png`; o arquivo público é gerado a partir do SVG mestre por `npm run brand:assets`.
 
 ## Primeiro acesso
 

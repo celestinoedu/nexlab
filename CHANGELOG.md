@@ -12,6 +12,7 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), 
 - **Primeiro administrador do cliente**: provisionamento interno protegido por segredo cria o tenant, vincula a pessoa responsável e envia o mesmo kit de boas-vindas desde o primeiro acesso.
 
 ### Alterado
+- **Logo oficial no e-mail de boas-vindas**: o cabeçalho agora usa a arte reversa oficial do NexLab, servida pelo próprio domínio em PNG para maior compatibilidade com clientes de e-mail.
 - **Nº Registro sequencial e imutável**: novos registros recebem o próximo número de forma atômica pelo contador da empresa. Os números já existentes foram mantidos, e a interface não permite mais editar o identificador interno.
 - **Referência única nas telas e documentos**: listas, Kanban, PDFs, relatórios e canhotos mostram somente o Nº OS quando informado; sem ele, mostram o Nº Registro interno.
 - **Convites sempre em português**: assunto e conteúdo alternativo do template deixam de usar textos padrão em inglês. O kit de boas-vindas só pode ser testado por um convite real para uma identidade inédita, nunca pelo fluxo “Reset your password”.
