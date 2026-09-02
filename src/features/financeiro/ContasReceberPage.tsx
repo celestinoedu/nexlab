@@ -31,7 +31,8 @@ export function ContasReceberPage() {
   const podeAdmin = profile?.role === 'admin'
 
   const [busca, setBusca] = React.useState('')
-  const [statusFiltro, setStatusFiltro] = React.useState<FiltroStatus>('todos')
+  // A tela abre no saldo efetivamente pendente, igual ao KPI de OS e ao Dashboard.
+  const [statusFiltro, setStatusFiltro] = React.useState<FiltroStatus>('aberto')
   const [mesFiltro, setMesFiltro] = React.useState('todos')
   const [entidadeFiltro, setEntidadeFiltro] = React.useState<string | null>(null)
   const [mostrarCancelados, setMostrarCancelados] = React.useState(false)

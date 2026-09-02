@@ -4,6 +4,12 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), 
 
 ## [Não publicado]
 
+## [0.20.1] - 2026-09-01 — Saldo a receber conciliado
+
+### Corrigido
+- **Saldo a receber conciliado**: Lista de OS, Dashboard e Contas a Receber passam a exibir o mesmo saldo de contas abertas de OS entregues; OS ainda em produção deixam de ser misturadas ao saldo financeiro.
+- **Contas zeradas ou desatualizadas**: o banco recalcula a conta após salvar os itens e mantém valor, entidade e mês sincronizados quando uma OS entregue é corrigida. A migration também repara os registros históricos divergentes sem alterar baixas, cancelamentos ou datas de pagamento.
+
 ## [0.20.0] - 2026-09-01 — Primeiro acesso guiado
 
 ### Adicionado

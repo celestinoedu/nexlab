@@ -2,6 +2,8 @@
 
 Atualizar este arquivo ao final de cada sessão de trabalho relevante, marcando o que foi concluído.
 
+**Atualização 2026-09-01 — auditoria do saldo a receber:** corrigida a ordem de gravação que criava contas zeradas ou com valores antigos; migration `0017` reconcilia o histórico e sincroniza valor, entidade e mês de OS entregues. Lista de OS, Dashboard e Contas a Receber agora usam o mesmo saldo de contas abertas.
+
 ## Fase 1 — Fundação ✅ concluída em 2026-08-09 (v0.1.0)
 
 - [x] Scaffold Vite + React + TypeScript, Tailwind v4, estrutura de pastas por feature.

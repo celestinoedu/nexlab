@@ -1,6 +1,6 @@
 # NexLab — Schema do banco de dados
 
-> Espelha `supabase/migrations/0001_init.sql` a `0010_multi_tenant.sql`. Se o schema mudar, atualize a migration nova + este arquivo no mesmo commit — nunca deixe este documento desatualizado em relação às migrations reais.
+> Espelha `supabase/migrations/0001_init.sql` a `0017_sincronizar_contas_receber.sql`. Se o schema mudar, atualize a migration nova + este arquivo no mesmo commit — nunca deixe este documento desatualizado em relação às migrations reais.
 
 ## Multi-tenant
 
@@ -169,7 +169,7 @@ Snapshot de Contas a Receber **por entidade × mês** — **trava o valor** do p
 `numero` (único, formato `prefixo + sequencial` a partir de `empresa_config`), `ordem_id` FK (era `demanda_id`), `entidade_id` FK, `valor_total`, `data_emissao`, `created_by`.
 
 ### `contas_receber` (nova na migration `0003`)
-**Uma linha por OS entregue** — substitui a antiga `vw_contas_receber` (agregado por entidade×mês): virou tabela real porque precisa suportar marcar como paga e "excluir" (soft-delete com justificativa). A tela de Contas a Receber agrega por entidade/mês no cliente, mesmo padrão de filtro já usado em Ordens de Serviço.
+**Uma linha por OS entregue** — substitui a antiga `vw_contas_receber` (agregado por entidade×mês): virou tabela real porque precisa suportar marcar como paga e "excluir" (soft-delete com justificativa). Desde a migration `0017`, triggers no cabeçalho e nos itens da OS mantêm valor, entidade e mês sincronizados, inclusive para OS criada diretamente como entregue; o estado de baixa e os dados de pagamento existentes são preservados. A tela abre filtrada por contas `aberto`, o mesmo saldo mostrado nos KPIs de OS e Dashboard.
 
 | Coluna | Tipo | Notas |
 |---|---|---|

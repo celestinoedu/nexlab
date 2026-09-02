@@ -17,7 +17,7 @@ import { useContasReceber } from '@/features/financeiro/hooks/useContasReceber'
 import { useDespesas } from '@/features/despesas/hooks/useDespesas'
 import { useEntidades } from '@/hooks/useEntidades'
 import { useInsumos } from '@/features/estoque/hooks/useInsumos'
-import { STATUS_OS_LABEL, valorTotalOrdem, type OrdemServicoComRelacoes } from '@/types/domain'
+import { STATUS_OS_LABEL, type OrdemServicoComRelacoes } from '@/types/domain'
 
 const DIAS_VENCENDO = 3
 const DIAS_SEM_MOVIMENTO = 15
@@ -64,15 +64,11 @@ export function DashboardPage() {
     const prontoEntregaMes = ordensDoMes.filter((o) => o.status === 'pronto_entrega').length
     const percentualConcluido = ordensDoMes.length > 0 ? Math.round((entreguesMes / ordensDoMes.length) * 100) : 0
 
-    // Mesma regra do KPI "Total a Receber" da Lista de OS: toda ordem
-    // pendente e não cancelada entra no valor, mesmo antes da entrega. A
-    // tabela contas_receber só nasce na entrega e, por isso, deixava o
-    // Dashboard artificialmente menor do que os dados operacionais de OS.
-    const aReceber = listaOrdens
-      .filter((o) => o.status !== 'cancelado' && o.status_pagamento === 'pendente')
-      .reduce((acc, o) => acc + valorTotalOrdem(o), 0)
-
     const listaContas = contasReceber ?? []
+    // Saldo financeiro real: somente contas abertas de OS já entregues.
+    const aReceber = listaContas
+      .filter((c) => c.status === 'aberto')
+      .reduce((acc, c) => acc + c.valor, 0)
     const recebidoMes = listaContas
       .filter((c) => c.status === 'pago' && c.data_pagamento && c.data_pagamento.startsWith(mesAtual.slice(0, 7)))
       .reduce((acc, c) => acc + c.valor, 0)

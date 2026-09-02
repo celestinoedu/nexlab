@@ -8,12 +8,12 @@ import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/utils'
 import { useEmpresaConfig } from '@/hooks/useEmpresaConfig'
 import { useOrdensServico } from './hooks/useOrdensServico'
+import { useContasReceber } from '@/features/financeiro/hooks/useContasReceber'
 import { KanbanBoard } from './components/KanbanBoard'
 import { ListaOrdensServico } from './components/ListaOrdensServico'
 import { OrdemServicoFormDialog } from './components/OrdemServicoFormDialog'
 import {
   STATUS_OS_LABEL,
-  valorTotalOrdem,
   type OrdemServicoComRelacoes,
   type StatusOS,
 } from '@/types/domain'
@@ -35,6 +35,7 @@ const VALOR_OCULTO = '••••'
 
 export function OrdensServicoPage() {
   const { data: ordens, isLoading } = useOrdensServico()
+  const { data: contasReceber, isLoading: carregandoContas } = useContasReceber()
   const { data: empresaConfig } = useEmpresaConfig()
   // Lista é a visão padrão — Kanban continua disponível pelo toggle.
   const [visao, setVisao] = React.useState<Visao>('lista')
@@ -96,9 +97,9 @@ export function OrdensServicoPage() {
   )
   const kpiEmProducao = ordensDoPeriodo.filter((o) => o.status === 'em_producao').length
   const kpiEntregue = ordensDoPeriodo.filter((o) => o.status === 'entregue').length
-  const kpiAReceber = ordensDoPeriodo
-    .filter((o) => o.status !== 'cancelado' && o.status_pagamento === 'pendente')
-    .reduce((acc, o) => acc + valorTotalOrdem(o), 0)
+  const kpiAReceber = (contasReceber ?? [])
+    .filter((c) => c.status === 'aberto' && (mesFiltro === 'todos' || c.mes_referencia === mesFiltro))
+    .reduce((acc, c) => acc + c.valor, 0)
 
   function abrirNovaOrdem() {
     setOrdemEditando(null)
@@ -219,7 +220,7 @@ export function OrdensServicoPage() {
         </div>
       )}
 
-      {isLoading ? (
+      {isLoading || carregandoContas ? (
         <div className="flex justify-center py-16">
           <Loader2 className="animate-spin text-brand-600" size={28} />
         </div>

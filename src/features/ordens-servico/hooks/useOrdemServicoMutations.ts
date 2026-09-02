@@ -118,16 +118,37 @@ function montarOrdemDemo(
   }
 }
 
-/** Replica trg_fn_criar_conta_receber: cria a Conta a Receber em cache quando a OS passa a "entregue" pela 1ª vez. */
+/** Replica a sincronização do banco: cria ou atualiza a Conta a Receber de uma OS entregue no cache demo. */
 function garantirContaReceberDemo(
   queryClient: QueryClient,
   ordem: OrdemServicoComRelacoes,
-  statusAnterior: StatusOS | null,
 ) {
-  if (ordem.status !== 'entregue' || statusAnterior === 'entregue') return
+  if (ordem.status !== 'entregue') return
 
   queryClient.setQueryData<ContaReceberComRelacoes[]>(['contas_receber'], (old) => {
-    if ((old ?? []).some((c) => c.ordem_id === ordem.id)) return old ?? []
+    const existente = (old ?? []).find((c) => c.ordem_id === ordem.id)
+    if (existente) {
+      return (old ?? []).map((conta) =>
+        conta.ordem_id === ordem.id
+          ? {
+              ...conta,
+              entidade_id: ordem.entidade_id,
+              mes_referencia: ordem.mes_referencia,
+              valor: Math.max(valorTotalOrdem(ordem), 0),
+              entidade: ordem.entidade,
+              ordem: {
+                id: ordem.id,
+                numero_os: ordem.numero_os,
+                numero_os_cliente: ordem.numero_os_cliente,
+                cliente_final: ordem.cliente_final,
+                nome_paciente: ordem.nome_paciente,
+                data_entrega: ordem.data_entrega,
+              },
+              updated_at: agoraIso(),
+            }
+          : conta,
+      )
+    }
     const novaConta: ContaReceberComRelacoes = {
       id: novoIdDemo(),
       ordem_id: ordem.id,
@@ -169,7 +190,7 @@ export function useOrdemServicoMutations() {
         const numeroOs = proximoNumeroOsDemo(queryClient)
         const ordem = montarOrdemDemo(queryClient, id, input, numeroOs, agoraIso())
         queryClient.setQueryData<OrdemServicoComRelacoes[]>(['ordens_servico'], (old) => [ordem, ...(old ?? [])])
-        garantirContaReceberDemo(queryClient, ordem, null)
+        garantirContaReceberDemo(queryClient, ordem)
         return ordem as unknown as OrdemServico
       }
 
@@ -190,6 +211,7 @@ export function useOrdemServicoMutations() {
     },
     onSuccess: () => {
       invalidarSeReal(queryClient, ['ordens_servico'])
+      invalidarSeReal(queryClient, ['contas_receber'])
     },
   })
 
@@ -202,7 +224,7 @@ export function useOrdemServicoMutations() {
         queryClient.setQueryData<OrdemServicoComRelacoes[]>(['ordens_servico'], (old) =>
           (old ?? []).map((o) => (o.id === id ? ordem : o)),
         )
-        garantirContaReceberDemo(queryClient, ordem, atual?.status ?? null)
+        garantirContaReceberDemo(queryClient, ordem)
         return
       }
 
@@ -224,6 +246,7 @@ export function useOrdemServicoMutations() {
     },
     onSuccess: () => {
       invalidarSeReal(queryClient, ['ordens_servico'])
+      invalidarSeReal(queryClient, ['contas_receber'])
     },
   })
 
@@ -239,8 +262,6 @@ export function useOrdemServicoMutations() {
       data_entrega?: string | null
     }) => {
       if (isDemoAtivo(queryClient)) {
-        const atual = queryClient.getQueryData<OrdemServicoComRelacoes[]>(['ordens_servico'])?.find((o) => o.id === id)
-        const statusAnterior = atual?.status ?? null
         let atualizada: OrdemServicoComRelacoes | undefined
         queryClient.setQueryData<OrdemServicoComRelacoes[]>(['ordens_servico'], (old) =>
           (old ?? []).map((o) => {
@@ -257,7 +278,7 @@ export function useOrdemServicoMutations() {
             return atualizada
           }),
         )
-        if (atualizada) garantirContaReceberDemo(queryClient, atualizada, statusAnterior)
+        if (atualizada) garantirContaReceberDemo(queryClient, atualizada)
         return
       }
 
@@ -284,6 +305,7 @@ export function useOrdemServicoMutations() {
     },
     onSettled: () => {
       invalidarSeReal(queryClient, ['ordens_servico'])
+      invalidarSeReal(queryClient, ['contas_receber'])
     },
   })
 
