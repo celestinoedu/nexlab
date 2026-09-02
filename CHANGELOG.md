@@ -4,6 +4,12 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), 
 
 ## [Não publicado]
 
+## [0.20.2] - 2026-09-02 — Convites sem tela branca
+
+### Corrigido
+- **Primeiro acesso pelo convite**: o token devolvido pelo Supabase é consumido antes de iniciar o `HashRouter`, eliminando o conflito de fragmento que deixava a tela totalmente branca. Convites válidos seguem para a criação de senha; links inválidos ou expirados mostram uma orientação clara para solicitar outro convite.
+- **Rotas inválidas**: qualquer endereço desconhecido volta para o login em vez de renderizar uma página vazia.
+
 ## [0.20.1] - 2026-09-01 — Saldo a receber conciliado
 
 ### Corrigido

@@ -1,4 +1,4 @@
-import { HashRouter, Routes, Route } from 'react-router-dom'
+import { HashRouter, Navigate, Routes, Route } from 'react-router-dom'
 import { AppShell } from '@/app/layout/AppShell'
 import { ProtectedRoute } from '@/app/layout/ProtectedRoute'
 import { OnboardingGate } from '@/app/layout/OnboardingGate'
@@ -70,6 +70,8 @@ export function AppRoutes() {
             </Route>
           </Route>
         </Route>
+        {/* Nunca deixa uma URL inválida ou antiga resultar em tela vazia. */}
+        <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </HashRouter>
   )

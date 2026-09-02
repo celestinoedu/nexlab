@@ -1,10 +1,10 @@
 import * as React from 'react'
-import { Link, Navigate, useLocation } from 'react-router-dom'
+import { Link, Navigate, useLocation, useSearchParams } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { toast } from 'sonner'
-import { Eye, EyeOff, FlaskConical, Loader2 } from 'lucide-react'
+import { AlertTriangle, Eye, EyeOff, FlaskConical, Loader2 } from 'lucide-react'
 import { useAuth } from '@/features/auth/AuthProvider'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -27,6 +27,8 @@ const DEMO_SENHA = 'teste123'
 export function LoginPage() {
   const { session, loading, signInWithPassword } = useAuth()
   const location = useLocation()
+  const [searchParams] = useSearchParams()
+  const linkInvalido = searchParams.get('acesso') === 'link-invalido'
   const [showPassword, setShowPassword] = React.useState(false)
   const [entrandoDemo, setEntrandoDemo] = React.useState(false)
 
@@ -74,6 +76,16 @@ export function LoginPage() {
               Entre com suas credenciais para continuar no NexLab.
             </p>
           </div>
+
+          {linkInvalido && (
+            <div role="alert" className="mb-4 flex gap-3 rounded-xl border border-warning-200 bg-warning-50 p-4 text-sm text-warning-800">
+              <AlertTriangle className="mt-0.5 shrink-0" size={18} />
+              <div>
+                <p className="font-semibold">Este link não é mais válido.</p>
+                <p className="mt-1 text-warning-700">Peça ao administrador um novo convite para criar seu acesso.</p>
+              </div>
+            </div>
+          )}
 
           <Card className="shadow-[0_18px_50px_rgba(23,32,51,0.08)]">
             <CardHeader className="border-b border-slate-100 pb-4">

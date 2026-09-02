@@ -39,6 +39,8 @@ Um backend Node/API própria exigiria hospedagem própria (a maioria dos hosts g
 
 GitHub Pages serve arquivos estáticos e **não faz rewrite de URL** (ex.: acessar `/financeiro` diretamente devolveria 404, pois não existe esse arquivo). Duas formas de contornar isso: um `404.html` que redireciona para `index.html`, ou rotear com `HashRouter` (URLs como `/#/financeiro`, que o navegador nunca envia ao servidor — sempre pede só `index.html`). Optamos por `HashRouter`: mais simples, sem hacks de redirecionamento, sem risco de piscar a tela em cada navegação.
 
+Convites e recuperações do Supabase no fluxo implícito também retornam credenciais no fragmento da URL. Como esse é o mesmo espaço usado pelo `HashRouter`, `src/features/auth/authCallback.ts` aguarda o Supabase consumir a sessão **antes** de montar o React e substitui o fragmento pela rota `/redefinir-senha`. Retornos inválidos ou expirados seguem para o login com orientação; a rota curinga impede que qualquer endereço desconhecido renderize uma tela vazia.
+
 `vite.config.ts` usa `base: './'` (caminho relativo) em vez de `/nome-do-repo/`: isso faz os assets (JS/CSS/fontes) resolverem corretamente **independente do nome do repositório ou de estar num subpath** (`usuario.github.io/nexlab/`) ou domínio próprio no futuro — sem precisar reconfigurar nada no build.
 
 ### Cache do `index.html` no GitHub Pages — tela em branco após deploy
