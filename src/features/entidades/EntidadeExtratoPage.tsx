@@ -23,6 +23,7 @@ export function EntidadeExtratoPage() {
   const { data: empresaConfig } = useEmpresaConfig()
 
   const [periodo, setPeriodo] = React.useState('todos')
+  const [somenteEntregues, setSomenteEntregues] = React.useState(false)
   const [editarCadastroAberto, setEditarCadastroAberto] = React.useState(false)
   const [precosAberto, setPrecosAberto] = React.useState(false)
   const [ordemEditando, setOrdemEditando] = React.useState<OrdemServicoComRelacoes | null>(null)
@@ -41,9 +42,14 @@ export function EntidadeExtratoPage() {
       .map((mes) => ({ value: mes, label: format(parseISO(mes), "MMMM 'de' yyyy", { locale: ptBR }) }))
   }, [ordensDaEntidade])
 
-  const ordensFiltradas = React.useMemo(
+  const ordensNoPeriodo = React.useMemo(
     () => ordensDaEntidade.filter((o) => periodo === 'todos' || o.mes_referencia === periodo),
     [ordensDaEntidade, periodo],
+  )
+
+  const ordensFiltradas = React.useMemo(
+    () => ordensNoPeriodo.filter((o) => !somenteEntregues || o.status === 'entregue'),
+    [ordensNoPeriodo, somenteEntregues],
   )
 
   const total = ordensFiltradas.reduce((acc, o) => acc + valorTotalOrdem(o), 0)
@@ -70,7 +76,8 @@ export function EntidadeExtratoPage() {
         periodo === 'todos'
           ? 'Todos os períodos'
           : format(parseISO(periodo), "MMMM 'de' yyyy", { locale: ptBR })
-      await baixarRelatorioFechamento(entidade, ordensFiltradas, periodoLabel, empresaConfig)
+      const filtroLabel = somenteEntregues ? `${periodoLabel} · Somente serviços entregues` : periodoLabel
+      await baixarRelatorioFechamento(entidade, ordensFiltradas, filtroLabel, empresaConfig)
     } catch {
       toast.error('Não foi possível gerar o relatório agora. Tente novamente.')
     }
@@ -145,6 +152,27 @@ export function EntidadeExtratoPage() {
             </option>
           ))}
         </select>
+
+        <label className="flex cursor-pointer items-center gap-2 text-sm font-medium text-slate-600">
+          <button
+            type="button"
+            role="switch"
+            aria-checked={somenteEntregues}
+            aria-label="Mostrar somente Serviços Entregues"
+            onClick={() => setSomenteEntregues((ativo) => !ativo)}
+            className={`relative h-6 w-11 shrink-0 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40 focus-visible:ring-offset-2 ${
+              somenteEntregues ? 'bg-brand-600' : 'bg-slate-300'
+            }`}
+          >
+            <span
+              aria-hidden="true"
+              className={`absolute top-0.5 size-5 rounded-full bg-white shadow-sm transition-transform ${
+                somenteEntregues ? 'translate-x-5' : 'translate-x-0.5'
+              }`}
+            />
+          </button>
+          Mostrar somente Serviços Entregues
+        </label>
 
         <div className="ml-auto flex items-center gap-3">
           <div className="rounded-xl bg-brand-50 px-4 py-2 text-right">
