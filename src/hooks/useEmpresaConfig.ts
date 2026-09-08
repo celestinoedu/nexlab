@@ -15,6 +15,8 @@ export interface EmpresaConfig {
   mostrar_email: boolean
   mostrar_logo: boolean
   onboarding_concluido: boolean
+  status_assinatura: 'trial' | 'ativa' | 'suspensa' | 'cancelada'
+  plano_assinatura: string
   /** Tenant de demonstração (migration 0011) — ver `src/lib/demoMode.ts`. */
   is_demo: boolean
 }

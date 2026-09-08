@@ -4,6 +4,12 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), 
 
 ## [Não publicado]
 
+### Adicionado
+- **Central de perfil e cobrança**: “Meu Perfil” agora é uma página responsiva com dados pessoais, CPF/CNPJ obrigatório, plano, status da assinatura e histórico de faturas/notas fiscais.
+
+### Corrigido
+- **Menu das iniciais**: o menu da conta ganhou um visual mais completo e passa a abrir ancorado logo abaixo do avatar, inclusive em telas com zoom e no celular.
+
 ## [0.20.2] - 2026-09-02 — Convites sem tela branca
 
 ### Corrigido

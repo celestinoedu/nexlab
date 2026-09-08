@@ -21,6 +21,7 @@ import { DashboardPage } from '@/features/dashboard/DashboardPage'
 import { ConfiguracoesPage } from '@/features/configuracoes/ConfiguracoesPage'
 import { UsuariosPage } from '@/features/configuracoes/UsuariosPage'
 import { TermosPage } from '@/features/configuracoes/TermosPage'
+import { MeuPerfilPage } from '@/features/configuracoes/MeuPerfilPage'
 import { OnboardingPage } from '@/features/onboarding/OnboardingPage'
 
 /**
@@ -67,6 +68,7 @@ export function AppRoutes() {
               <Route path="/configuracoes" element={<ConfiguracoesPage />} />
               <Route path="/configuracoes/usuarios" element={<UsuariosPage />} />
               <Route path="/configuracoes/termos" element={<TermosPage />} />
+              <Route path="/meu-perfil" element={<MeuPerfilPage />} />
             </Route>
           </Route>
         </Route>

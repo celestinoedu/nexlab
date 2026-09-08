@@ -109,6 +109,9 @@ Lista todo mundo com login no NexLab (tabela `profiles`) — nome, papel (badge 
 ### Termos e Condições (`TermosPage`, `/configuracoes/termos`)
 Texto estático (sem tabela nova no banco) com Termos de Uso + tratamento de dados pessoais sob a LGPD — cobre especificamente o nome de cliente final/paciente que trafega pelas Ordens de Serviço (base legal, quem acessa, onde fica armazenado, retenção, direitos do titular). Editar o conteúdo é editar o arquivo `TermosPage.tsx` diretamente.
 
+### Meu Perfil (`MeuPerfilPage`, `/meu-perfil`)
+O menu das iniciais abre ancorado imediatamente abaixo do avatar e leva a uma página completa. Cada usuário pode alterar o próprio nome e precisa cadastrar um CPF/CNPJ válido antes de acessar as demais telas (o tenant de demonstração é isento). E-mail, nível de acesso e vínculo com a empresa são somente leitura. A página também mostra o status e o plano da assinatura da empresa, além do histórico de pagamentos, faturas e notas fiscais disponíveis para download.
+
 ## Emissão de documentos
 
 - **PDF da Ordem de Serviço**: disponível para OS com status `entregue`, na Lista (ação da linha) e no Kanban (ícone no card) — sempre **baixa o arquivo** (`OS-<número>.pdf`), nunca só abre para visualizar.

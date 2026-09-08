@@ -6,6 +6,7 @@ import type { RoleUsuario } from '@/types/domain'
 export interface Profile {
   id: string
   nome: string | null
+  documento_fiscal: string | null
   role: RoleUsuario
   ativo: boolean
 }

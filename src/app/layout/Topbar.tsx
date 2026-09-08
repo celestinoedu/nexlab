@@ -1,22 +1,13 @@
 import * as React from 'react'
 import { Link } from 'react-router-dom'
-import { LogOut, User as UserIcon, Building2, Bell, AlertTriangle } from 'lucide-react'
+import { LogOut, User as UserIcon, Building2, Bell, AlertTriangle, ChevronDown } from 'lucide-react'
 import { useAuth } from '@/features/auth/AuthProvider'
 import { useEmpresaConfig } from '@/hooks/useEmpresaConfig'
 import { useInsumos } from '@/features/estoque/hooks/useInsumos'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover'
 import { Logo } from '@/components/shared/Logo'
 import { EmpresaConfigDialog } from '@/features/configuracoes/components/EmpresaConfigDialog'
-import { MeuPerfilDialog } from '@/features/configuracoes/components/MeuPerfilDialog'
 import { useProfile } from '@/hooks/useProfile'
 
 export function Topbar() {
@@ -26,8 +17,25 @@ export function Topbar() {
   const { data: insumos } = useInsumos()
   const iniciais = getIniciais(profile?.nome ?? user?.email)
   const [configAberta, setConfigAberta] = React.useState(false)
-  const [perfilAberto, setPerfilAberto] = React.useState(false)
+  const [menuAberto, setMenuAberto] = React.useState(false)
+  const menuRef = React.useRef<HTMLDivElement>(null)
   const sinalizados = (insumos ?? []).filter((i) => i.sinalizar_compra)
+
+  React.useEffect(() => {
+    if (!menuAberto) return
+    function fecharAoClicarFora(event: MouseEvent) {
+      if (!menuRef.current?.contains(event.target as Node)) setMenuAberto(false)
+    }
+    function fecharComEscape(event: KeyboardEvent) {
+      if (event.key === 'Escape') setMenuAberto(false)
+    }
+    document.addEventListener('mousedown', fecharAoClicarFora)
+    document.addEventListener('keydown', fecharComEscape)
+    return () => {
+      document.removeEventListener('mousedown', fecharAoClicarFora)
+      document.removeEventListener('keydown', fecharComEscape)
+    }
+  }, [menuAberto])
 
   return (
     <header className="flex h-16 items-center justify-between border-b border-slate-200/80 bg-white/95 px-4 backdrop-blur md:px-7">
@@ -96,29 +104,51 @@ export function Topbar() {
           </PopoverContent>
         </Popover>
 
-        <DropdownMenu>
-          <DropdownMenuTrigger className="flex items-center gap-2 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40">
+        <div ref={menuRef} className="relative">
+          <button
+            type="button"
+            onClick={() => setMenuAberto((aberto) => !aberto)}
+            className="flex items-center gap-1 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40"
+            aria-haspopup="menu"
+            aria-expanded={menuAberto}
+            aria-label="Abrir menu da conta"
+          >
             <Avatar>
               <AvatarFallback>{iniciais}</AvatarFallback>
             </Avatar>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>{user?.email}</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onSelect={() => setPerfilAberto(true)}>
-              <UserIcon size={16} />
-              Meu perfil
-            </DropdownMenuItem>
-            <DropdownMenuItem onSelect={() => signOut()} className="text-danger-500 focus:text-danger-700">
-              <LogOut size={16} />
-              Sair
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+            <ChevronDown size={14} className={`hidden text-slate-400 transition-transform sm:block ${menuAberto ? 'rotate-180' : ''}`} />
+          </button>
+
+          {menuAberto && (
+            <div
+              role="menu"
+              className="absolute right-0 top-full z-50 mt-2 w-72 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_14px_40px_rgba(23,32,51,0.16)]"
+            >
+              <div className="flex items-center gap-3 border-b border-slate-100 p-4">
+                <Avatar className="shrink-0">
+                  <AvatarFallback>{iniciais}</AvatarFallback>
+                </Avatar>
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-semibold text-slate-800">{profile?.nome || 'Minha conta'}</p>
+                  <p className="truncate text-xs text-slate-400">{user?.email}</p>
+                </div>
+              </div>
+              <div className="p-1.5">
+                <Link to="/meu-perfil" onClick={() => setMenuAberto(false)} role="menuitem" className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-brand-50 hover:text-brand-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40">
+                  <span className="flex size-8 items-center justify-center rounded-lg bg-brand-50 text-brand-700"><UserIcon size={16} /></span>
+                  <span className="flex-1">Meu Perfil</span>
+                </Link>
+                <button type="button" role="menuitem" onClick={() => { setMenuAberto(false); void signOut() }} className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-medium text-danger-500 transition-colors hover:bg-danger-100/60 hover:text-danger-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger-500/30">
+                  <span className="flex size-8 items-center justify-center rounded-lg bg-danger-100/70"><LogOut size={16} /></span>
+                  <span className="flex-1">Sair</span>
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
       <EmpresaConfigDialog open={configAberta} onOpenChange={setConfigAberta} />
-      <MeuPerfilDialog open={perfilAberto} onOpenChange={setPerfilAberto} />
     </header>
   )
 }

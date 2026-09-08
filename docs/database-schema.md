@@ -1,6 +1,6 @@
 # NexLab — Schema do banco de dados
 
-> Espelha `supabase/migrations/0001_init.sql` a `0017_sincronizar_contas_receber.sql`. Se o schema mudar, atualize a migration nova + este arquivo no mesmo commit — nunca deixe este documento desatualizado em relação às migrations reais.
+> Espelha `supabase/migrations/0001_init.sql` a `0018_perfil_faturamento.sql`. Se o schema mudar, atualize a migration nova + este arquivo no mesmo commit — nunca deixe este documento desatualizado em relação às migrations reais.
 
 ## Multi-tenant
 
@@ -49,6 +49,7 @@ Uma **Ordem de Serviço (OS)** pode ter vários serviços (itens). Cor e arco (s
 | `status_pagamento_os` | `pendente`, `pago` | Status financeiro editável no formulário da OS (migration `0003`). |
 | `status_conta_receber` | `aberto`, `pago`, `cancelado` | Status de uma linha de `contas_receber`; `cancelado` é a "exclusão" (soft-delete com justificativa). |
 | `status_fechamento_periodo` | `aberto`, `fechado` | Status de um fechamento **do laboratório inteiro** em `fechamentos_financeiros` (distinto de `status_fechamento`, que é por entidade). |
+| `status_fatura_assinatura` | `pendente`, `paga`, `vencida`, `cancelada` | Situação mensal da cobrança do NexLab exibida em “Meu Perfil”. |
 
 ## Tabelas
 
@@ -62,6 +63,7 @@ Perfil interno de cada usuário (não há cadastro público — administradores 
 | `id` | uuid PK | = `auth.users.id` |
 | `empresa_id` | uuid FK → `empresas` | migration `0010` — imutável após criado (`trg_fn_lock_empresa_id`), define de qual cliente é o usuário |
 | `nome` | text | |
+| `documento_fiscal` | text | migration `0018` — CPF/CNPJ do titular (somente dígitos); obrigatório no frontend antes de acessar as áreas internas |
 | `role` | `role_usuario` | default `operador` |
 | `ativo` | boolean | usuário desativado perde acesso mesmo com login válido (ver RLS) |
 | `created_at` | timestamptz | |
@@ -69,7 +71,10 @@ Perfil interno de cada usuário (não há cadastro público — administradores 
 ### `empresas` (era `empresa_config`, singleton — virou multi-linha na migration `0010`)
 Um cliente (tenant) do NexLab — dados usados nos cabeçalhos de PDF, editável na tela "Informações do negócio" (`EmpresaConfigDialog`, atalho no Topbar, escrita só `admin` **da própria empresa**). É a raiz do isolamento multi-tenant (ver § Multi-tenant): toda outra tabela de negócio tem `empresa_id` apontando pra uma linha aqui.
 
-`nome_fantasia`, `razao_social`, `documento`, `telefone`, `email`, `endereco`, `logo_url`, `prefixo_nota_servico` (default `'NS'`), `proximo_numero_nota` (default `1`), `updated_at`. Migration `0008`: `mostrar_endereco`, `mostrar_telefone`, `mostrar_email`, `mostrar_logo` (boolean, default `true` cada) — controlam se o campo aparece no cabeçalho dos PDFs (`nome_fantasia` sempre aparece, sem toggle). `logo_url` aponta pro bucket público de Storage `logos`, num caminho prefixado por empresa (`${empresaId}/logo-*`) — leitura pública, escrita só `admin` da empresa dona do arquivo. Migration `0010`: `proximo_numero_os` (bigint, default `1` — contador do próximo número de OS **por empresa**, ver `ordens_servico.numero_os`) e `status_assinatura` (`text`, default `'ativa'`, informativo — situação junto à Lotus, sem automação de cobrança). Migration `0011`: `is_demo` (boolean, default `false`) — marca o tenant fictício de demonstração (ver § Multi-tenant acima); o frontend usa essa flag pra bloquear escrita real no banco. Migration `0016`: `onboarding_concluido` (boolean; empresas novas recebem `false`) bloqueia as áreas internas até o primeiro administrador confirmar os dados essenciais.
+`nome_fantasia`, `razao_social`, `documento`, `telefone`, `email`, `endereco`, `logo_url`, `prefixo_nota_servico` (default `'NS'`), `proximo_numero_nota` (default `1`), `updated_at`. Migration `0008`: `mostrar_endereco`, `mostrar_telefone`, `mostrar_email`, `mostrar_logo` (boolean, default `true` cada) — controlam se o campo aparece no cabeçalho dos PDFs (`nome_fantasia` sempre aparece, sem toggle). `logo_url` aponta pro bucket público de Storage `logos`, num caminho prefixado por empresa (`${empresaId}/logo-*`) — leitura pública, escrita só `admin` da empresa dona do arquivo. Migration `0010`: `proximo_numero_os` (bigint, default `1` — contador do próximo número de OS **por empresa**, ver `ordens_servico.numero_os`) e `status_assinatura` (`text`, default `'ativa'`, informativo — situação junto à Lotus, sem automação de cobrança). Migration `0011`: `is_demo` (boolean, default `false`) — marca o tenant fictício de demonstração (ver § Multi-tenant acima); o frontend usa essa flag pra bloquear escrita real no banco. Migration `0016`: `onboarding_concluido` (boolean; empresas novas recebem `false`) bloqueia as áreas internas até o primeiro administrador confirmar os dados essenciais. Migration `0018`: `plano_assinatura` (text, default `Standard`) identifica o plano exibido ao cliente.
+
+### `faturas_assinatura`
+Histórico mensal da assinatura NexLab por tenant: competência, valor, status (`pendente`, `paga`, `vencida` ou `cancelada`), vencimento, pagamento e número/URL da nota fiscal. Usuários ativos podem consultar somente as linhas da própria empresa; a escrita fica reservada ao backend administrativo.
 
 ### `entidades`
 Unifica **Clientes** (consultórios/dentistas — cobrança direta) e **Parceiros** (laboratórios maiores — pagam comissão). Diferenciados pela coluna `tipo`.

@@ -163,6 +163,7 @@ Motivado por relatos de tela em branco após login no Safari/iOS em alguns apare
 - [x] Solicitar os dados essenciais do laboratório e do responsável depois da criação da senha e antes de liberar as telas internas.
 - [x] Salvar perfil pessoal e configuração do tenant em uma operação protegida e atômica.
 - [x] Tornar “Meu perfil” funcional, com edição segura do nome, consulta do acesso e atalho para alterar a senha.
+- [x] Evoluir “Meu Perfil” para uma página completa, exigir CPF/CNPJ por usuário e preparar plano, status da assinatura, faturas e notas fiscais.
 
 ## Ideias para avaliar depois (fora do escopo atual, não implementar sem pedir)
 

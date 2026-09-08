@@ -7,14 +7,17 @@ export function useProfileMutations() {
   const queryClient = useQueryClient()
   const { user } = useAuth()
 
-  const salvarNome = useMutation({
-    mutationFn: async (nome: string) => {
+  const salvarPerfil = useMutation({
+    mutationFn: async ({ nome, documentoFiscal }: { nome: string; documentoFiscal: string }) => {
       if (isDemoAtivo(queryClient)) throw new Error(ERRO_INDISPONIVEL_DEMO)
-      const { error } = await supabase.rpc('update_my_profile_name', { p_nome: nome.trim() })
+      const { error } = await supabase.rpc('update_my_profile', {
+        p_nome: nome.trim(),
+        p_documento_fiscal: documentoFiscal,
+      })
       if (error) throw new Error('Não foi possível salvar seu perfil agora. Tente novamente.')
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['profile', user?.id] }),
   })
 
-  return { salvarNome }
+  return { salvarPerfil }
 }

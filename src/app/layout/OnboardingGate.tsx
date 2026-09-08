@@ -1,9 +1,10 @@
-import { Navigate, Outlet } from 'react-router-dom'
+import { Navigate, Outlet, useLocation } from 'react-router-dom'
 import { Loader2 } from 'lucide-react'
 import { useEmpresaConfig } from '@/hooks/useEmpresaConfig'
 import { useProfile } from '@/hooks/useProfile'
 
 export function OnboardingGate() {
+  const location = useLocation()
   const { data: empresa, isLoading: carregandoEmpresa } = useEmpresaConfig()
   const { data: profile, isLoading: carregandoPerfil } = useProfile()
 
@@ -18,6 +19,10 @@ export function OnboardingGate() {
 
   if (profile?.role === 'admin' && empresa?.onboarding_concluido === false) {
     return <Navigate to="/primeiros-passos" replace />
+  }
+
+  if (!empresa?.is_demo && !profile?.documento_fiscal && location.pathname !== '/meu-perfil') {
+    return <Navigate to="/meu-perfil" replace state={{ documentoFiscalObrigatorio: true }} />
   }
 
   return <Outlet />
