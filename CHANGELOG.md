@@ -4,6 +4,11 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), 
 
 ## [Não publicado]
 
+## [0.21.2] - 2026-09-15 — Modal de relatório ampliado
+
+### Alterado
+- **Relatório de Parceiros quase em tela inteira**: o pop-up passa a ocupar toda a área útil do computador, mantendo apenas margens externas pequenas. No celular, continua praticamente em tela cheia, com conteúdo rolável e ações fixas.
+
 ## [0.21.1] - 2026-09-15 — Seleção de Ordens de Serviço
 
 ### Corrigido

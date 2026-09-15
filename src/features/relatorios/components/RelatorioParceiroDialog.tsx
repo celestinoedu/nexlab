@@ -202,7 +202,7 @@ export function RelatorioParceiroDialog({
 
   return (
     <Dialog open={open} onOpenChange={alterarAbertura}>
-      <DialogContent className="flex h-[92dvh] max-h-[92dvh] w-[calc(100%-1rem)] max-w-none flex-col overflow-hidden p-4 sm:h-[80vh] sm:max-h-[80vh] sm:w-[80vw] sm:p-6">
+      <DialogContent className="flex h-[calc(100%-1rem)] max-h-[calc(100%-1rem)] w-[calc(100%-1rem)] max-w-none flex-col overflow-hidden p-4 sm:h-[calc(100%-3rem)] sm:max-h-[calc(100%-3rem)] sm:w-[calc(100%-3rem)] sm:p-6">
         <DialogHeader className="shrink-0">
           <DialogTitle>Relatório de Parceiro</DialogTitle>
           <DialogDescription>Escolha o parceiro e como deseja montar o arquivo PDF.</DialogDescription>
