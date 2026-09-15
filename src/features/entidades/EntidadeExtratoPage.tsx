@@ -2,7 +2,7 @@ import * as React from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { format, parseISO } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
-import { ArrowLeft, Download, Loader2, Pencil, Wallet } from 'lucide-react'
+import { ArrowLeft, Download, FileCheck2, Loader2, Pencil, Wallet } from 'lucide-react'
 import { toast } from 'sonner'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -13,6 +13,7 @@ import { ListaOrdensServico } from '@/features/ordens-servico/components/ListaOr
 import { OrdemServicoFormDialog } from '@/features/ordens-servico/components/OrdemServicoFormDialog'
 import { EntidadeFormDialog } from './components/EntidadeFormDialog'
 import { TabelaPrecosDialog } from './components/TabelaPrecosDialog'
+import { RelatorioParceiroDialog } from '@/features/relatorios/components/RelatorioParceiroDialog'
 import { valorTotalOrdem, type OrdemServicoComRelacoes } from '@/types/domain'
 
 export function EntidadeExtratoPage() {
@@ -28,6 +29,7 @@ export function EntidadeExtratoPage() {
   const [precosAberto, setPrecosAberto] = React.useState(false)
   const [ordemEditando, setOrdemEditando] = React.useState<OrdemServicoComRelacoes | null>(null)
   const [dialogOrdemAberto, setDialogOrdemAberto] = React.useState(false)
+  const [relatorioServicosAberto, setRelatorioServicosAberto] = React.useState(false)
 
   const ordensDaEntidade = React.useMemo(
     () => (ordens ?? []).filter((o) => o.entidade_id === id),
@@ -123,6 +125,12 @@ export function EntidadeExtratoPage() {
           {!entidade.ativo && <Badge variant="neutral">Inativo</Badge>}
         </div>
         <div className="flex flex-wrap gap-2">
+          {entidade.tipo === 'parceiro' && (
+            <Button variant="secondary" size="sm" onClick={() => setRelatorioServicosAberto(true)}>
+              <FileCheck2 size={16} />
+              Relatório por serviços
+            </Button>
+          )}
           <Button variant="secondary" size="sm" onClick={() => setPrecosAberto(true)}>
             <Wallet size={16} />
             Tabela de preços
@@ -212,6 +220,14 @@ export function EntidadeExtratoPage() {
         onOpenChange={setDialogOrdemAberto}
         ordem={ordemEditando}
       />
+      {entidade.tipo === 'parceiro' && (
+        <RelatorioParceiroDialog
+          open={relatorioServicosAberto}
+          onOpenChange={setRelatorioServicosAberto}
+          parceiroFixo={entidade}
+          formatoInicial="servicos"
+        />
+      )}
     </div>
   )
 }

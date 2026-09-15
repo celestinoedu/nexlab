@@ -4,8 +4,11 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), 
 
 ## [Não publicado]
 
+## [0.21.0] - 2026-09-15 — Relatórios de parceiros
+
 ### Adicionado
 - **Central de perfil e cobrança**: “Meu Perfil” agora é uma página responsiva com dados pessoais, CPF/CNPJ obrigatório, plano, status da assinatura e histórico de faturas/notas fiscais.
+- **Relatório de Parceiros**: nova opção no hub de Relatórios para gerar PDF por período personalizado (até 30 dias), mensal, semestral ou anual, ou apenas com os serviços selecionados. O mesmo seletor de serviços também está disponível diretamente no extrato de cada parceiro.
 
 ### Corrigido
 - **Menu das iniciais**: o menu da conta ganhou um visual mais completo e passa a abrir ancorado logo abaixo do avatar, inclusive em telas com zoom e no celular.

@@ -2,7 +2,13 @@ import { Document, Page, View, Text, Image, StyleSheet, pdf } from '@react-pdf/r
 import { baixarBlob } from '@/lib/download'
 import { format, parseISO } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
-import { referenciaOrdemExibicao, valorTotalOrdem, type Entidade, type OrdemServicoComRelacoes } from '@/types/domain'
+import {
+  referenciaOrdemExibicao,
+  valorEfetivoItem,
+  valorTotalOrdem,
+  type Entidade,
+  type OrdemServicoComRelacoes,
+} from '@/types/domain'
 import type { EmpresaConfig } from '@/hooks/useEmpresaConfig'
 
 const styles = StyleSheet.create({
@@ -44,6 +50,8 @@ interface RelatorioFechamentoPdfDocumentProps {
   ordens: OrdemServicoComRelacoes[]
   periodoLabel: string
   empresa: EmpresaConfig | undefined
+  titulo?: string
+  servicoIds?: string[]
 }
 
 function formatarData(data: string | null) {
@@ -59,8 +67,16 @@ export function RelatorioFechamentoPdfDocument({
   ordens,
   periodoLabel,
   empresa,
+  titulo = 'Relatório de Fechamento',
+  servicoIds,
 }: RelatorioFechamentoPdfDocumentProps) {
-  const total = ordens.reduce((acc, o) => acc + valorTotalOrdem(o), 0)
+  const itensDaOrdem = (ordem: OrdemServicoComRelacoes) =>
+    servicoIds ? ordem.itens.filter((item) => servicoIds.includes(item.servico.id)) : ordem.itens
+  const valorDaOrdem = (ordem: OrdemServicoComRelacoes) =>
+    servicoIds
+      ? itensDaOrdem(ordem).reduce((total, item) => total + valorEfetivoItem(item, ordem.entidade.tipo), 0)
+      : valorTotalOrdem(ordem)
+  const total = ordens.reduce((acc, ordem) => acc + valorDaOrdem(ordem), 0)
 
   return (
     <Document>
@@ -84,7 +100,7 @@ export function RelatorioFechamentoPdfDocument({
             </View>
           </View>
           <View>
-            <Text style={styles.tituloDireita}>Relatório de Fechamento</Text>
+            <Text style={styles.tituloDireita}>{titulo}</Text>
             <Text style={styles.subtituloDireita}>{periodoLabel}</Text>
           </View>
         </View>
@@ -110,15 +126,17 @@ export function RelatorioFechamentoPdfDocument({
                 {[ordem.cliente_final, ordem.nome_paciente].filter(Boolean).join(' — ') || '—'}
               </Text>
               <Text style={[styles.td, styles.colServico]}>
-                {ordem.itens.map((i) => i.servico.nome).join(', ')}
+                {itensDaOrdem(ordem)
+                  .map((item) => `${item.servico.nome}${item.quantidade > 1 ? ` ×${item.quantidade}` : ''}`)
+                  .join(', ')}
               </Text>
-              <Text style={[styles.td, styles.colValor]}>{formatarMoeda(valorTotalOrdem(ordem))}</Text>
+              <Text style={[styles.td, styles.colValor]}>{formatarMoeda(valorDaOrdem(ordem))}</Text>
             </View>
           ))}
         </View>
 
         <View style={styles.totalRow}>
-          <Text style={styles.totalLabel}>Total do período:</Text>
+          <Text style={styles.totalLabel}>{servicoIds ? 'Total dos serviços:' : 'Total do período:'}</Text>
           <Text style={styles.totalValor}>{formatarMoeda(total)}</Text>
         </View>
 
@@ -142,4 +160,25 @@ export async function baixarRelatorioFechamento(
     <RelatorioFechamentoPdfDocument entidade={entidade} ordens={ordens} periodoLabel={periodoLabel} empresa={empresa} />,
   ).toBlob()
   baixarBlob(blob, `Fechamento-${entidade.nome.replace(/\s+/g, '-')}.pdf`)
+}
+
+/** Gera o relatório específico de parceiro, opcionalmente limitado aos serviços selecionados. */
+export async function baixarRelatorioParceiro(
+  parceiro: Entidade,
+  ordens: OrdemServicoComRelacoes[],
+  filtroLabel: string,
+  empresa: EmpresaConfig | undefined,
+  servicoIds?: string[],
+) {
+  const blob = await pdf(
+    <RelatorioFechamentoPdfDocument
+      entidade={parceiro}
+      ordens={ordens}
+      periodoLabel={filtroLabel}
+      empresa={empresa}
+      titulo="Relatório de Parceiro"
+      servicoIds={servicoIds}
+    />,
+  ).toBlob()
+  baixarBlob(blob, `Relatorio-Parceiro-${parceiro.nome.replace(/\s+/g, '-')}.pdf`)
 }
