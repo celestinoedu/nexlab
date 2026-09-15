@@ -6,7 +6,7 @@ Atualizar este arquivo ao final de cada sessão de trabalho relevante, marcando 
 
 **Atualização 2026-09-01 — auditoria do saldo a receber:** corrigida a ordem de gravação que criava contas zeradas ou com valores antigos; migration `0017` reconcilia o histórico e sincroniza valor, entidade e mês de OS entregues. Lista de OS, Dashboard e Contas a Receber agora usam o mesmo saldo de contas abertas.
 
-**Atualização 2026-09-15 — relatório de parceiros:** o hub de Relatórios ganhou emissão por parceiro e por período (personalizado de até 30 dias, mensal, semestral ou anual) ou por múltiplas Ordens de Serviço selecionadas. O extrato de um parceiro também oferece acesso direto ao relatório por OS; a seleção mostra os serviços feitos em cada ordem e o PDF inclui todos os itens das OS marcadas. O pop-up ocupa quase toda a área útil no computador e foi otimizado para celular.
+**Atualização 2026-09-15 — relatório de parceiros:** o hub de Relatórios ganhou emissão por parceiro e por período (personalizado de até 30 dias, mensal, semestral ou anual) ou por múltiplas Ordens de Serviço selecionadas. O extrato de um parceiro também oferece acesso direto ao relatório por OS; a seleção mostra os serviços feitos em cada ordem e permite buscar por número, cliente, paciente ou serviço. O PDF inclui todos os itens das OS marcadas. O pop-up ocupa quase toda a área útil no computador e foi otimizado para celular.
 
 ## Fase 1 — Fundação ✅ concluída em 2026-08-09 (v0.1.0)
 

@@ -4,6 +4,11 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), 
 
 ## [Não publicado]
 
+## [0.21.3] - 2026-09-15 — Busca de OS no relatório
+
+### Adicionado
+- **Busca de Ordens de Serviço**: o relatório de parceiros agora permite localizar OS por número, cliente final, paciente ou serviço. A tela mostra a quantidade encontrada, preserva seleções fora do filtro e permite selecionar ou limpar somente as OS visíveis.
+
 ## [0.21.2] - 2026-09-15 — Modal de relatório ampliado
 
 ### Alterado

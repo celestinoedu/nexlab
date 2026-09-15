@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { differenceInCalendarDays, endOfMonth, format, parseISO } from 'date-fns'
-import { Download, Loader2 } from 'lucide-react'
+import { Download, Loader2, Search } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import {
@@ -37,6 +37,10 @@ interface IntervaloRelatorio {
   inicio: string
   fim: string
   label: string
+}
+
+function normalizarBusca(valor: string) {
+  return valor.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim()
 }
 
 function intervaloDoPeriodo(
@@ -125,6 +129,7 @@ export function RelatorioParceiroDialog({
   const [ano, setAno] = React.useState(hoje.slice(0, 4))
   const [semestre, setSemestre] = React.useState<'1' | '2'>(Number(hoje.slice(5, 7)) <= 6 ? '1' : '2')
   const [ordensSelecionadas, setOrdensSelecionadas] = React.useState<string[]>([])
+  const [buscaOrdens, setBuscaOrdens] = React.useState('')
   const [gerando, setGerando] = React.useState(false)
 
   const parceiro = parceiroFixo ?? parceiros?.find((item) => item.id === parceiroId)
@@ -134,6 +139,20 @@ export function RelatorioParceiroDialog({
       .sort((a, b) => b.data_recebimento.localeCompare(a.data_recebimento) || b.numero_os - a.numero_os),
     [ordens, parceiroId],
   )
+  const ordensVisiveis = React.useMemo(() => {
+    const termo = normalizarBusca(buscaOrdens)
+    if (!termo) return ordensDoParceiro
+
+    return ordensDoParceiro.filter((ordem) => normalizarBusca([
+      referenciaOrdemExibicao(ordem).numero,
+      ordem.numero_os,
+      ordem.cliente_final,
+      ordem.nome_paciente,
+      ...ordem.itens.map((item) => item.servico.nome),
+    ].filter(Boolean).join(' ')).includes(termo))
+  }, [ordensDoParceiro, buscaOrdens])
+  const todasVisiveisSelecionadas = ordensVisiveis.length > 0 &&
+    ordensVisiveis.every((ordem) => ordensSelecionadas.includes(ordem.id))
 
   const intervalo = intervaloDoPeriodo(tipoPeriodo, dataInicio, dataFim, mes, ano, semestre)
   const periodoPersonalizadoInvalido = tipoPeriodo === 'personalizado' && Boolean(
@@ -159,6 +178,7 @@ export function RelatorioParceiroDialog({
       setParceiroId(parceiroFixo?.id ?? null)
       setFormato(formatoInicial)
       setOrdensSelecionadas([])
+      setBuscaOrdens('')
     }
     onOpenChange(aberto)
   }
@@ -223,6 +243,7 @@ export function RelatorioParceiroDialog({
                 onChange={(novoParceiroId) => {
                   setParceiroId(novoParceiroId)
                   setOrdensSelecionadas([])
+                  setBuscaOrdens('')
                 }}
                 placeholder={carregandoParceiros ? 'Carregando parceiros...' : 'Selecione um parceiro'}
                 searchPlaceholder="Buscar parceiro..."
@@ -316,18 +337,24 @@ export function RelatorioParceiroDialog({
           ) : (
             <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-4">
               <div className="mb-3 flex items-center justify-between gap-3">
-                <p className="text-xs font-medium text-slate-600">Ordens de Serviço a incluir</p>
-                {ordensDoParceiro.length > 0 && (
+                <p className="text-xs font-medium text-slate-600">
+                  Ordens de Serviço a incluir
+                  {parceiroId && <span className="ml-1 font-normal text-slate-400">({ordensVisiveis.length} de {ordensDoParceiro.length})</span>}
+                </p>
+                {ordensVisiveis.length > 0 && (
                   <button
                     type="button"
-                    onClick={() => setOrdensSelecionadas(
-                      ordensSelecionadas.length === ordensDoParceiro.length
-                        ? []
-                        : ordensDoParceiro.map((ordem) => ordem.id),
-                    )}
+                    onClick={() => {
+                      const idsVisiveis = new Set(ordensVisiveis.map((ordem) => ordem.id))
+                      setOrdensSelecionadas((atuais) => todasVisiveisSelecionadas
+                        ? atuais.filter((id) => !idsVisiveis.has(id))
+                        : Array.from(new Set([...atuais, ...idsVisiveis])))
+                    }}
                     className="text-xs font-medium text-brand-700 hover:text-brand-800"
                   >
-                    {ordensSelecionadas.length === ordensDoParceiro.length ? 'Limpar seleção' : 'Selecionar todas'}
+                    {todasVisiveisSelecionadas
+                      ? (buscaOrdens ? 'Limpar visíveis' : 'Limpar seleção')
+                      : (buscaOrdens ? 'Selecionar visíveis' : 'Selecionar todas')}
                   </button>
                 )}
               </div>
@@ -338,8 +365,25 @@ export function RelatorioParceiroDialog({
               ) : ordensDoParceiro.length === 0 ? (
                 <p className="text-sm text-slate-400">Este parceiro ainda não possui Ordens de Serviço cadastradas.</p>
               ) : (
+                <>
+                  <div className="relative mb-3">
+                    <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
+                    <Input
+                      type="search"
+                      value={buscaOrdens}
+                      onChange={(event) => setBuscaOrdens(event.target.value)}
+                      placeholder="Buscar por Nº OS, cliente, paciente ou serviço..."
+                      aria-label="Buscar Ordens de Serviço"
+                      className="pl-9"
+                    />
+                  </div>
+                  {ordensVisiveis.length === 0 ? (
+                    <p className="rounded-lg bg-white px-3 py-6 text-center text-sm text-slate-400">
+                      Nenhuma OS encontrada para essa busca.
+                    </p>
+                  ) : (
                 <div className="grid max-h-[42dvh] gap-2 overflow-y-auto pr-1 lg:grid-cols-2">
-                  {ordensDoParceiro.map((ordem) => {
+                  {ordensVisiveis.map((ordem) => {
                     const referencia = referenciaOrdemExibicao(ordem)
                     const pessoa = [ordem.cliente_final, ordem.nome_paciente].filter(Boolean).join(' — ')
                     const servicos = ordem.itens
@@ -366,6 +410,8 @@ export function RelatorioParceiroDialog({
                     )
                   })}
                 </div>
+                  )}
+                </>
               )}
             </div>
           )}
