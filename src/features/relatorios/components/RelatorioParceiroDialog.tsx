@@ -16,9 +16,14 @@ import { Combobox } from '@/components/shared/Combobox'
 import { useEntidades } from '@/hooks/useEntidades'
 import { useEmpresaConfig } from '@/hooks/useEmpresaConfig'
 import { useOrdensServico } from '@/features/ordens-servico/hooks/useOrdensServico'
-import type { Entidade, OrdemServicoComRelacoes } from '@/types/domain'
+import {
+  referenciaOrdemExibicao,
+  STATUS_OS_LABEL,
+  type Entidade,
+  type OrdemServicoComRelacoes,
+} from '@/types/domain'
 
-type FormatoRelatorio = 'periodo' | 'servicos'
+type FormatoRelatorio = 'periodo' | 'os'
 type TipoPeriodo = 'personalizado' | 'mensal' | 'semestral' | 'anual'
 
 interface RelatorioParceiroDialogProps {
@@ -119,21 +124,16 @@ export function RelatorioParceiroDialog({
   const [mes, setMes] = React.useState(hoje.slice(0, 7))
   const [ano, setAno] = React.useState(hoje.slice(0, 4))
   const [semestre, setSemestre] = React.useState<'1' | '2'>(Number(hoje.slice(5, 7)) <= 6 ? '1' : '2')
-  const [servicosSelecionados, setServicosSelecionados] = React.useState<string[]>([])
+  const [ordensSelecionadas, setOrdensSelecionadas] = React.useState<string[]>([])
   const [gerando, setGerando] = React.useState(false)
 
   const parceiro = parceiroFixo ?? parceiros?.find((item) => item.id === parceiroId)
   const ordensDoParceiro = React.useMemo(
-    () => (ordens ?? []).filter((ordem) => ordem.entidade_id === parceiroId),
+    () => (ordens ?? [])
+      .filter((ordem) => ordem.entidade_id === parceiroId)
+      .sort((a, b) => b.data_recebimento.localeCompare(a.data_recebimento) || b.numero_os - a.numero_os),
     [ordens, parceiroId],
   )
-  const servicosDisponiveis = React.useMemo(() => {
-    const mapa = new Map<string, string>()
-    for (const ordem of ordensDoParceiro) {
-      for (const item of ordem.itens) mapa.set(item.servico.id, item.servico.nome)
-    }
-    return Array.from(mapa, ([id, nome]) => ({ id, nome })).sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
-  }, [ordensDoParceiro])
 
   const intervalo = intervaloDoPeriodo(tipoPeriodo, dataInicio, dataFim, mes, ano, semestre)
   const periodoPersonalizadoInvalido = tipoPeriodo === 'personalizado' && Boolean(
@@ -145,12 +145,12 @@ export function RelatorioParceiroDialog({
       !gerando &&
       (formato === 'periodo'
         ? intervalo && !periodoPersonalizadoInvalido
-        : servicosSelecionados.length > 0),
+        : ordensSelecionadas.length > 0),
   )
 
-  function alternarServico(servicoId: string) {
-    setServicosSelecionados((atuais) =>
-      atuais.includes(servicoId) ? atuais.filter((id) => id !== servicoId) : [...atuais, servicoId],
+  function alternarOrdem(ordemId: string) {
+    setOrdensSelecionadas((atuais) =>
+      atuais.includes(ordemId) ? atuais.filter((id) => id !== ordemId) : [...atuais, ordemId],
     )
   }
 
@@ -158,7 +158,7 @@ export function RelatorioParceiroDialog({
     if (!aberto) {
       setParceiroId(parceiroFixo?.id ?? null)
       setFormato(formatoInicial)
-      setServicosSelecionados([])
+      setOrdensSelecionadas([])
     }
     onOpenChange(aberto)
   }
@@ -168,7 +168,7 @@ export function RelatorioParceiroDialog({
 
     let ordensFiltradas: OrdemServicoComRelacoes[]
     let filtroLabel: string
-    let servicoIds: string[] | undefined
+    let totalLabel: string | undefined
 
     if (formato === 'periodo') {
       if (!intervalo) return
@@ -177,14 +177,10 @@ export function RelatorioParceiroDialog({
       )
       filtroLabel = intervalo.label
     } else {
-      servicoIds = servicosSelecionados
-      ordensFiltradas = ordensDoParceiro.filter((ordem) =>
-        ordem.itens.some((item) => servicosSelecionados.includes(item.servico.id)),
-      )
-      const nomes = servicosDisponiveis
-        .filter((servico) => servicosSelecionados.includes(servico.id))
-        .map((servico) => servico.nome)
-      filtroLabel = `Serviços selecionados: ${nomes.join(', ')}`
+      ordensFiltradas = ordensDoParceiro.filter((ordem) => ordensSelecionadas.includes(ordem.id))
+      const referencias = ordensFiltradas.map((ordem) => `#${referenciaOrdemExibicao(ordem).numero}`)
+      filtroLabel = `OS selecionadas: ${referencias.join(', ')}`
+      totalLabel = 'Total das OS:'
     }
 
     if (ordensFiltradas.length === 0) {
@@ -195,7 +191,7 @@ export function RelatorioParceiroDialog({
     setGerando(true)
     try {
       const { baixarRelatorioParceiro } = await import('@/features/entidades/components/RelatorioFechamentoPdf')
-      await baixarRelatorioParceiro(parceiro, ordensFiltradas, filtroLabel, empresaConfig, servicoIds)
+      await baixarRelatorioParceiro(parceiro, ordensFiltradas, filtroLabel, empresaConfig, totalLabel)
       alterarAbertura(false)
     } catch {
       toast.error('Não foi possível gerar o relatório agora. Tente novamente.')
@@ -206,13 +202,13 @@ export function RelatorioParceiroDialog({
 
   return (
     <Dialog open={open} onOpenChange={alterarAbertura}>
-      <DialogContent className="max-w-2xl">
-        <DialogHeader>
+      <DialogContent className="flex h-[92dvh] max-h-[92dvh] w-[calc(100%-1rem)] max-w-none flex-col overflow-hidden p-4 sm:h-[80vh] sm:max-h-[80vh] sm:w-[80vw] sm:p-6">
+        <DialogHeader className="shrink-0">
           <DialogTitle>Relatório de Parceiro</DialogTitle>
           <DialogDescription>Escolha o parceiro e como deseja montar o arquivo PDF.</DialogDescription>
         </DialogHeader>
 
-        <div className="flex flex-col gap-5">
+        <div className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto pr-1">
           <div className="flex flex-col gap-1.5">
             <label htmlFor="parceiro-relatorio" className="text-xs font-medium text-slate-600">Parceiro</label>
             {parceiroFixo ? (
@@ -226,7 +222,7 @@ export function RelatorioParceiroDialog({
                 value={parceiroId}
                 onChange={(novoParceiroId) => {
                   setParceiroId(novoParceiroId)
-                  setServicosSelecionados([])
+                  setOrdensSelecionadas([])
                 }}
                 placeholder={carregandoParceiros ? 'Carregando parceiros...' : 'Selecione um parceiro'}
                 searchPlaceholder="Buscar parceiro..."
@@ -245,10 +241,10 @@ export function RelatorioParceiroDialog({
               description="Personalizado, mensal, semestral ou anual."
             />
             <RadioCard
-              checked={formato === 'servicos'}
-              onChange={() => setFormato('servicos')}
-              title="Por serviços selecionados"
-              description="Inclua somente os serviços marcados."
+              checked={formato === 'os'}
+              onChange={() => setFormato('os')}
+              title="Por OS selecionadas"
+              description="Escolha as Ordens de Serviço que entrarão no PDF."
             />
           </fieldset>
 
@@ -320,47 +316,62 @@ export function RelatorioParceiroDialog({
           ) : (
             <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-4">
               <div className="mb-3 flex items-center justify-between gap-3">
-                <p className="text-xs font-medium text-slate-600">Serviços a incluir</p>
-                {servicosDisponiveis.length > 0 && (
+                <p className="text-xs font-medium text-slate-600">Ordens de Serviço a incluir</p>
+                {ordensDoParceiro.length > 0 && (
                   <button
                     type="button"
-                    onClick={() => setServicosSelecionados(
-                      servicosSelecionados.length === servicosDisponiveis.length
+                    onClick={() => setOrdensSelecionadas(
+                      ordensSelecionadas.length === ordensDoParceiro.length
                         ? []
-                        : servicosDisponiveis.map((servico) => servico.id),
+                        : ordensDoParceiro.map((ordem) => ordem.id),
                     )}
                     className="text-xs font-medium text-brand-700 hover:text-brand-800"
                   >
-                    {servicosSelecionados.length === servicosDisponiveis.length ? 'Limpar seleção' : 'Selecionar todos'}
+                    {ordensSelecionadas.length === ordensDoParceiro.length ? 'Limpar seleção' : 'Selecionar todas'}
                   </button>
                 )}
               </div>
               {!parceiroId ? (
-                <p className="text-sm text-slate-400">Selecione um parceiro para listar os serviços.</p>
+                <p className="text-sm text-slate-400">Selecione um parceiro para listar as Ordens de Serviço.</p>
               ) : carregandoOrdens ? (
                 <div className="flex justify-center py-4"><Loader2 className="animate-spin text-brand-600" size={22} /></div>
-              ) : servicosDisponiveis.length === 0 ? (
-                <p className="text-sm text-slate-400">Este parceiro ainda não possui serviços em ordens cadastradas.</p>
+              ) : ordensDoParceiro.length === 0 ? (
+                <p className="text-sm text-slate-400">Este parceiro ainda não possui Ordens de Serviço cadastradas.</p>
               ) : (
-                <div className="grid max-h-52 gap-2 overflow-y-auto sm:grid-cols-2">
-                  {servicosDisponiveis.map((servico) => (
-                    <label key={servico.id} className="flex cursor-pointer items-center gap-2 rounded-lg bg-white px-3 py-2 text-sm text-slate-700">
+                <div className="grid max-h-[42dvh] gap-2 overflow-y-auto pr-1 lg:grid-cols-2">
+                  {ordensDoParceiro.map((ordem) => {
+                    const referencia = referenciaOrdemExibicao(ordem)
+                    const pessoa = [ordem.cliente_final, ordem.nome_paciente].filter(Boolean).join(' — ')
+                    const servicos = ordem.itens
+                      .map((item) => `${item.servico.nome}${item.quantidade > 1 ? ` ×${item.quantidade}` : ''}`)
+                      .join(', ')
+                    return (
+                    <label key={ordem.id} className="flex cursor-pointer items-start gap-3 rounded-lg bg-white px-3 py-2.5 text-sm text-slate-700">
                       <input
                         type="checkbox"
-                        checked={servicosSelecionados.includes(servico.id)}
-                        onChange={() => alternarServico(servico.id)}
-                        className="accent-brand-600"
+                        checked={ordensSelecionadas.includes(ordem.id)}
+                        onChange={() => alternarOrdem(ordem.id)}
+                        className="mt-1 accent-brand-600"
                       />
-                      {servico.nome}
+                      <span className="min-w-0 flex-1">
+                        <span className="flex flex-wrap items-center gap-x-2 font-medium text-slate-800">
+                          <span>#{referencia.numero}</span>
+                          <span className="font-normal text-slate-400">{format(parseISO(ordem.data_recebimento), 'dd/MM/yyyy')}</span>
+                          <span className="font-normal text-slate-500">{STATUS_OS_LABEL[ordem.status]}</span>
+                        </span>
+                        {pessoa && <span className="block truncate text-xs text-slate-500">{pessoa}</span>}
+                        <span className="block truncate text-xs text-slate-400">{servicos || 'Sem serviços'}</span>
+                      </span>
                     </label>
-                  ))}
+                    )
+                  })}
                 </div>
               )}
             </div>
           )}
         </div>
 
-        <DialogFooter>
+        <DialogFooter className="mt-4 shrink-0">
           <Button variant="secondary" onClick={() => alterarAbertura(false)}>Cancelar</Button>
           <Button variant="accent" onClick={gerarRelatorio} disabled={!podeGerar || carregandoOrdens}>
             {gerando ? <Loader2 className="animate-spin" size={16} /> : <Download size={16} />}

@@ -29,7 +29,7 @@ export function EntidadeExtratoPage() {
   const [precosAberto, setPrecosAberto] = React.useState(false)
   const [ordemEditando, setOrdemEditando] = React.useState<OrdemServicoComRelacoes | null>(null)
   const [dialogOrdemAberto, setDialogOrdemAberto] = React.useState(false)
-  const [relatorioServicosAberto, setRelatorioServicosAberto] = React.useState(false)
+  const [relatorioOrdensAberto, setRelatorioOrdensAberto] = React.useState(false)
 
   const ordensDaEntidade = React.useMemo(
     () => (ordens ?? []).filter((o) => o.entidade_id === id),
@@ -126,9 +126,9 @@ export function EntidadeExtratoPage() {
         </div>
         <div className="flex flex-wrap gap-2">
           {entidade.tipo === 'parceiro' && (
-            <Button variant="secondary" size="sm" onClick={() => setRelatorioServicosAberto(true)}>
+            <Button variant="secondary" size="sm" onClick={() => setRelatorioOrdensAberto(true)}>
               <FileCheck2 size={16} />
-              Relatório por serviços
+              Relatório por OS
             </Button>
           )}
           <Button variant="secondary" size="sm" onClick={() => setPrecosAberto(true)}>
@@ -222,10 +222,10 @@ export function EntidadeExtratoPage() {
       />
       {entidade.tipo === 'parceiro' && (
         <RelatorioParceiroDialog
-          open={relatorioServicosAberto}
-          onOpenChange={setRelatorioServicosAberto}
+          open={relatorioOrdensAberto}
+          onOpenChange={setRelatorioOrdensAberto}
           parceiroFixo={entidade}
-          formatoInicial="servicos"
+          formatoInicial="os"
         />
       )}
     </div>

@@ -4,6 +4,11 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), 
 
 ## [Não publicado]
 
+## [0.21.1] - 2026-09-15 — Seleção de Ordens de Serviço
+
+### Corrigido
+- **Relatório de Parceiros por seleção**: a escolha passa a ser feita por Ordens de Serviço do parceiro, exibindo número, data, status, cliente/paciente e serviços de cada OS. O PDF inclui todos os itens das OS marcadas. O pop-up também foi ampliado e otimizado para uso em celular, com conteúdo rolável e ações sempre visíveis.
+
 ## [0.21.0] - 2026-09-15 — Relatórios de parceiros
 
 ### Adicionado

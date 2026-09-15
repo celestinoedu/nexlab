@@ -4,7 +4,6 @@ import { format, parseISO } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import {
   referenciaOrdemExibicao,
-  valorEfetivoItem,
   valorTotalOrdem,
   type Entidade,
   type OrdemServicoComRelacoes,
@@ -51,7 +50,7 @@ interface RelatorioFechamentoPdfDocumentProps {
   periodoLabel: string
   empresa: EmpresaConfig | undefined
   titulo?: string
-  servicoIds?: string[]
+  totalLabel?: string
 }
 
 function formatarData(data: string | null) {
@@ -68,15 +67,9 @@ export function RelatorioFechamentoPdfDocument({
   periodoLabel,
   empresa,
   titulo = 'Relatório de Fechamento',
-  servicoIds,
+  totalLabel = 'Total do período:',
 }: RelatorioFechamentoPdfDocumentProps) {
-  const itensDaOrdem = (ordem: OrdemServicoComRelacoes) =>
-    servicoIds ? ordem.itens.filter((item) => servicoIds.includes(item.servico.id)) : ordem.itens
-  const valorDaOrdem = (ordem: OrdemServicoComRelacoes) =>
-    servicoIds
-      ? itensDaOrdem(ordem).reduce((total, item) => total + valorEfetivoItem(item, ordem.entidade.tipo), 0)
-      : valorTotalOrdem(ordem)
-  const total = ordens.reduce((acc, ordem) => acc + valorDaOrdem(ordem), 0)
+  const total = ordens.reduce((acc, ordem) => acc + valorTotalOrdem(ordem), 0)
 
   return (
     <Document>
@@ -126,17 +119,17 @@ export function RelatorioFechamentoPdfDocument({
                 {[ordem.cliente_final, ordem.nome_paciente].filter(Boolean).join(' — ') || '—'}
               </Text>
               <Text style={[styles.td, styles.colServico]}>
-                {itensDaOrdem(ordem)
+                {ordem.itens
                   .map((item) => `${item.servico.nome}${item.quantidade > 1 ? ` ×${item.quantidade}` : ''}`)
                   .join(', ')}
               </Text>
-              <Text style={[styles.td, styles.colValor]}>{formatarMoeda(valorDaOrdem(ordem))}</Text>
+              <Text style={[styles.td, styles.colValor]}>{formatarMoeda(valorTotalOrdem(ordem))}</Text>
             </View>
           ))}
         </View>
 
         <View style={styles.totalRow}>
-          <Text style={styles.totalLabel}>{servicoIds ? 'Total dos serviços:' : 'Total do período:'}</Text>
+          <Text style={styles.totalLabel}>{totalLabel}</Text>
           <Text style={styles.totalValor}>{formatarMoeda(total)}</Text>
         </View>
 
@@ -162,13 +155,13 @@ export async function baixarRelatorioFechamento(
   baixarBlob(blob, `Fechamento-${entidade.nome.replace(/\s+/g, '-')}.pdf`)
 }
 
-/** Gera o relatório específico de parceiro, opcionalmente limitado aos serviços selecionados. */
+/** Gera o relatório específico de parceiro com as OS já filtradas pela tela. */
 export async function baixarRelatorioParceiro(
   parceiro: Entidade,
   ordens: OrdemServicoComRelacoes[],
   filtroLabel: string,
   empresa: EmpresaConfig | undefined,
-  servicoIds?: string[],
+  totalLabel?: string,
 ) {
   const blob = await pdf(
     <RelatorioFechamentoPdfDocument
@@ -177,7 +170,7 @@ export async function baixarRelatorioParceiro(
       periodoLabel={filtroLabel}
       empresa={empresa}
       titulo="Relatório de Parceiro"
-      servicoIds={servicoIds}
+      totalLabel={totalLabel}
     />,
   ).toBlob()
   baixarBlob(blob, `Relatorio-Parceiro-${parceiro.nome.replace(/\s+/g, '-')}.pdf`)
