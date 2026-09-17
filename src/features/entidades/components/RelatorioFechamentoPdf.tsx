@@ -4,7 +4,8 @@ import { format, parseISO } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import {
   referenciaOrdemExibicao,
-  valorTotalOrdem,
+  valorFaturavelOrdem,
+  valorTotalFaturavelOrdens,
   type Entidade,
   type OrdemServicoComRelacoes,
 } from '@/types/domain'
@@ -69,7 +70,7 @@ export function RelatorioFechamentoPdfDocument({
   titulo = 'Relatório de Fechamento',
   totalLabel = 'Total do período:',
 }: RelatorioFechamentoPdfDocumentProps) {
-  const total = ordens.reduce((acc, ordem) => acc + valorTotalOrdem(ordem), 0)
+  const total = valorTotalFaturavelOrdens(ordens)
 
   return (
     <Document>
@@ -123,7 +124,7 @@ export function RelatorioFechamentoPdfDocument({
                   .map((item) => `${item.servico.nome}${item.quantidade > 1 ? ` ×${item.quantidade}` : ''}`)
                   .join(', ')}
               </Text>
-              <Text style={[styles.td, styles.colValor]}>{formatarMoeda(valorTotalOrdem(ordem))}</Text>
+              <Text style={[styles.td, styles.colValor]}>{formatarMoeda(valorFaturavelOrdem(ordem))}</Text>
             </View>
           ))}
         </View>

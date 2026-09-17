@@ -134,7 +134,7 @@ function garantirContaReceberDemo(
               ...conta,
               entidade_id: ordem.entidade_id,
               mes_referencia: ordem.mes_referencia,
-              valor: Math.max(valorTotalOrdem(ordem), 0),
+              valor: valorTotalOrdem(ordem),
               ...(existente.status === 'cancelado'
                 ? {}
                 : {
@@ -162,7 +162,7 @@ function garantirContaReceberDemo(
       ordem_id: ordem.id,
       entidade_id: ordem.entidade_id,
       mes_referencia: ordem.mes_referencia,
-      valor: Math.max(valorTotalOrdem(ordem), 0),
+      valor: valorTotalOrdem(ordem),
       status: ordem.status_pagamento === 'pago' ? 'pago' : 'aberto',
       forma_pagamento: ordem.forma_pagamento,
       data_pagamento: ordem.status_pagamento === 'pago' ? ordem.data_pagamento : null,

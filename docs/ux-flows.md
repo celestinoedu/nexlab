@@ -5,7 +5,7 @@
 ## Módulo Ordens de Serviço — OS (prioridade #1)
 
 ### KPIs no topo
-3 cards logo abaixo do cabeçalho (antes da busca): **Em Produção** (contagem de OS com esse status), **Entregue** (contagem) e **Total a Receber** (soma do valor das OS com status financeiro Pendente, exclui Canceladas). Todos recalculam pelo filtro de **período (mês)** já existente na tela — mudou o mês, os 3 cards mudam junto. Não são afetados pela busca por texto nem pelo chip de status da lista (dão uma visão geral do período, não da busca pontual do momento). Botão com ícone de olho acima dos cards **oculta os valores** (mostra "••••" no lugar dos 3 números) — preferência salva no navegador (`localStorage`), útil quando a tela fica visível no balcão pra qualquer pessoa que passe.
+3 cards logo abaixo do cabeçalho (antes da busca): **Em Produção** (contagem de OS com esse status), **Entregue** (contagem) e **Total das OS filtradas** (soma operacional, exclui Canceladas). Os três usam exatamente o mesmo conjunto da lista após aplicar **período, busca e chip de status**. Para Parceiro, o valor é a comissão; para Cliente, o valor cheio. Botão com ícone de olho acima dos cards **oculta os valores** (mostra "••••" no lugar dos 3 números) — preferência salva no navegador (`localStorage`), útil quando a tela fica visível no balcão pra qualquer pessoa que passe.
 
 ### Criar/editar uma OS
 Um único botão de destaque (**accent**, cor âmbar) "+ Nova OS", visível tanto na Lista quanto no Kanban, abre um **modal único** (mesmo componente `OrdemServicoFormDialog` para criar e editar), largo (`lg:max-w-5xl`) e dividido em **2 colunas no desktop** (empilha em 1 coluna no mobile, dados gerais primeiro):
@@ -51,7 +51,7 @@ Tela dedicada, foco no **resumo de OS** daquele Cliente/Parceiro — o cadastro 
 1. Cabeçalho com nome, badge de tipo, dados de contato.
 2. Botões **"Tabela de preços"** e **"Editar cadastro"** — abrem os mesmos modais já usados na lista, sem sair da tela.
 3. Filtro de período (chips derivados dos meses com OS daquela entidade, mais "Todos os períodos").
-4. Tabela de OS do período (reaproveita o mesmo componente da Lista principal de Ordens de Serviço — clicar numa linha abre o formulário de edição da OS, sem sair do extrato) e o total do período.
+4. Tabela de OS do período (reaproveita o mesmo componente da Lista principal de Ordens de Serviço — clicar numa linha abre o formulário de edição da OS, sem sair do extrato) e o total do período, sempre excluindo OS canceladas da soma.
 5. Botão **"Relatório (PDF)"** — gera e baixa um PDF com as OS do período filtrado (ver "Emissão de documentos" abaixo), pronto para enviar ao próprio Cliente/Parceiro.
 
 ## Módulo Catálogo de Serviços

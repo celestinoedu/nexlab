@@ -8,7 +8,7 @@ import {
   referenciaOrdemExibicao,
   STATUS_OS_LABEL,
   valorEfetivoItem,
-  valorTotalOrdem,
+  valorFaturavelOrdem,
   type OrdemServicoComRelacoes,
   type StatusOS,
 } from '@/types/domain'
@@ -166,7 +166,7 @@ export function ListaOrdensServico({ ordens, onEditOrdem, onImprimirOrdem }: Lis
                   <td className={`${TD_BASE} whitespace-nowrap text-slate-500`}>{formatarData(ordem.data_recebimento)}</td>
                   <td className={`${TD_BASE} whitespace-nowrap text-slate-500`}>{formatarData(ordem.data_prevista)}</td>
                   <td className={`${TD_BASE} whitespace-nowrap text-right font-medium text-slate-800`}>
-                    {formatarMoeda(valorTotalOrdem(ordem))}
+                    {formatarMoeda(valorFaturavelOrdem(ordem))}
                   </td>
                   <td className={TD_BASE}>
                     {ordem.status === 'entregue' && (

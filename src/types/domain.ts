@@ -205,7 +205,17 @@ export function valorEfetivoItem(item: OrdemServicoItem, tipoEntidade: TipoEntid
 /** Soma de todos os itens de uma OS, já descontado o desconto da ordem. */
 export function valorTotalOrdem(ordem: OrdemServicoComRelacoes): number {
   const subtotal = ordem.itens.reduce((acc, item) => acc + valorEfetivoItem(item, ordem.entidade.tipo), 0)
-  return subtotal - ordem.desconto
+  return Math.max(subtotal - ordem.desconto, 0)
+}
+
+/** Valor que entra em somatórias operacionais: OS cancelada não gera receita. */
+export function valorFaturavelOrdem(ordem: OrdemServicoComRelacoes): number {
+  return ordem.status === 'cancelado' ? 0 : valorTotalOrdem(ordem)
+}
+
+/** Soma padronizada para cards, extratos e relatórios de Ordens de Serviço. */
+export function valorTotalFaturavelOrdens(ordens: OrdemServicoComRelacoes[]): number {
+  return ordens.reduce((total, ordem) => total + valorFaturavelOrdem(ordem), 0)
 }
 
 type OrdemComNumeros = Pick<OrdemServico, 'numero_os' | 'numero_os_cliente'>

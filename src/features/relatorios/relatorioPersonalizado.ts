@@ -1,6 +1,6 @@
 import {
   valorEfetivoItem,
-  valorTotalOrdem,
+  valorFaturavelOrdem,
   type OrdemServicoComRelacoes,
 } from '@/types/domain'
 
@@ -16,7 +16,8 @@ export function itensDoRelatorio(ordem: OrdemServicoComRelacoes, servicoId: stri
  * quantidades; o desconto geral da OS não é atribuído a um item específico.
  */
 export function valorOrdemNoRelatorio(ordem: OrdemServicoComRelacoes, servicoId: string | null) {
-  if (!servicoId) return valorTotalOrdem(ordem)
+  if (ordem.status === 'cancelado') return 0
+  if (!servicoId) return valorFaturavelOrdem(ordem)
   return itensDoRelatorio(ordem, servicoId).reduce(
     (total, item) => total + valorEfetivoItem(item, ordem.entidade.tipo),
     0,

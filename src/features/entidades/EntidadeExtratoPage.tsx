@@ -14,7 +14,7 @@ import { OrdemServicoFormDialog } from '@/features/ordens-servico/components/Ord
 import { EntidadeFormDialog } from './components/EntidadeFormDialog'
 import { TabelaPrecosDialog } from './components/TabelaPrecosDialog'
 import { RelatorioParceiroDialog } from '@/features/relatorios/components/RelatorioParceiroDialog'
-import { valorTotalOrdem, type OrdemServicoComRelacoes } from '@/types/domain'
+import { valorTotalFaturavelOrdens, type OrdemServicoComRelacoes } from '@/types/domain'
 
 export function EntidadeExtratoPage() {
   const { id } = useParams<{ id: string }>()
@@ -54,7 +54,7 @@ export function EntidadeExtratoPage() {
     [ordensNoPeriodo, somenteEntregues],
   )
 
-  const total = ordensFiltradas.reduce((acc, o) => acc + valorTotalOrdem(o), 0)
+  const total = valorTotalFaturavelOrdens(ordensFiltradas)
 
   function abrirEdicaoOrdem(ordem: OrdemServicoComRelacoes) {
     setOrdemEditando(ordem)

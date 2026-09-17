@@ -219,7 +219,7 @@ export function OrdemServicoFormDialog({ open, onOpenChange, ordem }: OrdemServi
         entidadeSelecionada?.tipo === 'parceiro' ? item.valor_comissao ?? 0 : item.valor_unitario ?? 0
       return acc + unit * (item.quantidade || 0)
     }, 0)
-    return subtotal - (desconto || 0)
+    return Math.max(subtotal - (desconto || 0), 0)
   }, [itensAtuais, entidadeSelecionada, desconto])
 
   const onSubmit = async (values: FormValues) => {

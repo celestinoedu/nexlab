@@ -8,12 +8,12 @@ import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/utils'
 import { useEmpresaConfig } from '@/hooks/useEmpresaConfig'
 import { useOrdensServico } from './hooks/useOrdensServico'
-import { useContasReceber } from '@/features/financeiro/hooks/useContasReceber'
 import { KanbanBoard } from './components/KanbanBoard'
 import { ListaOrdensServico } from './components/ListaOrdensServico'
 import { OrdemServicoFormDialog } from './components/OrdemServicoFormDialog'
 import {
   STATUS_OS_LABEL,
+  valorTotalFaturavelOrdens,
   type OrdemServicoComRelacoes,
   type StatusOS,
 } from '@/types/domain'
@@ -35,7 +35,6 @@ const VALOR_OCULTO = '••••'
 
 export function OrdensServicoPage() {
   const { data: ordens, isLoading } = useOrdensServico()
-  const { data: contasReceber, isLoading: carregandoContas } = useContasReceber()
   const { data: empresaConfig } = useEmpresaConfig()
   // Lista é a visão padrão — Kanban continua disponível pelo toggle.
   const [visao, setVisao] = React.useState<Visao>('lista')
@@ -89,17 +88,11 @@ export function OrdensServicoPage() {
     [filtradosBase, statusFiltro],
   )
 
-  // KPIs sempre pelo período (mês) filtrado, independente da busca ou do
-  // chip de status da lista — dão uma visão geral do período, não da busca atual.
-  const ordensDoPeriodo = React.useMemo(
-    () => (ordens ?? []).filter((o) => mesFiltro === 'todos' || o.mes_referencia === mesFiltro),
-    [ordens, mesFiltro],
-  )
-  const kpiEmProducao = ordensDoPeriodo.filter((o) => o.status === 'em_producao').length
-  const kpiEntregue = ordensDoPeriodo.filter((o) => o.status === 'entregue').length
-  const kpiAReceber = (contasReceber ?? [])
-    .filter((c) => c.status === 'aberto' && (mesFiltro === 'todos' || c.mes_referencia === mesFiltro))
-    .reduce((acc, c) => acc + c.valor, 0)
+  // O resumo usa exatamente o mesmo conjunto exibido pela lista: mês, busca
+  // e status. OS canceladas permanecem consultáveis, mas valem zero no total.
+  const kpiEmProducao = filtradosLista.filter((o) => o.status === 'em_producao').length
+  const kpiEntregue = filtradosLista.filter((o) => o.status === 'entregue').length
+  const kpiTotalOrdens = valorTotalFaturavelOrdens(filtradosLista)
 
   function abrirNovaOrdem() {
     setOrdemEditando(null)
@@ -134,7 +127,7 @@ export function OrdensServicoPage() {
 
       <div className="flex flex-col gap-2">
         <div className="flex items-center justify-between">
-          <span className="text-xs font-medium text-slate-400">Resumo do período</span>
+          <span className="text-xs font-medium text-slate-400">Resumo dos filtros</span>
           <button
             type="button"
             onClick={alternarMostrarValores}
@@ -160,10 +153,10 @@ export function OrdensServicoPage() {
           />
           <KpiCard
             icon={Wallet}
-            label="Total a Receber"
+            label="Total das OS filtradas"
             value={
               mostrarValores
-                ? kpiAReceber.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+                ? kpiTotalOrdens.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
                 : VALOR_OCULTO
             }
             colorClass="bg-brand-100 text-brand-700"
@@ -197,7 +190,15 @@ export function OrdensServicoPage() {
 
         <div className="ml-auto flex items-center gap-1 rounded-xl border border-slate-200 bg-white p-1">
           <ToggleButton active={visao === 'lista'} onClick={() => setVisao('lista')} icon={List} label="Lista" />
-          <ToggleButton active={visao === 'kanban'} onClick={() => setVisao('kanban')} icon={LayoutGrid} label="Kanban" />
+          <ToggleButton
+            active={visao === 'kanban'}
+            onClick={() => {
+              setStatusFiltro('todos')
+              setVisao('kanban')
+            }}
+            icon={LayoutGrid}
+            label="Kanban"
+          />
         </div>
       </div>
 
@@ -220,7 +221,7 @@ export function OrdensServicoPage() {
         </div>
       )}
 
-      {isLoading || carregandoContas ? (
+      {isLoading ? (
         <div className="flex justify-center py-16">
           <Loader2 className="animate-spin text-brand-600" size={28} />
         </div>

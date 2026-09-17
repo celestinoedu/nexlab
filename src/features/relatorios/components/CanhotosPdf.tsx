@@ -1,7 +1,7 @@
 import { Document, Page, View, Text, Image, StyleSheet, pdf } from '@react-pdf/renderer'
 import { baixarBlob } from '@/lib/download'
 import { format, parseISO } from 'date-fns'
-import { ARCO_LABEL, referenciaOrdemExibicao, valorEfetivoItem, type OrdemServicoComRelacoes } from '@/types/domain'
+import { ARCO_LABEL, referenciaOrdemExibicao, valorEfetivoItem, valorTotalOrdem, type OrdemServicoComRelacoes } from '@/types/domain'
 import type { EmpresaConfig } from '@/hooks/useEmpresaConfig'
 
 /**
@@ -143,11 +143,7 @@ export function CanhotosPdfDocument({ itens, empresaNome, logoUrl }: CanhotosPdf
               <View key={indiceLinha} style={styles.linha} wrap={false}>
                 {linha.map(({ ordem, copia, totalCopias }) => {
                   const ehParceiro = ordem.entidade.tipo === 'parceiro'
-                  const subtotal = ordem.itens.reduce(
-                    (acc, item) => acc + valorEfetivoItem(item, ordem.entidade.tipo),
-                    0,
-                  )
-                  const total = subtotal - ordem.desconto
+                  const total = valorTotalOrdem(ordem)
                   const itensExibidos = ordem.itens.slice(0, MAX_ITENS_LISTADOS)
                   const itensRestantes = ordem.itens.length - itensExibidos.length
 

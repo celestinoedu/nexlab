@@ -2,7 +2,7 @@ import { Document, Page, View, Text, Image, StyleSheet, pdf } from '@react-pdf/r
 import { baixarBlob } from '@/lib/download'
 import { format, parseISO } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
-import { ARCO_LABEL, STATUS_OS_LABEL, referenciaOrdemExibicao, valorEfetivoItem, type OrdemServicoComRelacoes } from '@/types/domain'
+import { ARCO_LABEL, STATUS_OS_LABEL, referenciaOrdemExibicao, valorEfetivoItem, valorTotalOrdem, type OrdemServicoComRelacoes } from '@/types/domain'
 import type { EmpresaConfig } from '@/hooks/useEmpresaConfig'
 
 const styles = StyleSheet.create({
@@ -57,8 +57,7 @@ function formatarMoeda(valor: number) {
 
 export function OrdemServicoPdfDocument({ ordem, empresa }: OrdemServicoPdfDocumentProps) {
   const ehParceiro = ordem.entidade.tipo === 'parceiro'
-  const subtotal = ordem.itens.reduce((acc, item) => acc + valorEfetivoItem(item, ordem.entidade.tipo), 0)
-  const total = subtotal - ordem.desconto
+  const total = valorTotalOrdem(ordem)
   const referencia = referenciaOrdemExibicao(ordem)
 
   return (

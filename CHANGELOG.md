@@ -4,6 +4,15 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), 
 
 ## [Não publicado]
 
+## [0.22.1] - 2026-09-17 — Totais consistentes
+
+### Corrigido
+- **Total da Lista de OS**: o terceiro card agora soma exatamente as OS exibidas após os filtros de mês, busca e status, em vez de mostrar um saldo de Contas a Receber sem relação direta com a tabela.
+- **Regra única de somatória**: Lista de OS, extrato de Clientes/Parceiros, Dashboard e relatórios usam a mesma regra — valor cheio para Cliente, comissão para Parceiro, OS cancelada valendo zero e total nunca negativo.
+- **Produção do Dashboard**: OS canceladas deixam de entrar na quantidade do mês e no denominador do percentual concluído.
+
+## [0.22.0] - 2026-09-16 — Fechamento e financeiro
+
 ### Adicionado
 - **Reabertura do fechamento financeiro**: administradores podem reabrir um mês fechado, corrigir lançamentos com os totais ao vivo e fechá-lo novamente.
 - **Receita bruta na Visão Geral**: o card Financeiro passa a exibir a soma de todas as OS não canceladas do mês, sem confundir produção com saldo de contas já entregues.

@@ -17,7 +17,7 @@ import { useContasReceber } from '@/features/financeiro/hooks/useContasReceber'
 import { useDespesas } from '@/features/despesas/hooks/useDespesas'
 import { useEntidades } from '@/hooks/useEntidades'
 import { useInsumos } from '@/features/estoque/hooks/useInsumos'
-import { STATUS_OS_LABEL, valorTotalOrdem, type OrdemServicoComRelacoes } from '@/types/domain'
+import { STATUS_OS_LABEL, valorTotalFaturavelOrdens, type OrdemServicoComRelacoes } from '@/types/domain'
 
 const DIAS_VENCENDO = 3
 const DIAS_SEM_MOVIMENTO = 15
@@ -59,18 +59,19 @@ export function DashboardPage() {
 
     const mesAtual = format(startOfMonth(hoje), 'yyyy-MM-dd')
     const ordensDoMes = listaOrdens.filter((o) => o.mes_referencia === mesAtual)
-    const entreguesMes = ordensDoMes.filter((o) => o.status === 'entregue').length
-    const emProducaoMes = ordensDoMes.filter((o) => o.status === 'em_producao').length
-    const prontoEntregaMes = ordensDoMes.filter((o) => o.status === 'pronto_entrega').length
-    const percentualConcluido = ordensDoMes.length > 0 ? Math.round((entreguesMes / ordensDoMes.length) * 100) : 0
+    const ordensValidasDoMes = ordensDoMes.filter((o) => o.status !== 'cancelado')
+    const entreguesMes = ordensValidasDoMes.filter((o) => o.status === 'entregue').length
+    const emProducaoMes = ordensValidasDoMes.filter((o) => o.status === 'em_producao').length
+    const prontoEntregaMes = ordensValidasDoMes.filter((o) => o.status === 'pronto_entrega').length
+    const percentualConcluido = ordensValidasDoMes.length > 0
+      ? Math.round((entreguesMes / ordensValidasDoMes.length) * 100)
+      : 0
 
     const listaContas = contasReceber ?? []
     // Receita operacional do mês: inclui toda OS não cancelada do período,
     // independentemente de entrega ou baixa. Para parceiros, valorTotalOrdem
     // usa a comissão; para clientes, usa o valor cheio dos serviços.
-    const receitaBrutaMes = ordensDoMes
-      .filter((o) => o.status !== 'cancelado')
-      .reduce((acc, o) => acc + Math.max(valorTotalOrdem(o), 0), 0)
+    const receitaBrutaMes = valorTotalFaturavelOrdens(ordensDoMes)
     // Saldo financeiro real: somente contas abertas de OS já entregues.
     const aReceber = listaContas
       .filter((c) => c.status === 'aberto')
@@ -104,7 +105,7 @@ export function DashboardPage() {
     return {
       vencendo,
       atrasadas,
-      ordensDoMes,
+      ordensDoMes: ordensValidasDoMes,
       entreguesMes,
       emProducaoMes,
       prontoEntregaMes,
