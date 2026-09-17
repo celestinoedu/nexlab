@@ -73,7 +73,7 @@ Cadastro simples, mesmo padrão visual do Catálogo de Serviços: busca, chips d
 ## Módulo Fechamento Financeiro (`FechamentoFinanceiroPage`, `/fechamento`)
 
 - Seletor de mês (`input type="month"`). Mostra três números: **Recebido no mês** (Contas a Receber pagas, pelo mês do pagamento), **Despesas no mês** e **Resultado** (recebido − despesas).
-- Antes de fechado, os valores são recalculados toda vez que a tela abre. Botão **"Fechar o mês"** (só `admin`) trava um snapshot — a partir daí a tela mostra sempre esse valor travado para aquele mês, com a data em que foi fechado. Fechar de novo atualiza o snapshot (não é uma ação de uso único).
+- Antes de fechado, os valores são recalculados toda vez que a tela abre. Botão **"Fechar o mês"** (só `admin`) trava um snapshot — a partir daí a tela mostra sempre esse valor travado para aquele mês, com a data em que foi fechado. Um administrador pode usar **"Reabrir o mês"** para voltar ao cálculo ao vivo e fechá-lo novamente depois das correções.
 - Distinto do fechamento por entidade que já existe (`fechamentos`, sem tela própria) — este é o resultado do laboratório inteiro.
 
 ## Módulo Relatórios (`RelatoriosPage`, `/relatorios`)

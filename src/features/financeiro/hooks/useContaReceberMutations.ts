@@ -1,12 +1,38 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { isDemoAtivo, invalidarSeReal, atualizarNoCache } from '@/lib/demoMode'
-import type { ContaReceberComRelacoes } from '@/types/domain'
+import type { ContaReceberComRelacoes, OrdemServicoComRelacoes, StatusPagamentoOS } from '@/types/domain'
 
 function traduzErro(message: string): string {
   return message.toLowerCase().includes('row-level security')
     ? 'Somente administradores podem cancelar uma conta a receber.'
     : 'Não foi possível salvar agora. Tente novamente.'
+}
+
+function sincronizarOrdemDemo(
+  queryClient: ReturnType<typeof useQueryClient>,
+  contaId: string,
+  statusPagamento: StatusPagamentoOS,
+  dataPagamento: string | null,
+  formaPagamento?: string | null,
+) {
+  const conta = queryClient
+    .getQueryData<ContaReceberComRelacoes[]>(['contas_receber'])
+    ?.find((item) => item.id === contaId)
+  if (!conta) return
+
+  queryClient.setQueryData<OrdemServicoComRelacoes[]>(['ordens_servico'], (old) =>
+    (old ?? []).map((ordem) =>
+      ordem.id === conta.ordem_id
+        ? {
+            ...ordem,
+            status_pagamento: statusPagamento,
+            data_pagamento: dataPagamento,
+            ...(formaPagamento !== undefined ? { forma_pagamento: formaPagamento } : {}),
+          }
+        : ordem,
+    ),
+  )
 }
 
 export function useContaReceberMutations() {
@@ -28,6 +54,7 @@ export function useContaReceberMutations() {
           data_pagamento: dataPagamento,
           forma_pagamento: formaPagamento,
         })
+        sincronizarOrdemDemo(queryClient, id, 'pago', dataPagamento, formaPagamento)
         return
       }
       const { error } = await supabase
@@ -48,6 +75,7 @@ export function useContaReceberMutations() {
           status: 'aberto',
           data_pagamento: null,
         })
+        sincronizarOrdemDemo(queryClient, id, 'pendente', null)
         return
       }
       const { error } = await supabase.from('contas_receber').update({ status: 'aberto', data_pagamento: null }).eq('id', id)
@@ -75,6 +103,7 @@ export function useContaReceberMutations() {
             ids.includes(c.id) ? { ...c, status: 'pago', data_pagamento: dataPagamento, forma_pagamento: formaPagamento } : c,
           ),
         )
+        for (const id of ids) sincronizarOrdemDemo(queryClient, id, 'pago', dataPagamento, formaPagamento)
         return
       }
       const { error } = await supabase

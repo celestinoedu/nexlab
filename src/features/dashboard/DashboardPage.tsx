@@ -17,7 +17,7 @@ import { useContasReceber } from '@/features/financeiro/hooks/useContasReceber'
 import { useDespesas } from '@/features/despesas/hooks/useDespesas'
 import { useEntidades } from '@/hooks/useEntidades'
 import { useInsumos } from '@/features/estoque/hooks/useInsumos'
-import { STATUS_OS_LABEL, type OrdemServicoComRelacoes } from '@/types/domain'
+import { STATUS_OS_LABEL, valorTotalOrdem, type OrdemServicoComRelacoes } from '@/types/domain'
 
 const DIAS_VENCENDO = 3
 const DIAS_SEM_MOVIMENTO = 15
@@ -65,6 +65,12 @@ export function DashboardPage() {
     const percentualConcluido = ordensDoMes.length > 0 ? Math.round((entreguesMes / ordensDoMes.length) * 100) : 0
 
     const listaContas = contasReceber ?? []
+    // Receita operacional do mês: inclui toda OS não cancelada do período,
+    // independentemente de entrega ou baixa. Para parceiros, valorTotalOrdem
+    // usa a comissão; para clientes, usa o valor cheio dos serviços.
+    const receitaBrutaMes = ordensDoMes
+      .filter((o) => o.status !== 'cancelado')
+      .reduce((acc, o) => acc + Math.max(valorTotalOrdem(o), 0), 0)
     // Saldo financeiro real: somente contas abertas de OS já entregues.
     const aReceber = listaContas
       .filter((c) => c.status === 'aberto')
@@ -103,6 +109,7 @@ export function DashboardPage() {
       emProducaoMes,
       prontoEntregaMes,
       percentualConcluido,
+      receitaBrutaMes,
       aReceber,
       recebidoMes,
       despesasMes,
@@ -198,7 +205,8 @@ export function DashboardPage() {
               <p className="text-sm font-medium text-slate-500">Financeiro</p>
               <Wallet size={18} className="text-slate-400" />
             </div>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+              <ValorFinanceiro label="Receita bruta no mês" valor={dados.receitaBrutaMes} tom="success" />
               <ValorFinanceiro label="A receber" valor={dados.aReceber} tom="brand" />
               <ValorFinanceiro label="Recebido no mês" valor={dados.recebidoMes} tom="success" />
               <ValorFinanceiro label="Despesas no mês" valor={dados.despesasMes} tom="danger" />

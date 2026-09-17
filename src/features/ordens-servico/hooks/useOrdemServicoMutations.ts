@@ -135,6 +135,14 @@ function garantirContaReceberDemo(
               entidade_id: ordem.entidade_id,
               mes_referencia: ordem.mes_referencia,
               valor: Math.max(valorTotalOrdem(ordem), 0),
+              ...(existente.status === 'cancelado'
+                ? {}
+                : {
+                    status: ordem.status_pagamento === 'pago' ? 'pago' : 'aberto',
+                    forma_pagamento: ordem.forma_pagamento,
+                    data_pagamento: ordem.status_pagamento === 'pago' ? ordem.data_pagamento : null,
+                    justificativa_cancelamento: null,
+                  }),
               entidade: ordem.entidade,
               ordem: {
                 id: ordem.id,

@@ -48,16 +48,16 @@ Todo fechamento financeiro considera o mês **completo**: do dia 1 ao último di
 
 ## Contas a Receber
 
-- O indicador **“A receber” do Dashboard**, o KPI **“Total a Receber”** da Lista de OS e a abertura da tela Contas a Receber mostram a mesma coisa: a soma das contas com `status = aberto`, geradas por OS já entregues. OS ainda em produção são previsão operacional e não entram no saldo financeiro.
+- O indicador **“A receber” do Dashboard**, o KPI **“Total a Receber”** da Lista de OS e a abertura da tela Contas a Receber mostram a mesma coisa: a soma das contas com `status = aberto`, geradas por OS já entregues. OS ainda em produção são previsão operacional e não entram no saldo financeiro. O indicador separado **“Receita bruta no mês”** soma todas as OS não canceladas do mês, inclusive as que ainda estão em produção, usando valor cheio para Clientes e comissão para Parceiros.
 - **Cada OS entregue vira automaticamente uma linha de Contas a Receber** (`contas_receber`) — não é preciso lançar nada manualmente. Valor, entidade e mês permanecem sincronizados se os itens, o desconto ou os dados da OS forem corrigidos depois. O estado de baixa (aberto/pago/cancelado) e seus dados de pagamento continuam sendo administrados no Financeiro e não são sobrescritos pela sincronização.
 - Uma conta a receber tem três estados: `aberto` (default, aguardando) → `pago` (com data e forma de pagamento) ou `cancelado`.
 - **"Excluir" uma conta a receber é sempre um cancelamento com justificativa**, nunca uma exclusão de verdade: exige que o usuário explique o motivo, a linha some da visão padrão da tela mas continua no banco com `status = cancelado` e só reaparece se o usuário marcar "Mostrar cancelados". Ação restrita a `admin`.
-- O formulário da própria OS tem um **status financeiro** (Pendente/Pago) e **forma de pagamento** — é a mesma informação usada para popular a conta a receber no momento em que a OS é marcada como entregue; depois disso, quem gerencia o pagamento é a tela de Contas a Receber.
+- O formulário da própria OS tem um **status financeiro** (Pendente/Pago) e **forma de pagamento**. Ao alterar explicitamente esses campos em uma OS entregue, a Conta a Receber correspondente é atualizada; baixas ou reaberturas feitas em Contas a Receber também atualizam a OS. Edições comuns de itens, entidade ou datas continuam preservando a baixa financeira.
 - "Fechar o mês" (ação em `fechamentos`, por entidade) tira uma foto do valor total daquele momento — recurso existente desde a v0.1.0, ainda sem tela própria.
 
 ## Fechamento Financeiro (resultado do laboratório)
 
-Distinto do fechamento por entidade acima: mostra o **resultado do laboratório inteiro** num mês — tudo que foi efetivamente recebido (Contas a Receber com `status = pago`, pelo mês do pagamento) menos as Despesas lançadas naquele mês. Antes de fechar, os totais são recalculados ao vivo toda vez que a tela é aberta; a ação "Fechar o mês" (só `admin`) trava um snapshot em `fechamentos_financeiros` — se novas contas/despesas entrarem depois, o valor fechado não muda até alguém fechar o mês de novo.
+Distinto do fechamento por entidade acima: mostra o **resultado do laboratório inteiro** num mês — tudo que foi efetivamente recebido (Contas a Receber com `status = pago`, pelo mês do pagamento) menos as Despesas lançadas naquele mês. Antes de fechar, os totais são recalculados ao vivo toda vez que a tela é aberta; a ação "Fechar o mês" (só `admin`) trava um snapshot em `fechamentos_financeiros`. Um administrador pode **reabrir o mês** para voltar aos valores ao vivo e fechá-lo novamente depois das correções.
 
 ## Despesas
 

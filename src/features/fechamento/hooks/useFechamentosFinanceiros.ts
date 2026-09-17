@@ -63,3 +63,33 @@ export function useFecharMesFinanceiro() {
     },
   })
 }
+
+export function useReabrirMesFinanceiro() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (fechamento: FechamentoFinanceiro) => {
+      const patch = {
+        status: 'aberto' as const,
+        data_fechamento: null,
+      }
+
+      if (isDemoAtivo(queryClient)) {
+        queryClient.setQueryData<FechamentoFinanceiro[]>(['fechamentos_financeiros'], (old) =>
+          (old ?? []).map((item) => (item.id === fechamento.id ? { ...item, ...patch } : item)),
+        )
+        return
+      }
+
+      const { error } = await supabase
+        .from('fechamentos_financeiros')
+        .update(patch)
+        .eq('id', fechamento.id)
+
+      if (error) throw new Error('Não foi possível reabrir o mês agora. Tente novamente.')
+    },
+    onSuccess: () => {
+      invalidarSeReal(queryClient, ['fechamentos_financeiros'])
+    },
+  })
+}

@@ -4,6 +4,13 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), 
 
 ## [Não publicado]
 
+### Adicionado
+- **Reabertura do fechamento financeiro**: administradores podem reabrir um mês fechado, corrigir lançamentos com os totais ao vivo e fechá-lo novamente.
+- **Receita bruta na Visão Geral**: o card Financeiro passa a exibir a soma de todas as OS não canceladas do mês, sem confundir produção com saldo de contas já entregues.
+
+### Corrigido
+- **Status financeiro da OS e da conta**: mudanças explícitas de pagamento agora são sincronizadas nos dois sentidos. A migração corrige também contas históricas abertas cuja OS já estava marcada como paga, incluindo o caso reportado da OS #4857.
+
 ## [0.21.3] - 2026-09-15 — Busca de OS no relatório
 
 ### Adicionado

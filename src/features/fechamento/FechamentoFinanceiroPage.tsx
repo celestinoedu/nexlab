@@ -1,14 +1,18 @@
 import * as React from 'react'
 import { format, parseISO } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
-import { Lock, Loader2 } from 'lucide-react'
+import { Lock, Loader2, LockOpen } from 'lucide-react'
 import { toast } from 'sonner'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { useProfile } from '@/hooks/useProfile'
 import { useContasReceber } from '@/features/financeiro/hooks/useContasReceber'
 import { useDespesas } from '@/features/despesas/hooks/useDespesas'
-import { useFechamentosFinanceiros, useFecharMesFinanceiro } from './hooks/useFechamentosFinanceiros'
+import {
+  useFechamentosFinanceiros,
+  useFecharMesFinanceiro,
+  useReabrirMesFinanceiro,
+} from './hooks/useFechamentosFinanceiros'
 
 function formatarMoeda(valor: number) {
   return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
@@ -21,6 +25,7 @@ export function FechamentoFinanceiroPage() {
   const { data: fechamentos, isLoading: carregandoFechamentos } = useFechamentosFinanceiros()
   const { data: profile } = useProfile()
   const fecharMes = useFecharMesFinanceiro()
+  const reabrirMes = useReabrirMesFinanceiro()
   const podeAdmin = profile?.role === 'admin'
 
   const fechamentoExistente = fechamentos?.find((f) => f.mes_referencia.startsWith(mesSelecionado))
@@ -58,6 +63,16 @@ export function FechamentoFinanceiroPage() {
       toast.success('Mês fechado.')
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Não foi possível fechar o mês agora.')
+    }
+  }
+
+  async function reabrir() {
+    if (!fechamentoExistente) return
+    try {
+      await reabrirMes.mutateAsync(fechamentoExistente)
+      toast.success('Mês reaberto. Os valores voltaram a ser calculados ao vivo.')
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Não foi possível reabrir o mês agora.')
     }
   }
 
@@ -106,13 +121,20 @@ export function FechamentoFinanceiroPage() {
           </div>
 
           {jaFechado ? (
-            <p className="text-xs text-slate-400">
-              Fechado em{' '}
-              {fechamentoExistente?.data_fechamento &&
-                format(parseISO(fechamentoExistente.data_fechamento), "dd/MM/yyyy 'às' HH:mm")}
-              . Os valores acima ficam travados mesmo que novas contas/despesas sejam lançadas depois — para
-              refletir mudanças, é preciso fechar o mês de novo.
-            </p>
+            <div className="flex flex-wrap items-center gap-3">
+              <p className="text-xs text-slate-400">
+                Fechado em{' '}
+                {fechamentoExistente?.data_fechamento &&
+                  format(parseISO(fechamentoExistente.data_fechamento), "dd/MM/yyyy 'às' HH:mm")}
+                . Os valores ficam travados até o mês ser reaberto.
+              </p>
+              {podeAdmin && (
+                <Button variant="secondary" size="sm" onClick={reabrir} disabled={reabrirMes.isPending}>
+                  {reabrirMes.isPending ? <Loader2 className="animate-spin" size={16} /> : <LockOpen size={16} />}
+                  Reabrir o mês
+                </Button>
+              )}
+            </div>
           ) : podeAdmin ? (
             <Button className="self-start" onClick={fechar} disabled={fecharMes.isPending}>
               {fecharMes.isPending ? <Loader2 className="animate-spin" size={16} /> : <Lock size={16} />}

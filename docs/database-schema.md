@@ -1,6 +1,6 @@
 # NexLab — Schema do banco de dados
 
-> Espelha `supabase/migrations/0001_init.sql` a `0018_perfil_faturamento.sql`. Se o schema mudar, atualize a migration nova + este arquivo no mesmo commit — nunca deixe este documento desatualizado em relação às migrations reais.
+> Espelha `supabase/migrations/0001_init.sql` a `0019_reabertura_e_sincronia_financeira.sql`. Se o schema mudar, atualize a migration nova + este arquivo no mesmo commit — nunca deixe este documento desatualizado em relação às migrations reais.
 
 ## Multi-tenant
 
@@ -223,7 +223,7 @@ RLS fica habilitada e não existe policy para `anon` ou `authenticated`. Somente
 ### `fechamentos_financeiros` (nova na migration `0003`)
 Snapshot do **resultado do laboratório inteiro** por mês (não por entidade): `total_receitas` (soma de `contas_receber.valor` com `status = pago` no mês, por `data_pagamento`) menos `total_despesas` (soma de `despesas.valor` no mês, por `data_despesa`).
 
-`mes_referencia` (`unique`), `total_receitas`, `total_despesas`, `resultado`, `status` (`status_fechamento_periodo`), `data_fechamento`, `observacoes`, `created_by`. Antes de "fechar o mês", a tela calcula os totais ao vivo; depois de fechado, mostra o snapshot travado.
+`mes_referencia` (`unique`), `total_receitas`, `total_despesas`, `resultado`, `status` (`status_fechamento_periodo`), `data_fechamento`, `observacoes`, `created_by`. Antes de "fechar o mês", a tela calcula os totais ao vivo; depois de fechado, mostra o snapshot travado. Um administrador pode reabrir o período (`status = aberto`) para retomar o cálculo ao vivo e fechá-lo novamente.
 
 ## Views
 
