@@ -4,6 +4,14 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), 
 
 ## [Não publicado]
 
+## [0.23.0] - 2026-09-17 — Relatórios para Clientes e Parceiros
+
+### Adicionado
+- **Relatório por Cliente/Parceiro**: o relatório por período ou por OS selecionadas agora aceita também cadastros do tipo Cliente, tanto pelo hub de Relatórios quanto pelo extrato do cadastro. Os valores seguem a regra existente: valor cheio para Cliente e comissão para Parceiro.
+
+### Corrigido
+- **Lista de OS no celular**: as colunas de status, pagamento, datas e valor ganharam espaço mínimo suficiente para impedir que textos se sobreponham durante a rolagem horizontal.
+
 ## [0.22.1] - 2026-09-17 — Totais consistentes
 
 ### Corrigido

@@ -156,9 +156,9 @@ export async function baixarRelatorioFechamento(
   baixarBlob(blob, `Fechamento-${entidade.nome.replace(/\s+/g, '-')}.pdf`)
 }
 
-/** Gera o relatório específico de parceiro com as OS já filtradas pela tela. */
-export async function baixarRelatorioParceiro(
-  parceiro: Entidade,
+/** Gera o relatório específico de um Cliente/Parceiro com as OS já filtradas pela tela. */
+export async function baixarRelatorioEntidade(
+  entidade: Entidade,
   ordens: OrdemServicoComRelacoes[],
   filtroLabel: string,
   empresa: EmpresaConfig | undefined,
@@ -166,13 +166,14 @@ export async function baixarRelatorioParceiro(
 ) {
   const blob = await pdf(
     <RelatorioFechamentoPdfDocument
-      entidade={parceiro}
+      entidade={entidade}
       ordens={ordens}
       periodoLabel={filtroLabel}
       empresa={empresa}
-      titulo="Relatório de Parceiro"
+      titulo={`Relatório de ${entidade.tipo === 'parceiro' ? 'Parceiro' : 'Cliente'}`}
       totalLabel={totalLabel}
     />,
   ).toBlob()
-  baixarBlob(blob, `Relatorio-Parceiro-${parceiro.nome.replace(/\s+/g, '-')}.pdf`)
+  const tipoArquivo = entidade.tipo === 'parceiro' ? 'Parceiro' : 'Cliente'
+  baixarBlob(blob, `Relatorio-${tipoArquivo}-${entidade.nome.replace(/\s+/g, '-')}.pdf`)
 }

@@ -125,12 +125,10 @@ export function EntidadeExtratoPage() {
           {!entidade.ativo && <Badge variant="neutral">Inativo</Badge>}
         </div>
         <div className="flex flex-wrap gap-2">
-          {entidade.tipo === 'parceiro' && (
-            <Button variant="secondary" size="sm" onClick={() => setRelatorioOrdensAberto(true)}>
-              <FileCheck2 size={16} />
-              Relatório por OS
-            </Button>
-          )}
+          <Button variant="secondary" size="sm" onClick={() => setRelatorioOrdensAberto(true)}>
+            <FileCheck2 size={16} />
+            Relatório por OS
+          </Button>
           <Button variant="secondary" size="sm" onClick={() => setPrecosAberto(true)}>
             <Wallet size={16} />
             Tabela de preços
@@ -220,14 +218,12 @@ export function EntidadeExtratoPage() {
         onOpenChange={setDialogOrdemAberto}
         ordem={ordemEditando}
       />
-      {entidade.tipo === 'parceiro' && (
-        <RelatorioParceiroDialog
-          open={relatorioOrdensAberto}
-          onOpenChange={setRelatorioOrdensAberto}
-          parceiroFixo={entidade}
-          formatoInicial="os"
-        />
-      )}
+      <RelatorioParceiroDialog
+        open={relatorioOrdensAberto}
+        onOpenChange={setRelatorioOrdensAberto}
+        entidadeFixa={entidade}
+        formatoInicial="os"
+      />
     </div>
   )
 }

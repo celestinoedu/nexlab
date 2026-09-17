@@ -69,19 +69,19 @@ export function ListaOrdensServico({ ordens, onEditOrdem, onImprimirOrdem }: Lis
 
   return (
     <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white">
-      <table className="w-full min-w-[1080px] table-fixed text-left text-sm">
+      <table className="w-full min-w-[1280px] table-fixed text-left text-sm">
         <colgroup>
           <col className="w-[3.5%]" />
-          <col className="w-[5.5%]" />
-          <col className="w-[15%]" />
+          <col className="w-[6%]" />
           <col className="w-[13%]" />
-          <col className="w-[13%]" />
+          <col className="w-[11.5%]" />
+          <col className="w-[11.5%]" />
+          <col className="w-[12%]" />
           <col className="w-[9%]" />
-          <col className="w-[8.5%]" />
-          <col className="w-[8%]" />
-          <col className="w-[8%]" />
-          <col className="w-[9.5%]" />
-          <col className="w-[7%]" />
+          <col className="w-[10%]" />
+          <col className="w-[10%]" />
+          <col className="w-[9%]" />
+          <col className="w-[4.5%]" />
         </colgroup>
         <thead className="border-b border-slate-100 text-xs font-medium text-slate-400">
           <tr>
@@ -90,11 +90,11 @@ export function ListaOrdensServico({ ordens, onEditOrdem, onImprimirOrdem }: Lis
             <th className="px-3 py-3">Cliente / Parceiro</th>
             <th className="px-3 py-3">Serviços</th>
             <th className="px-3 py-3">Cliente final / Paciente</th>
-            <th className="px-3 py-3">Status OS</th>
-            <th className="px-3 py-3">Pagamento</th>
-            <th className="px-3 py-3">Recebimento</th>
-            <th className="px-3 py-3">Previsão</th>
-            <th className="px-3 py-3 text-right">Valor</th>
+            <th className="whitespace-nowrap px-3 py-3">Status OS</th>
+            <th className="whitespace-nowrap px-3 py-3">Pagamento</th>
+            <th className="whitespace-nowrap px-3 py-3">Recebimento</th>
+            <th className="whitespace-nowrap px-3 py-3">Previsão</th>
+            <th className="whitespace-nowrap px-3 py-3 text-right">Valor</th>
             <th className="px-3 py-3" />
           </tr>
         </thead>

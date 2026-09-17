@@ -29,7 +29,7 @@ type TipoPeriodo = 'personalizado' | 'mensal' | 'semestral' | 'anual'
 interface RelatorioParceiroDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  parceiroFixo?: Entidade
+  entidadeFixa?: Entidade
   formatoInicial?: FormatoRelatorio
 }
 
@@ -97,7 +97,7 @@ function RadioCard({
     >
       <input
         type="radio"
-        name="formato-relatorio-parceiro"
+        name="formato-relatorio-entidade"
         checked={checked}
         onChange={onChange}
         className="mt-0.5 accent-brand-600"
@@ -113,14 +113,14 @@ function RadioCard({
 export function RelatorioParceiroDialog({
   open,
   onOpenChange,
-  parceiroFixo,
+  entidadeFixa,
   formatoInicial = 'periodo',
 }: RelatorioParceiroDialogProps) {
   const hoje = format(new Date(), 'yyyy-MM-dd')
-  const { data: parceiros, isLoading: carregandoParceiros } = useEntidades('parceiro')
+  const { data: entidades, isLoading: carregandoEntidades } = useEntidades()
   const { data: ordens, isLoading: carregandoOrdens } = useOrdensServico()
   const { data: empresaConfig } = useEmpresaConfig()
-  const [parceiroId, setParceiroId] = React.useState<string | null>(parceiroFixo?.id ?? null)
+  const [entidadeId, setEntidadeId] = React.useState<string | null>(entidadeFixa?.id ?? null)
   const [formato, setFormato] = React.useState<FormatoRelatorio>(formatoInicial)
   const [tipoPeriodo, setTipoPeriodo] = React.useState<TipoPeriodo>('mensal')
   const [dataInicio, setDataInicio] = React.useState(hoje)
@@ -132,25 +132,25 @@ export function RelatorioParceiroDialog({
   const [buscaOrdens, setBuscaOrdens] = React.useState('')
   const [gerando, setGerando] = React.useState(false)
 
-  const parceiro = parceiroFixo ?? parceiros?.find((item) => item.id === parceiroId)
-  const ordensDoParceiro = React.useMemo(
+  const entidade = entidadeFixa ?? entidades?.find((item) => item.id === entidadeId)
+  const ordensDaEntidade = React.useMemo(
     () => (ordens ?? [])
-      .filter((ordem) => ordem.entidade_id === parceiroId)
+      .filter((ordem) => ordem.entidade_id === entidadeId)
       .sort((a, b) => b.data_recebimento.localeCompare(a.data_recebimento) || b.numero_os - a.numero_os),
-    [ordens, parceiroId],
+    [ordens, entidadeId],
   )
   const ordensVisiveis = React.useMemo(() => {
     const termo = normalizarBusca(buscaOrdens)
-    if (!termo) return ordensDoParceiro
+    if (!termo) return ordensDaEntidade
 
-    return ordensDoParceiro.filter((ordem) => normalizarBusca([
+    return ordensDaEntidade.filter((ordem) => normalizarBusca([
       referenciaOrdemExibicao(ordem).numero,
       ordem.numero_os,
       ordem.cliente_final,
       ordem.nome_paciente,
       ...ordem.itens.map((item) => item.servico.nome),
     ].filter(Boolean).join(' ')).includes(termo))
-  }, [ordensDoParceiro, buscaOrdens])
+  }, [ordensDaEntidade, buscaOrdens])
   const todasVisiveisSelecionadas = ordensVisiveis.length > 0 &&
     ordensVisiveis.every((ordem) => ordensSelecionadas.includes(ordem.id))
 
@@ -160,7 +160,7 @@ export function RelatorioParceiroDialog({
       (dataInicio > dataFim || differenceInCalendarDays(parseISO(dataFim), parseISO(dataInicio)) > 30),
   )
   const podeGerar = Boolean(
-    parceiro &&
+    entidade &&
       !gerando &&
       (formato === 'periodo'
         ? intervalo && !periodoPersonalizadoInvalido
@@ -175,7 +175,7 @@ export function RelatorioParceiroDialog({
 
   function alterarAbertura(aberto: boolean) {
     if (!aberto) {
-      setParceiroId(parceiroFixo?.id ?? null)
+      setEntidadeId(entidadeFixa?.id ?? null)
       setFormato(formatoInicial)
       setOrdensSelecionadas([])
       setBuscaOrdens('')
@@ -184,7 +184,7 @@ export function RelatorioParceiroDialog({
   }
 
   async function gerarRelatorio() {
-    if (!parceiro || !podeGerar) return
+    if (!entidade || !podeGerar) return
 
     let ordensFiltradas: OrdemServicoComRelacoes[]
     let filtroLabel: string
@@ -192,12 +192,12 @@ export function RelatorioParceiroDialog({
 
     if (formato === 'periodo') {
       if (!intervalo) return
-      ordensFiltradas = ordensDoParceiro.filter(
+      ordensFiltradas = ordensDaEntidade.filter(
         (ordem) => ordem.data_recebimento >= intervalo.inicio && ordem.data_recebimento <= intervalo.fim,
       )
       filtroLabel = intervalo.label
     } else {
-      ordensFiltradas = ordensDoParceiro.filter((ordem) => ordensSelecionadas.includes(ordem.id))
+      ordensFiltradas = ordensDaEntidade.filter((ordem) => ordensSelecionadas.includes(ordem.id))
       const referencias = ordensFiltradas.map((ordem) => `#${referenciaOrdemExibicao(ordem).numero}`)
       filtroLabel = `OS selecionadas: ${referencias.join(', ')}`
       totalLabel = 'Total das OS:'
@@ -210,8 +210,8 @@ export function RelatorioParceiroDialog({
 
     setGerando(true)
     try {
-      const { baixarRelatorioParceiro } = await import('@/features/entidades/components/RelatorioFechamentoPdf')
-      await baixarRelatorioParceiro(parceiro, ordensFiltradas, filtroLabel, empresaConfig, totalLabel)
+      const { baixarRelatorioEntidade } = await import('@/features/entidades/components/RelatorioFechamentoPdf')
+      await baixarRelatorioEntidade(entidade, ordensFiltradas, filtroLabel, empresaConfig, totalLabel)
       alterarAbertura(false)
     } catch {
       toast.error('Não foi possível gerar o relatório agora. Tente novamente.')
@@ -224,31 +224,34 @@ export function RelatorioParceiroDialog({
     <Dialog open={open} onOpenChange={alterarAbertura}>
       <DialogContent className="flex h-[calc(100%-1rem)] max-h-[calc(100%-1rem)] w-[calc(100%-1rem)] max-w-none flex-col overflow-hidden p-4 sm:h-[calc(100%-3rem)] sm:max-h-[calc(100%-3rem)] sm:w-[calc(100%-3rem)] sm:p-6">
         <DialogHeader className="shrink-0">
-          <DialogTitle>Relatório de Parceiro</DialogTitle>
-          <DialogDescription>Escolha o parceiro e como deseja montar o arquivo PDF.</DialogDescription>
+          <DialogTitle>Relatório por Cliente/Parceiro</DialogTitle>
+          <DialogDescription>Escolha o cliente ou parceiro e como deseja montar o arquivo PDF.</DialogDescription>
         </DialogHeader>
 
         <div className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto pr-1">
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="parceiro-relatorio" className="text-xs font-medium text-slate-600">Parceiro</label>
-            {parceiroFixo ? (
+            <label htmlFor="entidade-relatorio" className="text-xs font-medium text-slate-600">Cliente ou parceiro</label>
+            {entidadeFixa ? (
               <div className="flex h-10 items-center rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm font-medium text-slate-700">
-                {parceiroFixo.nome}
+                {entidadeFixa.nome}
               </div>
             ) : (
               <Combobox
-                id="parceiro-relatorio"
-                options={(parceiros ?? []).map((item) => ({ value: item.id, label: item.nome }))}
-                value={parceiroId}
-                onChange={(novoParceiroId) => {
-                  setParceiroId(novoParceiroId)
+                id="entidade-relatorio"
+                options={(entidades ?? []).map((item) => ({
+                  value: item.id,
+                  label: `${item.nome} · ${item.tipo === 'parceiro' ? 'Parceiro' : 'Cliente'}`,
+                }))}
+                value={entidadeId}
+                onChange={(novaEntidadeId) => {
+                  setEntidadeId(novaEntidadeId)
                   setOrdensSelecionadas([])
                   setBuscaOrdens('')
                 }}
-                placeholder={carregandoParceiros ? 'Carregando parceiros...' : 'Selecione um parceiro'}
-                searchPlaceholder="Buscar parceiro..."
-                emptyMessage="Nenhum parceiro encontrado."
-                disabled={carregandoParceiros}
+                placeholder={carregandoEntidades ? 'Carregando cadastros...' : 'Selecione um cliente ou parceiro'}
+                searchPlaceholder="Buscar cliente ou parceiro..."
+                emptyMessage="Nenhum cliente ou parceiro encontrado."
+                disabled={carregandoEntidades}
               />
             )}
           </div>
@@ -290,12 +293,12 @@ export function RelatorioParceiroDialog({
                 {tipoPeriodo === 'personalizado' && (
                   <>
                     <div className="flex flex-col gap-1.5">
-                      <label htmlFor="parceiro-data-inicio" className="text-xs font-medium text-slate-600">Data inicial</label>
-                      <Input id="parceiro-data-inicio" type="date" value={dataInicio} onChange={(e) => setDataInicio(e.target.value)} />
+                      <label htmlFor="entidade-data-inicio" className="text-xs font-medium text-slate-600">Data inicial</label>
+                      <Input id="entidade-data-inicio" type="date" value={dataInicio} onChange={(e) => setDataInicio(e.target.value)} />
                     </div>
                     <div className="flex flex-col gap-1.5">
-                      <label htmlFor="parceiro-data-fim" className="text-xs font-medium text-slate-600">Data final</label>
-                      <Input id="parceiro-data-fim" type="date" value={dataFim} onChange={(e) => setDataFim(e.target.value)} />
+                      <label htmlFor="entidade-data-fim" className="text-xs font-medium text-slate-600">Data final</label>
+                      <Input id="entidade-data-fim" type="date" value={dataFim} onChange={(e) => setDataFim(e.target.value)} />
                     </div>
                     {periodoPersonalizadoInvalido && (
                       <p className="text-xs font-medium text-red-600 sm:col-span-2">
@@ -307,22 +310,22 @@ export function RelatorioParceiroDialog({
 
                 {tipoPeriodo === 'mensal' && (
                   <div className="flex flex-col gap-1.5 sm:col-span-2">
-                    <label htmlFor="parceiro-mes" className="text-xs font-medium text-slate-600">Mês</label>
-                    <Input id="parceiro-mes" type="month" value={mes} onChange={(e) => setMes(e.target.value)} />
+                    <label htmlFor="entidade-mes" className="text-xs font-medium text-slate-600">Mês</label>
+                    <Input id="entidade-mes" type="month" value={mes} onChange={(e) => setMes(e.target.value)} />
                   </div>
                 )}
 
                 {(tipoPeriodo === 'semestral' || tipoPeriodo === 'anual') && (
                   <div className="flex flex-col gap-1.5">
-                    <label htmlFor="parceiro-ano" className="text-xs font-medium text-slate-600">Ano</label>
-                    <Input id="parceiro-ano" type="number" min="2000" max="2100" value={ano} onChange={(e) => setAno(e.target.value)} />
+                    <label htmlFor="entidade-ano" className="text-xs font-medium text-slate-600">Ano</label>
+                    <Input id="entidade-ano" type="number" min="2000" max="2100" value={ano} onChange={(e) => setAno(e.target.value)} />
                   </div>
                 )}
                 {tipoPeriodo === 'semestral' && (
                   <div className="flex flex-col gap-1.5">
-                    <label htmlFor="parceiro-semestre" className="text-xs font-medium text-slate-600">Semestre</label>
+                    <label htmlFor="entidade-semestre" className="text-xs font-medium text-slate-600">Semestre</label>
                     <select
-                      id="parceiro-semestre"
+                      id="entidade-semestre"
                       value={semestre}
                       onChange={(e) => setSemestre(e.target.value as '1' | '2')}
                       className="h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40"
@@ -339,7 +342,7 @@ export function RelatorioParceiroDialog({
               <div className="mb-3 flex items-center justify-between gap-3">
                 <p className="text-xs font-medium text-slate-600">
                   Ordens de Serviço a incluir
-                  {parceiroId && <span className="ml-1 font-normal text-slate-400">({ordensVisiveis.length} de {ordensDoParceiro.length})</span>}
+                  {entidadeId && <span className="ml-1 font-normal text-slate-400">({ordensVisiveis.length} de {ordensDaEntidade.length})</span>}
                 </p>
                 {ordensVisiveis.length > 0 && (
                   <button
@@ -358,12 +361,12 @@ export function RelatorioParceiroDialog({
                   </button>
                 )}
               </div>
-              {!parceiroId ? (
-                <p className="text-sm text-slate-400">Selecione um parceiro para listar as Ordens de Serviço.</p>
+              {!entidadeId ? (
+                <p className="text-sm text-slate-400">Selecione um cliente ou parceiro para listar as Ordens de Serviço.</p>
               ) : carregandoOrdens ? (
                 <div className="flex justify-center py-4"><Loader2 className="animate-spin text-brand-600" size={22} /></div>
-              ) : ordensDoParceiro.length === 0 ? (
-                <p className="text-sm text-slate-400">Este parceiro ainda não possui Ordens de Serviço cadastradas.</p>
+              ) : ordensDaEntidade.length === 0 ? (
+                <p className="text-sm text-slate-400">Este cadastro ainda não possui Ordens de Serviço.</p>
               ) : (
                 <>
                   <div className="relative mb-3">
@@ -382,7 +385,7 @@ export function RelatorioParceiroDialog({
                       Nenhuma OS encontrada para essa busca.
                     </p>
                   ) : (
-                <div className="grid max-h-[42dvh] gap-2 overflow-y-auto pr-1 lg:grid-cols-2">
+                <div className="grid max-h-[42dvh] gap-2 overflow-x-hidden overflow-y-auto pr-1 lg:grid-cols-2">
                   {ordensVisiveis.map((ordem) => {
                     const referencia = referenciaOrdemExibicao(ordem)
                     const pessoa = [ordem.cliente_final, ordem.nome_paciente].filter(Boolean).join(' — ')

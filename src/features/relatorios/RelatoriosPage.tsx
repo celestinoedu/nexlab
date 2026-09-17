@@ -34,8 +34,8 @@ const FERRAMENTAS: Ferramenta[] = [
   },
   {
     id: 'parceiros',
-    titulo: 'Relatório de Parceiros',
-    descricao: 'Gere um PDF de um parceiro por período ou pelas Ordens de Serviço que você selecionar.',
+    titulo: 'Relatório por Cliente/Parceiro',
+    descricao: 'Gere um PDF de um cliente ou parceiro por período ou pelas Ordens de Serviço que você selecionar.',
     icon: Handshake,
   },
 ]
