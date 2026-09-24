@@ -4,6 +4,7 @@ import { toast } from 'sonner'
 import { Plus, Search, Loader2, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { TotalInfo } from '@/components/shared/TotalInfo'
 import { cn } from '@/lib/utils'
 import { useProfile } from '@/hooks/useProfile'
 import { useDespesas } from './hooks/useDespesas'
@@ -67,7 +68,10 @@ export function DespesasPage() {
         <h1 className="text-2xl font-semibold text-slate-900">Despesas</h1>
         <div className="flex items-center gap-3">
           <div className="rounded-xl bg-brand-50 px-4 py-2 text-right">
-            <span className="block text-xs font-medium text-brand-700">Total (filtro atual)</span>
+            <div className="flex items-center gap-1 text-xs font-medium text-brand-700">
+              <span>Total (filtro atual)</span>
+              <TotalInfo titulo="Total de despesas">Soma os valores das despesas exibidas, respeitando a busca pela descrição e a categoria selecionada. Inclui todas as datas; esta tela não filtra por mês.</TotalInfo>
+            </div>
             <span className="text-lg font-semibold text-brand-900">
               {totalFiltrado.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
             </span>

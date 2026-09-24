@@ -18,6 +18,7 @@ import { useDespesas } from '@/features/despesas/hooks/useDespesas'
 import { useEntidades } from '@/hooks/useEntidades'
 import { useInsumos } from '@/features/estoque/hooks/useInsumos'
 import { STATUS_OS_LABEL, valorTotalFaturavelOrdens, type OrdemServicoComRelacoes } from '@/types/domain'
+import { TotalInfo, REGRA_VALOR_OS, REGRA_MES_OS } from '@/components/shared/TotalInfo'
 
 const DIAS_VENCENDO = 3
 const DIAS_SEM_MOVIMENTO = 15
@@ -207,10 +208,10 @@ export function DashboardPage() {
               <Wallet size={18} className="text-slate-400" />
             </div>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-              <ValorFinanceiro label="Receita bruta no mês" valor={dados.receitaBrutaMes} tom="success" />
-              <ValorFinanceiro label="A receber" valor={dados.aReceber} tom="brand" />
-              <ValorFinanceiro label="Recebido no mês" valor={dados.recebidoMes} tom="success" />
-              <ValorFinanceiro label="Despesas no mês" valor={dados.despesasMes} tom="danger" />
+              <ValorFinanceiro label="Receita bruta no mês" valor={dados.receitaBrutaMes} tom="success" info={`Total operacional das OS do mês corrente, incluindo não entregues, pagas e pendentes. Apesar do nome “bruta”, já desconta os descontos das OS. ${REGRA_VALOR_OS} ${REGRA_MES_OS}`} />
+              <ValorFinanceiro label="A receber" valor={dados.aReceber} tom="brand" info="Soma as contas em aberto de todos os meses, geradas pelas OS entregues. Exclui contas pagas e canceladas. Corresponde a Contas a Receber em Aberto, sem outros filtros." />
+              <ValorFinanceiro label="Recebido no mês" valor={dados.recebidoMes} tom="success" info="Soma as contas pagas pela data de pagamento no mês corrente, independentemente do mês da OS. Exclui abertas e canceladas. Usa os valores atuais, mesmo se houver fechamento gravado." />
+              <ValorFinanceiro label="Despesas no mês" valor={dados.despesasMes} tom="danger" info="Soma todas as despesas cuja data da despesa pertence ao mês corrente. Usa os valores atuais, mesmo se houver fechamento gravado." />
             </div>
           </CardContent>
         </Card>
@@ -285,11 +286,13 @@ function PrazoCard({
   )
 }
 
-function ValorFinanceiro({ label, valor, tom }: { label: string; valor: number; tom: 'brand' | 'success' | 'danger' }) {
+function ValorFinanceiro({ label, valor, tom, info }: { label: string; valor: number; tom: 'brand' | 'success' | 'danger'; info: string }) {
   const cor = tom === 'brand' ? 'text-brand-800' : tom === 'success' ? 'text-success-700' : 'text-danger-700'
   return (
     <div>
-      <p className="text-xs font-medium uppercase text-slate-400">{label}</p>
+      <div className="flex items-center gap-1 text-xs font-medium uppercase text-slate-400">
+        <span>{label}</span><TotalInfo titulo={label}>{info}</TotalInfo>
+      </div>
       <p className={`text-lg font-semibold ${cor}`}>{formatarMoeda(valor)}</p>
     </div>
   )

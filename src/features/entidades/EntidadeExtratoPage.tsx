@@ -15,6 +15,7 @@ import { EntidadeFormDialog } from './components/EntidadeFormDialog'
 import { TabelaPrecosDialog } from './components/TabelaPrecosDialog'
 import { RelatorioParceiroDialog } from '@/features/relatorios/components/RelatorioParceiroDialog'
 import { valorTotalFaturavelOrdens, type OrdemServicoComRelacoes } from '@/types/domain'
+import { TotalInfo, REGRA_VALOR_OS, REGRA_MES_OS } from '@/components/shared/TotalInfo'
 
 export function EntidadeExtratoPage() {
   const { id } = useParams<{ id: string }>()
@@ -182,7 +183,13 @@ export function EntidadeExtratoPage() {
 
         <div className="ml-auto flex items-center gap-3">
           <div className="rounded-xl bg-brand-50 px-4 py-2 text-right">
-            <span className="block text-xs font-medium text-brand-700">Total no período</span>
+            <div className="flex items-center gap-1 text-xs font-medium text-brand-700">
+              <span>Total no período</span>
+              <TotalInfo titulo="Total no período">
+                <p>Soma as OS deste cliente/parceiro no período selecionado. Se “Somente Serviços Entregues” estiver ativo, restringe às entregues. Inclui pagas e pendentes.</p>
+                <p>{REGRA_VALOR_OS} {REGRA_MES_OS}</p>
+              </TotalInfo>
+            </div>
             <span className="text-lg font-semibold text-brand-900">
               {total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
             </span>

@@ -5,6 +5,7 @@ import { LayoutGrid, List, Plus, Search, Loader2, Wrench, Wallet, PackageCheck, 
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { TotalInfo, REGRA_VALOR_OS, REGRA_MES_OS } from '@/components/shared/TotalInfo'
 import { cn } from '@/lib/utils'
 import { useEmpresaConfig } from '@/hooks/useEmpresaConfig'
 import { useOrdensServico } from './hooks/useOrdensServico'
@@ -142,18 +143,21 @@ export function OrdensServicoPage() {
           <KpiCard
             icon={Wrench}
             label="Em Produção"
+            info="Quantidade de OS em produção que atendem aos filtros de mês, busca e status. Não é um valor em reais."
             value={mostrarValores ? String(kpiEmProducao) : VALOR_OCULTO}
             colorClass="bg-warning-100 text-warning-700"
           />
           <KpiCard
             icon={PackageCheck}
             label="Entregue"
+            info="Quantidade de OS entregues que atendem aos filtros de mês, busca e status, incluindo as já pagas. Não é um valor em reais."
             value={mostrarValores ? String(kpiEntregue) : VALOR_OCULTO}
             colorClass="bg-success-100 text-success-700"
           />
           <KpiCard
             icon={Wallet}
             label="Total das OS filtradas"
+            info={`${REGRA_VALOR_OS} Respeita mês, busca e status selecionados. Inclui OS pagas e pendentes; sem o filtro Entregue, também inclui OS ainda não entregues. ${REGRA_MES_OS} Contas a Receber abre somente com contas em aberto, por isso os totais podem diferir.`}
             value={
               mostrarValores
                 ? kpiTotalOrdens.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
@@ -271,12 +275,14 @@ function KpiCard({
   value,
   colorClass,
   className,
+  info,
 }: {
   icon: typeof Wrench
   label: string
   value: string
   colorClass: string
   className?: string
+  info: string
 }) {
   return (
     <div className={cn('flex w-full items-center gap-3 rounded-xl border border-slate-200 bg-white p-4', className)}>
@@ -284,7 +290,9 @@ function KpiCard({
         <Icon size={18} strokeWidth={1.75} />
       </div>
       <div className="min-w-0">
-        <span className="block truncate text-xs font-medium text-slate-500">{label}</span>
+        <div className="flex items-center gap-1 text-xs font-medium text-slate-500">
+          <span>{label}</span><TotalInfo titulo={label}>{info}</TotalInfo>
+        </div>
         <span className="block truncate text-xl font-semibold text-slate-900">{value}</span>
       </div>
     </div>

@@ -42,6 +42,9 @@ export function Combobox({
         <button
           id={id}
           type="button"
+          role="combobox"
+          aria-expanded={open}
+          aria-label={id ? undefined : placeholder}
           disabled={disabled}
           className={cn(
             'flex h-10 w-full items-center justify-between rounded-xl border border-slate-200 bg-white px-3 text-sm',
@@ -54,10 +57,17 @@ export function Combobox({
           <ChevronDown size={16} className="ml-2 shrink-0 text-slate-400" />
         </button>
       </PopoverTrigger>
-      <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0">
-        <Command>
+      <PopoverContent
+        side="bottom"
+        align="start"
+        collisionPadding={12}
+        sticky="always"
+        hideWhenDetached
+        className="flex max-h-[var(--radix-popover-content-available-height)] w-[var(--radix-popover-trigger-width)] max-w-[calc(100vw-1.5rem)] flex-col overflow-hidden p-0"
+      >
+        <Command className="min-h-0">
           <CommandInput placeholder={searchPlaceholder} autoFocus />
-          <CommandList>
+          <CommandList className="min-h-0 overscroll-contain">
             <CommandEmpty>{emptyMessage}</CommandEmpty>
             <CommandGroup>
               {options.map((option) => (

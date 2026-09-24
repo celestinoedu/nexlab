@@ -6,6 +6,7 @@ import { toast } from 'sonner'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { TotalInfo, REGRA_VALOR_OS, REGRA_MES_OS } from '@/components/shared/TotalInfo'
 import { Combobox, type ComboboxOption } from '@/components/shared/Combobox'
 import { cn } from '@/lib/utils'
 import { useProfile } from '@/hooks/useProfile'
@@ -31,7 +32,7 @@ export function ContasReceberPage() {
   const podeAdmin = profile?.role === 'admin'
 
   const [busca, setBusca] = React.useState('')
-  // A tela abre no saldo efetivamente pendente, igual ao KPI de OS e ao Dashboard.
+  // A tela abre no saldo pendente; o total operacional de OS inclui as pagas.
   const [statusFiltro, setStatusFiltro] = React.useState<FiltroStatus>('aberto')
   const [mesFiltro, setMesFiltro] = React.useState('todos')
   const [entidadeFiltro, setEntidadeFiltro] = React.useState<string | null>(null)
@@ -153,7 +154,14 @@ export function ContasReceberPage() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl font-semibold text-slate-900">Contas a Receber</h1>
         <div className="rounded-xl bg-brand-50 px-4 py-2 text-right">
-          <span className="block text-xs font-medium text-brand-700">Total (filtro atual)</span>
+          <div className="flex items-center justify-end gap-1 text-xs font-medium text-brand-700">
+            <span>{statusFiltro === 'aberto' ? 'A receber (filtros atuais)' : statusFiltro === 'pago' ? 'Recebido (filtros atuais)' : 'Total (filtros atuais)'}</span>
+            <TotalInfo titulo="Total de Contas a Receber">
+              <p>Soma os valores das contas geradas pelas OS entregues, respeitando status, mês, cliente/parceiro e busca. Contas canceladas valem zero, mesmo quando visíveis.</p>
+              <p>Em Aberto: somente pendentes. Em Pago: somente quitadas. Em Todos: abertas + pagas. Esta tela abre em Aberto; o total de OS entregues também inclui as já pagas e pode incluir OS cuja conta foi cancelada.</p>
+              <p>{REGRA_VALOR_OS} {REGRA_MES_OS} O filtro de mês não usa a data do pagamento.</p>
+            </TotalInfo>
+          </div>
           <span className="text-lg font-semibold text-brand-900">
             {totalFiltrado.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
           </span>

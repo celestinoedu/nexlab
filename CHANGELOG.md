@@ -4,6 +4,17 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), 
 
 ## [Não publicado]
 
+## [0.24.0] - 2026-09-24 — Clareza dos totais e formulário de OS
+
+### Adicionado
+- Botões de informação nos indicadores de OS, Contas a Receber, extrato, Dashboard, Despesas, Fechamento e total do formulário, com regras de cálculo, datas e filtros.
+
+### Corrigido
+- Nova OS ampliada, com cabeçalho e ações fixos, conteúdo rolável e navegação por teclado na ordem visual.
+- Listas pesquisáveis alinhadas ao campo com compensação do zoom de 80% e altura limitada ao espaço disponível.
+- Rótulo de Contas a Receber acompanha o filtro de status, distinguindo saldo pendente e recebido.
+- Valor de um serviço na Nova OS usa primeiro a tabela do Cliente/Parceiro e recorre ao preço padrão do catálogo quando não há entidade ou preço específico, inclusive se a entidade for escolhida depois do serviço.
+
 ## [0.23.0] - 2026-09-17 — Relatórios para Clientes e Parceiros
 
 ### Adicionado

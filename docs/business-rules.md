@@ -22,7 +22,7 @@ Confirmado com o cliente: **não existe uma % genérica automática de comissão
 - **SpartanDentalLab**: comissão em valor fixo por tipo de serviço, sem relação de % constante (ex.: PIPS R$642 → comissão R$135 ≈ 21%; Meia Mola R$29 → R$8 ≈ 27,5%).
 - **MS Laboratorio**: comissão em % fixo de 37% sobre todos os itens (mas isso é uma coincidência de negociação desse parceiro específico — não uma regra do sistema).
 
-Por isso a tabela `tabela_precos` guarda o **valor final já negociado** por `entidade_id × servico_id`, e não uma fórmula. Ao adicionar um item de serviço numa OS, o sistema busca esse valor automaticamente; se não existir, cai no `preco_padrao` do catálogo (`servicos`) — só relevante para Clientes (Parceiros sem preço específico cadastrado não devem gerar comissão "adivinhada", o valor fica em branco para preenchimento manual).
+Por isso a tabela `tabela_precos` guarda o **valor final já negociado** por `entidade_id × servico_id`, e não uma fórmula. Ao adicionar um item de serviço numa OS, o sistema busca esse valor automaticamente. A prioridade é: preço/comissão da tabela do Cliente ou Parceiro selecionado; se nenhuma entidade estiver selecionada ou não existir preço específico para aquele serviço, usa o `preco_padrao` do catálogo (`servicos`). Ao selecionar a entidade depois dos serviços, os valores sugeridos são recalculados com essa mesma prioridade. O campo permanece editável para ajustes pontuais na OS.
 
 **Cliente novo nasce com a tabela de preços da GRS Lab, Parceiro nasce vazio**: ao cadastrar uma Entidade tipo Cliente, um trigger (`trg_copiar_precos_cliente`, migration `0009`) copia automaticamente o `preco_padrao` de cada serviço ativo do catálogo pra `tabela_precos` daquele cliente — editável depois, linha a linha, na mesma tela de sempre. Parceiro continua sem cópia nenhuma (tabela vazia até alguém preencher preço do parceiro + comissão), porque não existe "comissão padrão" pra copiar — cada Parceiro negocia a dele do zero (ver acima).
 
@@ -59,6 +59,10 @@ Todo fechamento financeiro considera o mês **completo**: do dia 1 ao último di
 ## Fechamento Financeiro (resultado do laboratório)
 
 Distinto do fechamento por entidade acima: mostra o **resultado do laboratório inteiro** num mês — tudo que foi efetivamente recebido (Contas a Receber com `status = pago`, pelo mês do pagamento) menos as Despesas lançadas naquele mês. Antes de fechar, os totais são recalculados ao vivo toda vez que a tela é aberta; a ação "Fechar o mês" (só `admin`) trava um snapshot em `fechamentos_financeiros`. Um administrador pode **reabrir o mês** para voltar aos valores ao vivo e fechá-lo novamente depois das correções.
+
+## Explicação dos indicadores
+
+Os cards monetários oferecem um botão de informação acessível por clique, toque e teclado. OS entregues incluem pagas e pendentes; Contas a Receber abre em Aberto. Para comparar, use o mesmo mês e entidade e selecione Todos no Financeiro, lembrando que contas canceladas não somam, mesmo se a OS continuar entregue. O mês das OS usa entrega ou, na ausência, recebimento; recebido no mês usa a data de pagamento. Fechamentos fechados exibem os valores gravados, enquanto o Dashboard usa valores atuais.
 
 ## Despesas
 

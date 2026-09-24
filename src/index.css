@@ -85,8 +85,8 @@ body {
  * Densidade global do produto. Equivale ao zoom de 80% que era necessário
  * aplicar manualmente, mas mantém o app ocupando toda a largura e altura do
  * aparelho. O zoom participa do layout (diferente de transform: scale), então
- * popovers, diálogos, tabelas e pontos de quebra continuam posicionados pela
- * viewport real.
+ * tabelas e pontos de quebra participam do layout. Menus posicionados por
+ * coordenadas da viewport precisam da compensação abaixo.
  */
 .app-screen {
   height: 100dvh;
@@ -107,6 +107,13 @@ body {
 
   .app-min-screen {
     min-height: 125dvh;
+  }
+
+  /* Radix/Floating UI calcula a posição e a largura em pixels da viewport.
+   * Neutraliza o zoom herdado somente no wrapper portaled para não aplicar
+   * 80% novamente às coordenadas e à largura do campo de origem. */
+  [data-radix-popper-content-wrapper] {
+    zoom: 1.25;
   }
 }
 

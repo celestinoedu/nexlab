@@ -5,6 +5,7 @@ import { Lock, Loader2, LockOpen } from 'lucide-react'
 import { toast } from 'sonner'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { TotalInfo } from '@/components/shared/TotalInfo'
 import { useProfile } from '@/hooks/useProfile'
 import { useContasReceber } from '@/features/financeiro/hooks/useContasReceber'
 import { useDespesas } from '@/features/despesas/hooks/useDespesas'
@@ -105,15 +106,24 @@ export function FechamentoFinanceiroPage() {
         <>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <div className="rounded-xl border border-slate-200 bg-white p-4">
-              <span className="text-xs font-medium text-slate-400">Recebido no mês</span>
+              <div className="flex items-center gap-1 text-xs font-medium text-slate-400">
+                <span>Recebido no mês</span>
+                <TotalInfo titulo="Recebido no mês">Soma as contas pagas cuja data de pagamento pertence ao mês selecionado, independentemente do mês da OS. Contas abertas e canceladas não entram. Quando o mês está fechado, mostra o valor gravado no fechamento até que seja reaberto.</TotalInfo>
+              </div>
               <p className="text-2xl font-semibold text-success-700">{formatarMoeda(receitasExibidas)}</p>
             </div>
             <div className="rounded-xl border border-slate-200 bg-white p-4">
-              <span className="text-xs font-medium text-slate-400">Despesas no mês</span>
+              <div className="flex items-center gap-1 text-xs font-medium text-slate-400">
+                <span>Despesas no mês</span>
+                <TotalInfo titulo="Despesas no mês">Soma as despesas pela data da despesa no mês selecionado. Quando o mês está fechado, mostra o valor gravado no fechamento até que seja reaberto.</TotalInfo>
+              </div>
               <p className="text-2xl font-semibold text-danger-500">{formatarMoeda(despesasExibidas)}</p>
             </div>
             <div className="rounded-xl border border-brand-200 bg-brand-50 p-4">
-              <span className="text-xs font-medium text-brand-700">Resultado do mês</span>
+              <div className="flex items-center gap-1 text-xs font-medium text-brand-700">
+                <span>Resultado do mês</span>
+                <TotalInfo titulo="Resultado do mês">Recebido no mês menos despesas no mês. Pode ser negativo. Em mês fechado, usa os dois valores gravados no fechamento; em mês aberto, usa os valores atuais.</TotalInfo>
+              </div>
               <p className={resultado >= 0 ? 'text-2xl font-semibold text-brand-900' : 'text-2xl font-semibold text-danger-700'}>
                 {formatarMoeda(resultado)}
               </p>
