@@ -32,9 +32,10 @@ interface ServicoFormDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   servico?: Servico | null
+  onCreated?: (servico: Servico) => void
 }
 
-export function ServicoFormDialog({ open, onOpenChange, servico }: ServicoFormDialogProps) {
+export function ServicoFormDialog({ open, onOpenChange, servico, onCreated }: ServicoFormDialogProps) {
   const isEditing = Boolean(servico)
   const { createServico, updateServico } = useServicoMutations()
 
@@ -77,7 +78,8 @@ export function ServicoFormDialog({ open, onOpenChange, servico }: ServicoFormDi
         await updateServico.mutateAsync({ id: servico.id, input })
         toast.success('Serviço atualizado.')
       } else {
-        await createServico.mutateAsync(input)
+        const criado = await createServico.mutateAsync(input)
+        onCreated?.(criado)
         toast.success('Serviço criado.')
       }
       onOpenChange(false)

@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { toast } from 'sonner'
-import { Loader2, Lock, Search, Download } from 'lucide-react'
+import { Loader2, Lock, Search, Download, Plus } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
@@ -16,6 +16,7 @@ import { useServicos } from '@/hooks/useServicos'
 import { useTabelaPrecos } from '@/hooks/useTabelaPrecos'
 import { useProfile } from '@/hooks/useProfile'
 import { useTabelaPrecosMutations } from '../hooks/useTabelaPrecosMutations'
+import { ServicoFormDialog } from '@/features/servicos/components/ServicoFormDialog'
 import type { Entidade } from '@/types/domain'
 
 interface TabelaPrecosDialogProps {
@@ -47,6 +48,7 @@ export function TabelaPrecosDialog({ open, onOpenChange, entidade }: TabelaPreco
   const [valoresParceiro, setValoresParceiro] = React.useState<Record<string, string>>({})
   const [modos, setModos] = React.useState<Record<string, ModoEntrada>>({})
   const [busca, setBusca] = React.useState('')
+  const [novoServicoAberto, setNovoServicoAberto] = React.useState(false)
   const ehParceiro = entidade?.tipo === 'parceiro'
   const podeEditar = profile?.role === 'admin'
 
@@ -143,6 +145,7 @@ export function TabelaPrecosDialog({ open, onOpenChange, entidade }: TabelaPreco
   const gridCols = ehParceiro ? 'grid-cols-[1fr_9rem_9rem_3rem]' : 'grid-cols-[1fr_7rem]'
 
   return (
+    <>
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-xl sm:max-w-[70vw]">
         <DialogHeader>
@@ -171,6 +174,12 @@ export function TabelaPrecosDialog({ open, onOpenChange, entidade }: TabelaPreco
               className="pl-9"
             />
           </div>
+          {podeEditar && (
+            <Button type="button" variant="secondary" size="sm" onClick={() => setNovoServicoAberto(true)}>
+              <Plus size={15} />
+              Novo serviço
+            </Button>
+          )}
           <Button
             type="button"
             variant="secondary"
@@ -183,6 +192,12 @@ export function TabelaPrecosDialog({ open, onOpenChange, entidade }: TabelaPreco
             Baixar CSV
           </Button>
         </div>
+
+        {podeEditar && (
+          <p className="text-xs text-slate-500">
+            Um novo serviço entra no catálogo geral. Depois de criá-lo, defina aqui o preço ou a comissão deste {ehParceiro ? 'parceiro' : 'cliente'}.
+          </p>
+        )}
 
         {carregando ? (
           <div className="flex justify-center py-10">
@@ -288,5 +303,11 @@ export function TabelaPrecosDialog({ open, onOpenChange, entidade }: TabelaPreco
         </DialogFooter>
       </DialogContent>
     </Dialog>
+    <ServicoFormDialog
+      open={novoServicoAberto}
+      onOpenChange={setNovoServicoAberto}
+      onCreated={(servico) => setBusca(servico.nome)}
+    />
+    </>
   )
 }

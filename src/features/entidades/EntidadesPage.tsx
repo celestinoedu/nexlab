@@ -120,7 +120,7 @@ export function EntidadesPage() {
                 <th className="px-4 py-3">Documento</th>
                 <th className="px-4 py-3">Contato</th>
                 <th className="px-4 py-3">Situação</th>
-                <th className="px-4 py-3" />
+                <th className="px-4 py-3 text-right">Ações</th>
               </tr>
             </thead>
             <tbody>
@@ -159,11 +159,12 @@ export function EntidadesPage() {
                       <button
                         type="button"
                         onClick={(e) => abrirPrecos(e, entidade)}
-                        className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+                        className="flex h-8 items-center justify-center gap-1.5 rounded-lg px-2 text-brand-700 hover:bg-brand-50"
                         aria-label="Tabela de preços"
                         title="Tabela de preços"
                       >
                         <Wallet size={16} />
+                        <span className="hidden lg:inline">Tabela de preços</span>
                       </button>
                     </div>
                   </td>
