@@ -24,7 +24,6 @@ const POR_PAGINA = COLUNAS * LINHAS
 const CANHOTO_LARGURA = (595.28 - 18 * 2) / COLUNAS
 const CANHOTO_ALTURA = (841.89 - 18 * 2) / LINHAS
 const MAX_ITENS_LISTADOS = 3
-const MAX_CHARS_OBSERVACAO = 55
 
 const PRETO = '#000000'
 
@@ -118,11 +117,6 @@ function formatarMoeda(valor: number) {
   return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 }
 
-function truncarObservacao(texto: string) {
-  if (texto.length <= MAX_CHARS_OBSERVACAO) return texto
-  return `${texto.slice(0, MAX_CHARS_OBSERVACAO).trimEnd()}…`
-}
-
 function agrupar<T>(lista: T[], tamanho: number): T[][] {
   const grupos: T[][] = []
   for (let i = 0; i < lista.length; i += tamanho) grupos.push(lista.slice(i, i + tamanho))
@@ -205,7 +199,7 @@ export function CanhotosPdfDocument({ itens, empresaNome, logoUrl }: CanhotosPdf
                         </View>
 
                         {ordem.observacoes && (
-                          <Text style={styles.observacoes}>Obs.: {truncarObservacao(ordem.observacoes)}</Text>
+                          <Text style={styles.observacoes}>Obs.: {ordem.observacoes}</Text>
                         )}
                       </View>
 
