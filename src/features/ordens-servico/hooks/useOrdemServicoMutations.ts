@@ -1,4 +1,5 @@
 import { useMutation, useQueryClient, type QueryClient } from '@tanstack/react-query'
+import { format } from 'date-fns'
 import { supabase } from '@/lib/supabase'
 import { isDemoAtivo, invalidarSeReal, novoIdDemo, agoraIso } from '@/lib/demoMode'
 import {
@@ -41,6 +42,14 @@ export interface OrdemServicoFormInput {
 function traduzErroSalvar(_message: string): string {
   return 'Não foi possível salvar a OS agora. Tente novamente.'
 }
+
+function observacoesComExclusao(observacoes: string | null, motivo: string): string {
+  const registro = `OS excluída em ${format(new Date(), 'dd/MM/yyyy HH:mm')}. Motivo: ${motivo}`
+  return observacoes?.trim() ? `${observacoes.trim()}\n\n${registro}` : registro
+}
+
+const ERRO_COBRANCA_VINCULADA =
+  'Esta OS possui uma Conta a Receber aberta ou paga. Cancele a conta no Financeiro antes de excluir a OS.'
 
 /** Mês cheio de fechamento — mesma regra da coluna gerada `ordens_servico.mes_referencia` no banco. */
 function calcularMesReferencia(dataEntrega: string | null, dataRecebimento: string): string {
@@ -258,6 +267,54 @@ export function useOrdemServicoMutations() {
     },
   })
 
+  const excluirOrdem = useMutation({
+    mutationFn: async ({ id, motivo }: { id: string; motivo: string }) => {
+      const justificativa = motivo.trim()
+      if (!justificativa) throw new Error('Informe o motivo da exclusão.')
+
+      if (isDemoAtivo(queryClient)) {
+        const ordem = queryClient.getQueryData<OrdemServicoComRelacoes[]>(['ordens_servico'])?.find((o) => o.id === id)
+        if (!ordem || ordem.status === 'cancelado') throw new Error('Esta OS não está disponível para exclusão.')
+        const conta = queryClient.getQueryData<ContaReceberComRelacoes[]>(['contas_receber'])?.find((c) => c.ordem_id === id)
+        if (conta && conta.status !== 'cancelado') throw new Error(ERRO_COBRANCA_VINCULADA)
+        queryClient.setQueryData<OrdemServicoComRelacoes[]>(['ordens_servico'], (old) =>
+          (old ?? []).map((o) => o.id === id
+            ? { ...o, status: 'cancelado', observacoes: observacoesComExclusao(o.observacoes, justificativa) }
+            : o),
+        )
+        return
+      }
+
+      const { data: authData, error: authError } = await supabase.auth.getUser()
+      if (authError || !authData.user) throw new Error('Sua sessão expirou. Entre novamente para excluir a OS.')
+      const { data: perfil, error: perfilError } = await supabase
+        .from('profiles').select('role').eq('id', authData.user.id).single()
+      if (perfilError || perfil?.role !== 'admin') throw new Error('Somente administradores podem excluir uma OS.')
+
+      const { data: conta, error: contaError } = await supabase
+        .from('contas_receber').select('status').eq('ordem_id', id).maybeSingle()
+      if (contaError) throw new Error('Não foi possível verificar a cobrança vinculada. Tente novamente.')
+      if (conta && conta.status !== 'cancelado') throw new Error(ERRO_COBRANCA_VINCULADA)
+
+      const { data: ordem, error: ordemError } = await supabase
+        .from('ordens_servico').select('status, observacoes, updated_at').eq('id', id).single()
+      if (ordemError || !ordem || ordem.status === 'cancelado') {
+        throw new Error('Esta OS não está disponível para exclusão. Atualize a lista e tente novamente.')
+      }
+
+      const { data: atualizada, error: updateError } = await supabase
+        .from('ordens_servico')
+        .update({ status: 'cancelado', observacoes: observacoesComExclusao(ordem.observacoes, justificativa) })
+        .eq('id', id)
+        .eq('status', ordem.status)
+        .eq('updated_at', ordem.updated_at)
+        .select('id')
+      if (updateError) throw new Error('Não foi possível excluir a OS agora. Tente novamente.')
+      if (!atualizada?.length) throw new Error('A OS foi alterada por outra pessoa. Atualize a lista antes de excluir.')
+    },
+    onSuccess: () => invalidarSeReal(queryClient, ['ordens_servico']),
+  })
+
   /** Muda o status (drag-and-drop no Kanban) com atualização otimista. */
   const updateStatus = useMutation({
     mutationFn: async ({
@@ -317,5 +374,5 @@ export function useOrdemServicoMutations() {
     },
   })
 
-  return { createOrdem, updateOrdem, updateStatus }
+  return { createOrdem, updateOrdem, excluirOrdem, updateStatus }
 }

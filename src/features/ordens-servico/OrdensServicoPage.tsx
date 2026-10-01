@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input'
 import { TotalInfo, REGRA_VALOR_OS, REGRA_MES_OS } from '@/components/shared/TotalInfo'
 import { cn } from '@/lib/utils'
 import { useEmpresaConfig } from '@/hooks/useEmpresaConfig'
+import { useProfile } from '@/hooks/useProfile'
 import { useOrdensServico } from './hooks/useOrdensServico'
 import { KanbanBoard } from './components/KanbanBoard'
 import { ListaOrdensServico } from './components/ListaOrdensServico'
@@ -37,6 +38,7 @@ const VALOR_OCULTO = '••••'
 export function OrdensServicoPage() {
   const { data: ordens, isLoading } = useOrdensServico()
   const { data: empresaConfig } = useEmpresaConfig()
+  const { data: profile } = useProfile()
   // Lista é a visão padrão — Kanban continua disponível pelo toggle.
   const [visao, setVisao] = React.useState<Visao>('lista')
   const [busca, setBusca] = React.useState('')
@@ -85,12 +87,14 @@ export function OrdensServicoPage() {
   }, [ordens, busca, mesFiltro])
 
   const filtradosLista = React.useMemo(
-    () => filtradosBase.filter((o) => statusFiltro === 'todos' || o.status === statusFiltro),
+    () => filtradosBase.filter((o) =>
+      statusFiltro === 'todos' ? o.status !== 'cancelado' : o.status === statusFiltro,
+    ),
     [filtradosBase, statusFiltro],
   )
 
   // O resumo usa exatamente o mesmo conjunto exibido pela lista: mês, busca
-  // e status. OS canceladas permanecem consultáveis, mas valem zero no total.
+  // e status. OS canceladas ficam disponíveis no filtro próprio.
   const kpiEmProducao = filtradosLista.filter((o) => o.status === 'em_producao').length
   const kpiEntregue = filtradosLista.filter((o) => o.status === 'entregue').length
   const kpiTotalOrdens = valorTotalFaturavelOrdens(filtradosLista)
@@ -219,7 +223,7 @@ export function OrdensServicoPage() {
                   : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50',
               )}
             >
-              {status === 'todos' ? 'Todos' : STATUS_OS_LABEL[status]}
+              {status === 'todos' ? 'Não canceladas' : STATUS_OS_LABEL[status]}
             </button>
           ))}
         </div>
@@ -235,7 +239,12 @@ export function OrdensServicoPage() {
         <ListaOrdensServico ordens={filtradosLista} onEditOrdem={abrirEdicao} onImprimirOrdem={baixarPdf} />
       )}
 
-      <OrdemServicoFormDialog open={dialogAberto} onOpenChange={setDialogAberto} ordem={ordemEditando} />
+      <OrdemServicoFormDialog
+        open={dialogAberto}
+        onOpenChange={setDialogAberto}
+        ordem={ordemEditando}
+        podeExcluir={profile?.role === 'admin'}
+      />
     </div>
   )
 }

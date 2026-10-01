@@ -104,7 +104,7 @@ export function ListaOrdensServico({ ordens, onEditOrdem, onImprimirOrdem }: Lis
             return (
               <React.Fragment key={ordem.id}>
                 <tr
-                  onClick={() => onEditOrdem(ordem)}
+                  onClick={() => ordem.status === 'cancelado' ? alternarExpandida(ordem.id) : onEditOrdem(ordem)}
                   className="cursor-pointer border-b border-slate-50 transition-colors last:border-0 hover:bg-slate-50"
                 >
                   <td className="px-2 py-3 align-top" onClick={(e) => e.stopPropagation()}>
@@ -232,7 +232,7 @@ export function ListaOrdensServico({ ordens, onEditOrdem, onImprimirOrdem }: Lis
                           {ordem.observacoes && (
                             <div className="col-span-2">
                               <p className="text-xs font-medium uppercase text-slate-400">Observações</p>
-                              <p className="text-slate-700">{ordem.observacoes}</p>
+                              <p className="whitespace-pre-line text-slate-700">{ordem.observacoes}</p>
                             </div>
                           )}
                         </div>

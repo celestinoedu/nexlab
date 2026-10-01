@@ -40,6 +40,8 @@ Todo fechamento financeiro considera o mês **completo**: do dia 1 ao último di
 
 `recebido` → `em_producao` → `pronto_entrega` → `entregue`. `cancelado` é um estado terminal alternativo, fora do fluxo principal (não aparece como coluna do Kanban — ver `docs/ux-flows.md`). Só OS com `status = 'entregue'` entram no cálculo de Contas a Receber (`vw_contas_receber`) — uma OS em produção não é "a receber" ainda.
 
+**Excluir OS** é um cancelamento lógico restrito a administradores: a confirmação exige motivo, que fica registrado com data nas observações da OS. A OS sai da lista padrão e dos totais, mas pode ser consultada pelo filtro "Cancelado". Se já existir Conta a Receber aberta ou paga, primeiro é necessário cancelá-la no Financeiro; a exclusão da OS só prossegue depois disso, para preservar a consistência entre operação e cobrança.
+
 ## Numeração
 
 - **Nº Registro** (`ordens_servico.numero_os`): sequencial interno e imutável do NexLab, gerado de forma atômica por empresa ao criar uma OS. A regra vale apenas para novos registros; números históricos são preservados.

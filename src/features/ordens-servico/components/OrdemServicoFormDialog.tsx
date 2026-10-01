@@ -38,6 +38,7 @@ import {
 import { STATUS_OS_LABEL, referenciaOrdemExibicao, type OrdemServicoComRelacoes, type StatusOS } from '@/types/domain'
 import { cn } from '@/lib/utils'
 import { InfoFinanceiraDialog } from './InfoFinanceiraDialog'
+import { ExcluirOrdemDialog } from './ExcluirOrdemDialog'
 
 const itemSchema = z.object({
   servico_id: z.string().min(1, 'Escolha um serviço'),
@@ -98,9 +99,10 @@ interface OrdemServicoFormDialogProps {
   onOpenChange: (open: boolean) => void
   /** Presente = editando essa OS; ausente = criando uma nova. */
   ordem?: OrdemServicoComRelacoes | null
+  podeExcluir?: boolean
 }
 
-export function OrdemServicoFormDialog({ open, onOpenChange, ordem }: OrdemServicoFormDialogProps) {
+export function OrdemServicoFormDialog({ open, onOpenChange, ordem, podeExcluir = false }: OrdemServicoFormDialogProps) {
   const isEditing = Boolean(ordem)
   const { data: entidades } = useEntidades()
   const { data: servicos } = useServicos()
@@ -129,6 +131,7 @@ export function OrdemServicoFormDialog({ open, onOpenChange, ordem }: OrdemServi
   const formaPagamento = useWatch({ control, name: 'forma_pagamento' })
   const dataPagamento = useWatch({ control, name: 'data_pagamento' })
   const [infoFinanceiraAberta, setInfoFinanceiraAberta] = React.useState(false)
+  const [exclusaoAberta, setExclusaoAberta] = React.useState(false)
   const [erroAoSalvar, setErroAoSalvar] = React.useState<string | null>(null)
   const erroValidacao = primeiraMensagemErro(errors)
 
@@ -398,7 +401,10 @@ export function OrdemServicoFormDialog({ open, onOpenChange, ordem }: OrdemServi
                       className="h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40"
                       {...register('status')}
                     >
-                      {(Object.keys(STATUS_OS_LABEL) as StatusOS[]).map((opcao) => (
+                      {(status === 'cancelado'
+                        ? (['cancelado'] as StatusOS[])
+                        : (Object.keys(STATUS_OS_LABEL) as StatusOS[]).filter((opcao) => opcao !== 'cancelado')
+                      ).map((opcao) => (
                         <option key={opcao} value={opcao}>
                           {STATUS_OS_LABEL[opcao]}
                         </option>
@@ -505,14 +511,22 @@ export function OrdemServicoFormDialog({ open, onOpenChange, ordem }: OrdemServi
                 {erroAoSalvar || `Não foi possível salvar: ${erroValidacao}`}
               </p>
             )}
-            <div className="flex justify-end gap-2">
-              <Button type="button" variant="secondary" disabled={isSubmitting} onClick={() => onOpenChange(false)}>
-                Cancelar
-              </Button>
-              <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting && <Loader2 className="animate-spin" size={16} />}
-                Salvar
-              </Button>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              {ordem && ordem.status !== 'cancelado' && podeExcluir && (
+                <Button type="button" variant="destructive" disabled={isSubmitting} onClick={() => setExclusaoAberta(true)}>
+                  <Trash2 size={16} />
+                  Excluir OS
+                </Button>
+              )}
+              <div className="ml-auto flex gap-2">
+                <Button type="button" variant="secondary" disabled={isSubmitting} onClick={() => onOpenChange(false)}>
+                  Cancelar
+                </Button>
+                <Button type="submit" disabled={isSubmitting}>
+                  {isSubmitting && <Loader2 className="animate-spin" size={16} />}
+                  Salvar
+                </Button>
+              </div>
             </div>
           </DialogFooter>
         </form>
@@ -530,6 +544,14 @@ export function OrdemServicoFormDialog({ open, onOpenChange, ordem }: OrdemServi
           setValue('data_pagamento', dados.data_pagamento)
         }}
       />
+      {exclusaoAberta && (
+        <ExcluirOrdemDialog
+          open
+          onOpenChange={setExclusaoAberta}
+          ordem={ordem ?? null}
+          onDeleted={() => onOpenChange(false)}
+        />
+      )}
     </Dialog>
   )
 }
