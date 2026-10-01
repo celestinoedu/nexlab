@@ -2,6 +2,8 @@
 
 Atualizar este arquivo ao final de cada sessão de trabalho relevante, marcando o que foi concluído.
 
+**Atualização 2026-10-01 — busca de serviços na Nova OS:** o seletor passou a buscar trechos do nome, sem exigir acentos. A correspondência aproximada mostrava serviços sem relação com o termo digitado, como ao buscar "Monta".
+
 **Atualização 2026-09-30 — impressão de canhotos:** removido o corte fixo das observações em 55 caracteres; o PDF passa a exibir o texto completo no espaço disponível do canhoto.
 
 **Atualização 2026-09-17 — relatório por Cliente/Parceiro e mobile:** o relatório por período ou por OS selecionadas passa a aceitar entidades cadastradas tanto como Cliente quanto como Parceiro, preservando o cálculo de valor cheio/comissão de cada tipo. A lista de OS também recebeu larguras mínimas maiores para impedir sobreposição de status, datas e valores durante a rolagem horizontal no celular.

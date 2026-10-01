@@ -11,6 +11,14 @@ export interface ComboboxOption {
   hint?: React.ReactNode
 }
 
+function normalizarBusca(texto: string) {
+  return texto.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+}
+
+function filtrarPorNome(nome: string, busca: string) {
+  return normalizarBusca(nome).includes(normalizarBusca(busca.trim())) ? 1 : 0
+}
+
 interface ComboboxProps {
   options: ComboboxOption[]
   value: string | null
@@ -65,7 +73,7 @@ export function Combobox({
         hideWhenDetached
         className="flex max-h-[var(--radix-popover-content-available-height)] w-[var(--radix-popover-trigger-width)] max-w-[calc(100vw-1.5rem)] flex-col overflow-hidden p-0"
       >
-        <Command className="min-h-0">
+        <Command className="min-h-0" filter={filtrarPorNome}>
           <CommandInput placeholder={searchPlaceholder} autoFocus />
           <CommandList className="min-h-0 overscroll-contain">
             <CommandEmpty>{emptyMessage}</CommandEmpty>
