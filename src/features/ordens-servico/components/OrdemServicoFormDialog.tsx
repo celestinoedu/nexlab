@@ -5,6 +5,7 @@ import {
   useFieldArray,
   useWatch,
   type Control,
+  type FieldErrors,
   type UseFormRegister,
 } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -71,6 +72,18 @@ const schema = z
 
 type FormValues = z.infer<typeof schema>
 
+function primeiraMensagemErro(value: unknown): string | null {
+  if (!value || typeof value !== 'object') return null
+  if ('message' in value && typeof value.message === 'string') return value.message
+
+  for (const [key, child] of Object.entries(value)) {
+    if (key === 'ref') continue
+    const message = primeiraMensagemErro(child)
+    if (message) return message
+  }
+  return null
+}
+
 const ITEM_VAZIO = {
   servico_id: '',
   cor: '',
@@ -116,6 +129,8 @@ export function OrdemServicoFormDialog({ open, onOpenChange, ordem }: OrdemServi
   const formaPagamento = useWatch({ control, name: 'forma_pagamento' })
   const dataPagamento = useWatch({ control, name: 'data_pagamento' })
   const [infoFinanceiraAberta, setInfoFinanceiraAberta] = React.useState(false)
+  const [erroAoSalvar, setErroAoSalvar] = React.useState<string | null>(null)
+  const erroValidacao = primeiraMensagemErro(errors)
 
   const { data: precos } = useTabelaPrecos(entidadeId || null)
   const entidadeSelecionada = entidades?.find((e) => e.id === entidadeId)
@@ -125,6 +140,7 @@ export function OrdemServicoFormDialog({ open, onOpenChange, ordem }: OrdemServi
   // e deixa o número interno a cargo da sequência atômica do banco.
   React.useEffect(() => {
     if (!open) return
+    setErroAoSalvar(null)
     skipNextAutoSuggestPrazo.current = isEditing
 
     if (ordem) {
@@ -238,6 +254,7 @@ export function OrdemServicoFormDialog({ open, onOpenChange, ordem }: OrdemServi
   }, [itensAtuais, entidadeSelecionada, desconto])
 
   const onSubmit = async (values: FormValues) => {
+    setErroAoSalvar(null)
     const input: OrdemServicoFormInput = {
       numero_os_cliente: values.numero_os_cliente?.trim() || null,
       entidade_id: values.entidade_id,
@@ -272,8 +289,12 @@ export function OrdemServicoFormDialog({ open, onOpenChange, ordem }: OrdemServi
       }
       onOpenChange(false)
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Não foi possível salvar a OS agora.')
+      setErroAoSalvar(err instanceof Error ? err.message : 'Não foi possível salvar a OS agora.')
     }
+  }
+
+  const onInvalid = (_errors: FieldErrors<FormValues>) => {
+    setErroAoSalvar(null)
   }
 
   return (
@@ -292,7 +313,7 @@ export function OrdemServicoFormDialog({ open, onOpenChange, ordem }: OrdemServi
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="flex min-h-0 flex-1 flex-col" noValidate>
+        <form onSubmit={handleSubmit(onSubmit, onInvalid)} className="flex min-h-0 flex-1 flex-col" noValidate>
           <div className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto overscroll-contain p-5 sm:p-6">
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]">
               {/* Coluna esquerda: dados gerais da OS */}
@@ -309,7 +330,7 @@ export function OrdemServicoFormDialog({ open, onOpenChange, ordem }: OrdemServi
                   </div>
 
                   <div className="flex flex-col gap-1.5 sm:col-span-2">
-                    <Label htmlFor="entidade_id">Cliente ou Parceiro</Label>
+                    <Label htmlFor="entidade_id">Cliente ou Parceiro *</Label>
                     <Controller
                       control={control}
                       name="entidade_id"
@@ -478,14 +499,21 @@ export function OrdemServicoFormDialog({ open, onOpenChange, ordem }: OrdemServi
             </div>
 
           </div>
-          <DialogFooter className="m-0 shrink-0 border-t border-slate-200 bg-white px-5 py-4 sm:px-6">
-            <Button type="button" variant="secondary" disabled={isSubmitting} onClick={() => onOpenChange(false)}>
-              Cancelar
-            </Button>
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting && <Loader2 className="animate-spin" size={16} />}
-              Salvar
-            </Button>
+          <DialogFooter className="m-0 shrink-0 flex-col items-stretch border-t border-slate-200 bg-white px-5 py-4 sm:px-6">
+            {(erroAoSalvar || erroValidacao) && (
+              <p role="alert" className="rounded-lg bg-danger-100 px-3 py-2 text-sm text-danger-700">
+                {erroAoSalvar || `Não foi possível salvar: ${erroValidacao}`}
+              </p>
+            )}
+            <div className="flex justify-end gap-2">
+              <Button type="button" variant="secondary" disabled={isSubmitting} onClick={() => onOpenChange(false)}>
+                Cancelar
+              </Button>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting && <Loader2 className="animate-spin" size={16} />}
+                Salvar
+              </Button>
+            </div>
           </DialogFooter>
         </form>
       </DialogContent>
