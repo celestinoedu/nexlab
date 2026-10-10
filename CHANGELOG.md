@@ -4,6 +4,17 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), 
 
 ## [Não publicado]
 
+## [0.26.0] - 2026-10-10 — Mensalidade pelo Mercado Pago
+
+### Adicionado
+- **Pagamento da mensalidade pelo Mercado Pago**: em Meu Perfil, o cliente paga por Pix, cartão ou boleto (Checkout Pro), quitando de uma vez todas as mensalidades em aberto, ou ativa o débito automático no cartão. Um webhook confirma o pagamento e dá a baixa automaticamente. Edge Functions `mercadopago-pagamento` e `mercadopago-webhook`, migration `0026`. Ver `docs/mercado-pago.md`.
+- Histórico de faturas mostra as mensalidades em aberto (pendentes e vencidas) junto das pagas, com lista própria no celular.
+- Painel: selo de débito automático, forma de pagamento de cada baixa e valor em atraso considerando todas as parcelas vencidas.
+- Tela "Painel restrito à Lotus" quando uma conta sem acesso abre `/#/admin`, no lugar do redirecionamento silencioso.
+
+### Alterado
+- Com débito automático ativo, o cliente só recebe aviso em caso de atraso (ex.: cartão recusado).
+
 ## [0.25.0] - 2026-10-10 — Painel administrativo de assinaturas
 
 ### Adicionado

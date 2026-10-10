@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { formatarCompetencia, formatarData, formatarMoeda } from '@/features/assinatura/situacao'
-import { useAdminAssinaturaMutations, usePagamentosAdmin, type AssinaturaAdmin } from '../hooks/useAdminAssinaturas'
+import { useAdminAssinaturaMutations, usePagamentosAdmin, type AssinaturaAdmin, type PagamentoAdmin } from '../hooks/useAdminAssinaturas'
 
 interface AssinaturaDialogProps {
   item: AssinaturaAdmin | null
@@ -93,6 +93,11 @@ export function AssinaturaDialog({ item, onOpenChange }: AssinaturaDialogProps) 
             <Input id="assinatura_aviso" type="number" min="0" max="30" step="1" inputMode="numeric" value={diasAviso} onChange={(event) => setDiasAviso(event.target.value)} className="sm:w-32" />
             <p className="text-xs text-slate-400">O pop-up e a tarja aparecem a partir desse prazo e continuam enquanto houver atraso.</p>
           </div>
+          {item?.debito_automatico === 'authorized' && item.valor_mensal != null && Number(valor) !== item.valor_mensal && (
+            <p className="rounded-xl bg-warning-100/70 p-3 text-sm text-warning-700 sm:col-span-2">
+              Este cliente paga por débito automático. O novo valor não muda a cobrança já cadastrada no cartão: peça para ele cancelar e ativar de novo o débito automático em Meu Perfil.
+            </p>
+          )}
           <label className="flex items-start gap-2.5 rounded-xl border border-slate-200 p-3 sm:col-span-2">
             <input type="checkbox" className="mt-0.5 size-4 rounded border-slate-300" checked={ativa} onChange={(event) => setAtiva(event.target.checked)} />
             <span>
@@ -114,7 +119,7 @@ export function AssinaturaDialog({ item, onOpenChange }: AssinaturaDialogProps) 
                     <li key={pagamento.id} className="flex items-center justify-between gap-3 px-3 py-2 text-sm">
                       <span className="min-w-0">
                         <span className="block font-medium text-slate-700 first-letter:uppercase">{formatarCompetencia(pagamento.competencia)}</span>
-                        <span className="block text-xs text-slate-400">Pago em {formatarData(pagamento.data_pagamento)}</span>
+                        <span className="block text-xs text-slate-400">Pago em {formatarData(pagamento.data_pagamento)} · {descreverOrigem(pagamento)}</span>
                       </span>
                       <span className="shrink-0 font-medium text-slate-700">{formatarMoeda(pagamento.valor)}</span>
                     </li>
@@ -151,4 +156,18 @@ export function AssinaturaDialog({ item, onOpenChange }: AssinaturaDialogProps) 
       </DialogContent>
     </Dialog>
   )
+}
+
+const FORMAS: Record<string, string> = {
+  pix: 'Pix',
+  cartao_credito: 'cartão de crédito',
+  cartao_debito: 'cartão de débito',
+  boleto: 'boleto',
+  saldo_mercadopago: 'saldo Mercado Pago',
+}
+
+function descreverOrigem(pagamento: PagamentoAdmin) {
+  if (pagamento.origem !== 'mercadopago') return 'baixa manual'
+  const forma = pagamento.forma_pagamento ? FORMAS[pagamento.forma_pagamento] ?? pagamento.forma_pagamento : null
+  return forma ? `Mercado Pago (${forma})` : 'Mercado Pago'
 }

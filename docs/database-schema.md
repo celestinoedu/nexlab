@@ -1,6 +1,6 @@
 # NexLab — Schema do banco de dados
 
-> Espelha `supabase/migrations/0001_init.sql` a `0025_painel_admin_assinaturas.sql`. Se o schema mudar, atualize a migration nova + este arquivo no mesmo commit — nunca deixe este documento desatualizado em relação às migrations reais.
+> Espelha `supabase/migrations/0001_init.sql` a `0026_mercado_pago.sql`. Se o schema mudar, atualize a migration nova + este arquivo no mesmo commit — nunca deixe este documento desatualizado em relação às migrations reais.
 
 ## Multi-tenant
 
@@ -232,6 +232,12 @@ Snapshot do **resultado do laboratório inteiro** por mês (não por entidade): 
 `platform_admins`: contas da Lotus com acesso ao painel `/#/admin`. Começa vazia; o acesso é concedido por insert manual no SQL Editor (ver `docs/painel-admin.md`).
 
 Funções (todas `security definer`, todas começam por `exigir_platform_admin()`): `admin_listar_assinaturas()`, `admin_salvar_assinatura(...)`, `admin_registrar_pagamento(...)` (grava o pagamento e avança o vencimento um mês), `admin_desfazer_ultimo_pagamento(...)` e `admin_listar_pagamentos(...)`. `is_platform_admin()` só informa ao frontend se o menu deve aparecer.
+
+### Mercado Pago (migration `0026`)
+
+`faturas_assinatura` ganha `origem` (`manual` ou `mercadopago`), `forma_pagamento` e `mp_payment_id`. `assinaturas` ganha `mp_preapproval_id` e `mp_preapproval_status` (débito automático). `pagamentos_mercadopago` registra cada pagamento já processado pelo webhook (chave `mp_payment_id`), impedindo baixa em dobro; sem acesso para `anon`/`authenticated`.
+
+`quitar_mensalidade(...)` é o núcleo único da baixa, sem permissão para usuários do app. É chamado por `admin_registrar_pagamento` (painel) e por `registrar_pagamento_mercadopago` (somente `service_role`, usada pela Edge Function `mercadopago-webhook`), que pode quitar várias parcelas de uma vez.
 
 ## Views
 

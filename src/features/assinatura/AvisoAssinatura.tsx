@@ -5,8 +5,9 @@ import { useEmpresaConfig } from '@/hooks/useEmpresaConfig'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { cn } from '@/lib/utils'
+import { LOTUS_EMAIL_SUPORTE } from '@/lib/appInfo'
 import { useMinhaAssinatura } from './useMinhaAssinatura'
-import { calcularSituacao, descreverPrazo, diasAte, formatarData, formatarMoeda, hojeLocal } from './situacao'
+import { calcularSituacao, descreverPrazo, diasAte, formatarData, formatarMoeda, hojeLocal, parcelasEmAberto } from './situacao'
 
 /**
  * Aviso de mensalidade perto do vencimento ou em atraso: pop-up uma vez por
@@ -19,7 +20,9 @@ export function AvisoAssinatura() {
   const { data: assinatura } = useMinhaAssinatura(Boolean(empresa && !empresa.is_demo))
   const hoje = hojeLocal()
   const situacao = calcularSituacao(assinatura, hoje)
-  const exibir = Boolean(assinatura) && (situacao === 'atrasada' || situacao === 'vence_em_breve')
+  // Com débito automático ativo, só o atraso (ex.: cartão recusado) merece aviso.
+  const debitoAtivo = assinatura?.mp_preapproval_status === 'authorized'
+  const exibir = Boolean(assinatura) && (situacao === 'atrasada' || (situacao === 'vence_em_breve' && !debitoAtivo))
   const chave = empresa ? `nexlab:aviso-assinatura:${empresa.id}` : ''
   const marca = assinatura ? `${hoje}|${assinatura.proximo_vencimento}` : ''
   const [fechadoEm, setFechadoEm] = React.useState<string | null>(null)
@@ -32,6 +35,7 @@ export function AvisoAssinatura() {
   const dias = diasAte(assinatura.proximo_vencimento, hoje)
   const vencimento = formatarData(assinatura.proximo_vencimento)
   const valor = formatarMoeda(assinatura.valor_mensal)
+  const vencidas = parcelasEmAberto(assinatura, hoje).filter((parcela) => parcela.atrasada).length
 
   function fecharPopup() {
     gravarArmazenado(chave, marca)
@@ -56,7 +60,7 @@ export function AvisoAssinatura() {
           </span>
         </p>
         <Link to="/meu-perfil" className="shrink-0 font-semibold underline underline-offset-2">
-          Ver detalhes
+          Pagar agora
         </Link>
       </div>
 
@@ -73,19 +77,21 @@ export function AvisoAssinatura() {
             </div>
             <DialogTitle>{atrasada ? 'Mensalidade em atraso' : `Sua mensalidade ${descreverPrazo(dias)}`}</DialogTitle>
             <DialogDescription>
-              {atrasada
+              {atrasada && vencidas > 1
+                ? `Há ${vencidas} mensalidades do NexLab em aberto, somando ${formatarMoeda(vencidas * assinatura.valor_mensal)}. A mais antiga ${descreverPrazo(dias)} (${vencimento}). Regularize o pagamento para continuar usando o sistema sem interrupções.`
+                : atrasada
                 ? `A mensalidade do NexLab de ${valor} ${descreverPrazo(dias)} (${vencimento}). Regularize o pagamento para continuar usando o sistema sem interrupções.`
                 : `O pagamento de ${valor} do NexLab vence em ${vencimento}. Mantenha em dia para continuar usando o sistema sem interrupções.`}
             </DialogDescription>
           </DialogHeader>
           <p className="text-sm text-slate-500">
-            Já pagou? Desconsidere este aviso. Dúvidas: <span className="font-medium text-slate-700">lotus@lotusnegocios.com</span>
+            Pagou pelo Mercado Pago? A confirmação é automática e este aviso some sozinho. Dúvidas: <span className="font-medium text-slate-700">{LOTUS_EMAIL_SUPORTE}</span>
           </p>
           <DialogFooter className="flex-col-reverse gap-2 sm:flex-row">
-            <Button type="button" variant="secondary" onClick={() => { fecharPopup(); navigate('/meu-perfil') }}>
-              Ver faturas
+            <Button type="button" variant="secondary" onClick={fecharPopup}>
+              Entendi
             </Button>
-            <Button type="button" onClick={fecharPopup}>Entendi</Button>
+            <Button type="button" onClick={() => { fecharPopup(); navigate('/meu-perfil') }}>Pagar agora</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

@@ -1,6 +1,6 @@
 import * as React from 'react'
-import { Link, Navigate } from 'react-router-dom'
-import { AlertTriangle, ArrowLeft, CalendarClock, CheckCircle2, Loader2, LogOut, Pencil, Search, Settings2, Wallet } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { AlertTriangle, ArrowLeft, CalendarClock, CheckCircle2, CreditCard, Loader2, LogOut, Pencil, Search, Settings2, ShieldAlert, Wallet } from 'lucide-react'
 import { useAuth } from '@/features/auth/AuthProvider'
 import { useIsPlatformAdmin } from '@/hooks/useIsPlatformAdmin'
 import { Logo } from '@/components/shared/Logo'
@@ -17,6 +17,7 @@ import {
   formatarData,
   formatarMoeda,
   hojeLocal,
+  parcelasEmAberto,
   type SituacaoAssinatura,
 } from '@/features/assinatura/situacao'
 import { useAdminAssinaturas, type AssinaturaAdmin } from './hooks/useAdminAssinaturas'
@@ -41,7 +42,7 @@ const ORDEM: Record<SituacaoAssinatura, number> = { atrasada: 0, vence_em_breve:
  * pertencer a um laboratório. A proteção real está nas funções `admin_*`.
  */
 export function AdminPage() {
-  const { signOut } = useAuth()
+  const { user, signOut } = useAuth()
   const { data: isAdmin, isLoading: verificando } = useIsPlatformAdmin()
   const { data: itens, isLoading, isError, error } = useAdminAssinaturas(isAdmin === true)
   const [filtro, setFiltro] = React.useState<Filtro>('todos')
@@ -65,13 +66,36 @@ export function AdminPage() {
   if (verificando) {
     return <div className="app-min-screen flex items-center justify-center bg-mist"><Loader2 className="animate-spin text-brand-600" size={28} /></div>
   }
-  if (!isAdmin) return <Navigate to="/" replace />
+  if (!isAdmin) {
+    // Mostra qual conta está logada: a sessão salva costuma ser a da
+    // Demonstração, e um redirecionamento silencioso parecia "link quebrado".
+    return (
+      <div className="app-min-screen flex items-center justify-center bg-mist p-4">
+        <Card className="flex w-full max-w-sm flex-col items-center gap-4 p-6 text-center">
+          <span className="flex size-12 items-center justify-center rounded-xl bg-warning-100 text-warning-700"><ShieldAlert size={22} /></span>
+          <div>
+            <h1 className="text-lg font-semibold text-slate-900">Painel restrito à Lotus</h1>
+            <p className="mt-1 text-sm text-slate-500">
+              Você está conectado como <span className="font-medium text-slate-700">{user?.email}</span>, que não tem acesso ao painel administrativo.
+            </p>
+          </div>
+          <div className="flex w-full flex-col gap-2">
+            <Button onClick={() => void signOut()}><LogOut />Sair e entrar com outra conta</Button>
+            <Button asChild variant="secondary"><Link to="/">Voltar ao app</Link></Button>
+          </div>
+        </Card>
+      </div>
+    )
+  }
 
   const contagem = (situacao: SituacaoAssinatura) => linhas.filter((linha) => linha.situacao === situacao).length
   const atrasadas = linhas.filter((linha) => linha.situacao === 'atrasada')
   const cobradas = linhas.filter((linha) => linha.situacao !== 'sem_cobranca')
   const receitaMensal = cobradas.reduce((total, linha) => total + (linha.item.valor_mensal ?? 0), 0)
-  const valorEmAtraso = atrasadas.reduce((total, linha) => total + (linha.item.valor_mensal ?? 0), 0)
+  const valorEmAtraso = atrasadas.reduce(
+    (total, linha) => total + (linha.item.valor_mensal ?? 0) * parcelasEmAberto(linha.item, hoje).filter((parcela) => parcela.atrasada).length,
+    0,
+  )
 
   const termo = busca.trim().toLocaleLowerCase('pt-BR')
   const visiveis = linhas.filter(({ item, situacao }) =>
@@ -161,7 +185,7 @@ export function AdminPage() {
                   {visiveis.map(({ item, situacao }) => (
                     <tr key={item.empresa_id} className="border-b border-slate-100 last:border-0">
                       <td className="px-5 py-3.5">
-                        <p className="font-medium text-slate-800">{item.nome_fantasia}</p>
+                        <p className="flex flex-wrap items-center gap-x-2 gap-y-1 font-medium text-slate-800"><span>{item.nome_fantasia}</span>{item.debito_automatico === 'authorized' && <DebitoBadge />}</p>
                         <p className="text-xs text-slate-400">{[item.email, `${item.usuarios_ativos} usuário${item.usuarios_ativos === 1 ? '' : 's'}`].filter(Boolean).join(' · ')}</p>
                       </td>
                       <td className="px-4 py-3.5 font-medium text-slate-700">{item.valor_mensal != null ? formatarMoeda(item.valor_mensal) : '—'}</td>
@@ -181,7 +205,7 @@ export function AdminPage() {
                   <li key={item.empresa_id} className="flex flex-col gap-3 p-4">
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
-                        <p className="truncate font-medium text-slate-800">{item.nome_fantasia}</p>
+                        <p className="flex items-center gap-2 font-medium text-slate-800"><span className="truncate">{item.nome_fantasia}</span>{item.debito_automatico === 'authorized' && <DebitoBadge />}</p>
                         <p className="text-sm text-slate-500">{item.valor_mensal != null ? `${formatarMoeda(item.valor_mensal)} por mês` : 'Cobrança não configurada'}</p>
                       </div>
                       <SituacaoBadge item={item} situacao={situacao} />
@@ -232,7 +256,8 @@ function SituacaoBadge({ item, situacao }: { item: AssinaturaAdmin; situacao: Si
 
 function Vencimento({ item, situacao, hoje }: { item: AssinaturaAdmin; situacao: SituacaoAssinatura; hoje: string }) {
   if (!item.proximo_vencimento) return <span className="text-slate-400">—</span>
-  const prazo = descreverPrazo(diasAte(item.proximo_vencimento, hoje))
+  const vencidas = parcelasEmAberto(item, hoje).filter((parcela) => parcela.atrasada).length
+  const prazo = vencidas > 1 ? `${vencidas} mensalidades em aberto` : descreverPrazo(diasAte(item.proximo_vencimento, hoje))
   return (
     <span className="flex items-baseline gap-2 md:flex-col md:gap-0">
       <span className="font-medium text-slate-700">{formatarData(item.proximo_vencimento)}</span>
@@ -264,4 +289,8 @@ function Acoes({ item, situacao, onEditar, onPagar }: { item: AssinaturaAdmin; s
       </Button>
     </div>
   )
+}
+
+function DebitoBadge() {
+  return <Badge variant="info" className="shrink-0 whitespace-nowrap" title="Paga por débito automático no cartão (Mercado Pago)"><CreditCard size={12} />Débito automático</Badge>
 }

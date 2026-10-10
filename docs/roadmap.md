@@ -183,6 +183,14 @@ Motivado por relatos de tela em branco após login no Safari/iOS em alguns apare
 - [x] Pop-up diário e tarja fixa no rodapé para mensalidade perto do vencimento ou em atraso.
 - [x] Rodar a migration `0025` no Supabase, cadastrar a conta da Lotus em `platform_admins` e publicar o frontend (v0.25.0).
 
+## Mensalidade pelo Mercado Pago ✅ concluída em 2026-10-10 (v0.26.0)
+
+- [x] Checkout Pro (Pix, cartão, boleto) quitando todas as mensalidades em aberto e débito automático no cartão (assinatura), na conta PJ da Lotus.
+- [x] Edge Functions `mercadopago-pagamento` e `mercadopago-webhook` (assinatura secreta + reconsulta na API, baixa idempotente) e migration `0026`.
+- [x] Histórico de faturas com parcelas em aberto, lista no celular e avisos com o total devido.
+- [x] Aplicação, webhook e secrets configurados; migration `0026` aplicada; funções e frontend publicados.
+- [ ] Teste real com um Pix de valor baixo e com a ativação do débito automático.
+
 ## Ideias para avaliar depois (fora do escopo atual, não implementar sem pedir)
 
 - App nativo em loja (Play Store/App Store) via Capacitor, caso o modelo de vendas mude e passe a depender de descoberta pela loja — custo recorrente de US$99/ano (Apple) + build iOS exige Mac/Xcode.

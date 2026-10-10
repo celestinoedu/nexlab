@@ -9,6 +9,10 @@ Painel exclusivo da Lotus para controlar a mensalidade de cada laboratório. End
 - **Registrar pagamento**: dá baixa no vencimento atual, grava o pagamento no histórico que o cliente vê em **Meu Perfil** e avança o vencimento para o mês seguinte, mantendo o dia contratado (um cliente "dia 31" vence em 28/02 e volta para 31/03).
 - **Desfazer último pagamento** (dentro de Editar): corrige uma baixa feita por engano e devolve o vencimento para a data anterior.
 
+## Mercado Pago
+
+Os clientes pagam pelo Mercado Pago (Pix, cartão, boleto ou débito automático) e a baixa é automática. O painel mostra o selo **Débito automático** e, no histórico, a forma de cada pagamento. "Registrar pagamento" continua disponível para pagamentos feitos por fora. Configuração em [`mercado-pago.md`](./mercado-pago.md).
+
 ## O que o cliente vê
 
 | Situação | Quando | No app do cliente |
@@ -18,7 +22,7 @@ Painel exclusivo da Lotus para controlar a mensalidade de cada laboratório. End
 | Em atraso | passou do vencimento sem pagamento registrado | pop-up 1× por dia + tarja vermelha no rodapé |
 | Sem cobrança | sem cobrança configurada ou pausada | nada |
 
-Todos os usuários do laboratório veem os avisos. Eles somem sozinhos quando o pagamento é registrado (o app consulta a assinatura a cada 15 minutos ou ao recarregar). O acesso **não é bloqueado** automaticamente.
+Todos os usuários do laboratório veem os avisos. Eles somem sozinhos quando o pagamento é confirmado (o app consulta a assinatura a cada 15 minutos, ao recarregar e logo após voltar do Mercado Pago). Com débito automático ativo, só o atraso gera aviso. O acesso **não é bloqueado** automaticamente.
 
 ## Ativação (uma vez)
 

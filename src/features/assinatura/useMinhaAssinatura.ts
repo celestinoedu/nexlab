@@ -4,8 +4,11 @@ import { supabase } from '@/lib/supabase'
 export interface MinhaAssinatura {
   valor_mensal: number
   proximo_vencimento: string
+  dia_vencimento: number
   dias_aviso: number
   ativa: boolean
+  /** Débito automático no Mercado Pago: pending, authorized, paused, cancelled ou nulo. */
+  mp_preapproval_status: string | null
 }
 
 /**
@@ -19,7 +22,7 @@ export function useMinhaAssinatura(enabled = true) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('assinaturas')
-        .select('valor_mensal, proximo_vencimento, dias_aviso, ativa')
+        .select('valor_mensal, proximo_vencimento, dia_vencimento, dias_aviso, ativa, mp_preapproval_status')
         .maybeSingle()
       if (error) throw error
       return data ? ({ ...data, valor_mensal: Number(data.valor_mensal) } as MinhaAssinatura) : null

@@ -5,6 +5,9 @@
  * o aviso não virar de dia às 21h por causa do UTC.
  */
 
+/** Âncora do card de pagamento em Meu Perfil (botões "Pagar" rolam até ele). */
+export const ID_PAGAR_MENSALIDADE = 'pagar-mensalidade'
+
 export type SituacaoAssinatura = 'sem_cobranca' | 'em_dia' | 'vence_em_breve' | 'atrasada'
 
 export interface DadosVencimento {
@@ -47,6 +50,32 @@ export function proximoVencimentoApos(vencimento: string, diaVencimento: number)
   const [ano, mes] = vencimento.split('-').map(Number)
   const ultimoDia = new Date(Date.UTC(ano, mes + 1, 0)).getUTCDate()
   return new Date(Date.UTC(ano, mes, Math.min(diaVencimento, ultimoDia))).toISOString().slice(0, 10)
+}
+
+export interface ParcelaEmAberto {
+  vencimento: string
+  competencia: string
+  atrasada: boolean
+}
+
+/**
+ * Mensalidades ainda não pagas: sempre o vencimento atual e, quando o atraso
+ * passa de um mês, também os vencimentos seguintes que já chegaram. Cada
+ * "Registrar pagamento" no painel quita a mais antiga.
+ */
+export function parcelasEmAberto(
+  assinatura: (DadosVencimento & { dia_vencimento: number | null }) | null | undefined,
+  hoje = hojeLocal(),
+): ParcelaEmAberto[] {
+  if (!assinatura?.ativa || !assinatura.proximo_vencimento) return []
+  const dia = assinatura.dia_vencimento ?? Number(assinatura.proximo_vencimento.slice(8, 10))
+  const parcelas: ParcelaEmAberto[] = []
+  let vencimento = assinatura.proximo_vencimento
+  do {
+    parcelas.push({ vencimento, competencia: `${vencimento.slice(0, 8)}01`, atrasada: vencimento < hoje })
+    vencimento = proximoVencimentoApos(vencimento, dia)
+  } while (vencimento <= hoje && parcelas.length < 12)
+  return parcelas
 }
 
 export function descreverPrazo(dias: number): string {

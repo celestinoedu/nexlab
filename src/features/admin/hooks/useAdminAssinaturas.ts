@@ -15,6 +15,8 @@ export interface AssinaturaAdmin {
   dias_aviso: number | null
   ativa: boolean | null
   ultimo_pagamento: string | null
+  /** Débito automático no Mercado Pago (pending, authorized, paused, cancelled) ou nulo. */
+  debito_automatico: string | null
 }
 
 export interface PagamentoAdmin {
@@ -23,6 +25,8 @@ export interface PagamentoAdmin {
   valor: number
   data_vencimento: string
   data_pagamento: string
+  origem: 'manual' | 'mercadopago'
+  forma_pagamento: string | null
 }
 
 export interface SalvarAssinaturaInput {

@@ -1,5 +1,6 @@
 import * as React from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useQueryClient } from '@tanstack/react-query'
 import {
   AlertCircle,
   CalendarDays,
@@ -25,7 +26,8 @@ import { Label } from '@/components/ui/label'
 import { useFaturasAssinatura, type StatusFatura } from './hooks/useFaturasAssinatura'
 import { useProfileMutations } from './hooks/useProfileMutations'
 import { useMinhaAssinatura } from '@/features/assinatura/useMinhaAssinatura'
-import { SITUACAO_LABEL, calcularSituacao, descreverPrazo, diasAte } from '@/features/assinatura/situacao'
+import { ID_PAGAR_MENSALIDADE, SITUACAO_LABEL, calcularSituacao, descreverPrazo, diasAte, parcelasEmAberto } from '@/features/assinatura/situacao'
+import { PagarMensalidadeCard } from '@/features/assinatura/PagarMensalidadeCard'
 
 const STATUS_FATURA: Record<StatusFatura, { label: string; variant: 'success' | 'warning' | 'danger' | 'neutral' }> = {
   paga: { label: 'Paga', variant: 'success' },
@@ -49,6 +51,10 @@ export function MeuPerfilPage() {
   const { data: faturas, isLoading: carregandoFaturas, isError: erroFaturas } = useFaturasAssinatura()
   const { data: mensalidade } = useMinhaAssinatura(Boolean(empresa && !empresa.is_demo))
   const { salvarPerfil } = useProfileMutations()
+  const queryClient = useQueryClient()
+  const [searchParams, setSearchParams] = useSearchParams()
+  // Retorno do Mercado Pago (back_urls da Edge Function mercadopago-pagamento).
+  const [retornoMercadoPago] = React.useState(() => ({ pagamento: searchParams.get('pagamento'), debito: searchParams.get('debito') }))
   const [nome, setNome] = React.useState('')
   const [documentoFiscal, setDocumentoFiscal] = React.useState('')
 
@@ -57,6 +63,23 @@ export function MeuPerfilPage() {
     setNome(profile.nome ?? '')
     setDocumentoFiscal(formatarCpfCnpj(profile.documento_fiscal ?? ''))
   }, [profile])
+
+  React.useEffect(() => {
+    const { pagamento, debito } = retornoMercadoPago
+    if (!pagamento && !debito) return
+    if (pagamento === 'aprovado') toast.success('Pagamento aprovado! A confirmação aparece aqui em instantes.')
+    else if (pagamento === 'pendente') toast.info('Pagamento em processamento. Boleto pode levar até 3 dias úteis para compensar.')
+    else if (pagamento === 'falhou') toast.error('O pagamento não foi concluído. Tente novamente ou escolha outra forma de pagamento.')
+    if (debito) toast.info('Cadastro do débito automático recebido. A confirmação aparece aqui em instantes.')
+    setSearchParams({}, { replace: true })
+    // O webhook costuma confirmar em segundos; consulta de novo algumas vezes.
+    const atualizar = () => {
+      void queryClient.invalidateQueries({ queryKey: ['minha_assinatura'] })
+      void queryClient.invalidateQueries({ queryKey: ['faturas_assinatura'] })
+    }
+    const timers = [3_000, 10_000, 30_000].map((ms) => window.setTimeout(atualizar, ms))
+    return () => timers.forEach(window.clearTimeout)
+  }, [retornoMercadoPago, queryClient, setSearchParams])
 
   async function onSalvar(event: React.FormEvent) {
     event.preventDefault()
@@ -78,6 +101,35 @@ export function MeuPerfilPage() {
   const assinatura = STATUS_ASSINATURA[empresa?.status_assinatura ?? 'ativa']
   const documentoPendente = !profile?.documento_fiscal
   const situacaoMensalidade = calcularSituacao(mensalidade)
+  const pagamentoUrgente = situacaoMensalidade === 'atrasada' || situacaoMensalidade === 'vence_em_breve'
+  // Parcelas ainda não pagas entram no topo do histórico, antes das faturas pagas.
+  const competenciasRegistradas = new Set((faturas ?? []).map((fatura) => fatura.competencia))
+  const linhasFaturas = [
+    ...parcelasEmAberto(mensalidade)
+      .filter((parcela) => !competenciasRegistradas.has(parcela.competencia))
+      .reverse()
+      .map((parcela) => ({
+        id: `aberta-${parcela.competencia}`,
+        competencia: parcela.competencia,
+        data_vencimento: parcela.vencimento,
+        valor: mensalidade!.valor_mensal,
+        status: (parcela.atrasada ? 'vencida' : 'pendente') as StatusFatura,
+        nota_fiscal_numero: null as string | null,
+        nota_fiscal_url: null as string | null,
+        emAberto: true,
+      })),
+    ...(faturas ?? []).map((fatura) => ({ ...fatura, emAberto: false })),
+  ]
+  const irParaPagamento = () => document.getElementById(ID_PAGAR_MENSALIDADE)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  const acaoFatura = (fatura: (typeof linhasFaturas)[number]) => {
+    if (fatura.emAberto) {
+      // Com débito automático, a parcela que ainda não venceu será cobrada no cartão.
+      if (fatura.status === 'pendente' && mensalidade?.mp_preapproval_status === 'authorized') return <span className="text-xs text-slate-400">Cobrança automática</span>
+      return <Button variant="secondary" size="sm" onClick={irParaPagamento}>Pagar</Button>
+    }
+    if (fatura.nota_fiscal_url) return <Button asChild variant="ghost" size="sm"><a href={fatura.nota_fiscal_url} target="_blank" rel="noreferrer"><Download size={15} />Baixar NF</a></Button>
+    return <span className="text-slate-300">—</span>
+  }
 
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-5">
@@ -86,6 +138,8 @@ export function MeuPerfilPage() {
         <h1 className="mt-1 text-2xl font-semibold text-slate-900">Meu Perfil</h1>
         <p className="mt-1 text-sm text-slate-500">Gerencie seus dados pessoais, assinatura, pagamentos e notas fiscais.</p>
       </div>
+
+      {mensalidade && pagamentoUrgente && <PagarMensalidadeCard assinatura={mensalidade} podeGerenciarDebito={profile?.role === 'admin'} />}
 
       {documentoPendente && !empresa?.is_demo && (
         <div className="flex items-start gap-3 rounded-2xl border border-warning-500/30 bg-warning-100/70 p-4 text-warning-700">
@@ -146,6 +200,8 @@ export function MeuPerfilPage() {
         </Card>
       </div>
 
+      {mensalidade && !pagamentoUrgente && <PagarMensalidadeCard assinatura={mensalidade} podeGerenciarDebito={profile?.role === 'admin'} />}
+
       <Card>
         <CardHeader className="flex-row items-center justify-between gap-4 border-b border-slate-100 pb-4">
           <div className="flex items-center gap-3">
@@ -158,18 +214,38 @@ export function MeuPerfilPage() {
             <div className="flex justify-center py-12"><Loader2 className="animate-spin text-brand-600" size={24} /></div>
           ) : erroFaturas ? (
             <p className="px-6 py-10 text-center text-sm text-slate-500">Não foi possível carregar as faturas agora.</p>
-          ) : !faturas?.length ? (
+          ) : !linhasFaturas.length ? (
             <div className="flex flex-col items-center px-6 py-12 text-center"><FileText className="text-slate-300" size={32} /><p className="mt-3 text-sm font-medium text-slate-700">Nenhuma fatura emitida</p><p className="mt-1 max-w-sm text-sm text-slate-400">Quando o controle de cobrança começar, suas faturas e notas fiscais aparecerão aqui.</p></div>
           ) : (
-            <div className="overflow-x-auto">
+            <>
+            <ul className="flex flex-col divide-y divide-slate-100 md:hidden">
+              {linhasFaturas.map((fatura) => {
+                const status = STATUS_FATURA[fatura.status]
+                return (
+                  <li key={fatura.id} className={`flex items-center justify-between gap-3 px-5 py-4 ${fatura.emAberto ? 'bg-amber-50/40' : ''}`}>
+                    <div className="min-w-0">
+                      <p className="font-medium text-slate-800 first-letter:uppercase">{formatarCompetencia(fatura.competencia)}</p>
+                      <p className="mt-0.5 text-xs text-slate-500">{formatarMoeda(fatura.valor)} · vence {formatarData(fatura.data_vencimento)}</p>
+                      {!fatura.emAberto && fatura.nota_fiscal_numero && <p className="mt-0.5 text-xs text-slate-400">{fatura.nota_fiscal_numero}</p>}
+                    </div>
+                    <div className="flex shrink-0 flex-col items-end gap-2">
+                      <Badge variant={status.variant}>{status.label}</Badge>
+                      {acaoFatura(fatura)}
+                    </div>
+                  </li>
+                )
+              })}
+            </ul>
+            <div className="hidden overflow-x-auto md:block">
               <table className="w-full min-w-[720px] text-sm">
                 <thead><tr className="border-b border-slate-100 text-left text-xs font-semibold tracking-wide text-slate-400 uppercase"><th className="px-6 py-3">Competência</th><th className="px-4 py-3">Vencimento</th><th className="px-4 py-3">Valor</th><th className="px-4 py-3">Status</th><th className="px-4 py-3">Nota fiscal</th><th className="px-6 py-3 text-right">Ação</th></tr></thead>
-                <tbody>{faturas.map((fatura) => {
+                <tbody>{linhasFaturas.map((fatura) => {
                   const status = STATUS_FATURA[fatura.status]
-                  return <tr key={fatura.id} className="border-b border-slate-100 last:border-0"><td className="px-6 py-4 font-medium text-slate-700">{formatarCompetencia(fatura.competencia)}</td><td className="px-4 py-4 text-slate-500">{formatarData(fatura.data_vencimento)}</td><td className="px-4 py-4 font-medium text-slate-700">{formatarMoeda(fatura.valor)}</td><td className="px-4 py-4"><Badge variant={status.variant}>{status.label}</Badge></td><td className="px-4 py-4 text-slate-500">{fatura.nota_fiscal_numero || 'Aguardando emissão'}</td><td className="px-6 py-4 text-right">{fatura.nota_fiscal_url ? <Button asChild variant="ghost" size="sm"><a href={fatura.nota_fiscal_url} target="_blank" rel="noreferrer"><Download size={15} />Baixar</a></Button> : <span className="text-slate-300">—</span>}</td></tr>
+                  return <tr key={fatura.id} className={`border-b border-slate-100 last:border-0 ${fatura.emAberto ? 'bg-amber-50/40' : ''}`}><td className="px-6 py-4 font-medium text-slate-700 first-letter:uppercase">{formatarCompetencia(fatura.competencia)}</td><td className="px-4 py-4 text-slate-500">{formatarData(fatura.data_vencimento)}</td><td className="px-4 py-4 font-medium text-slate-700">{formatarMoeda(fatura.valor)}</td><td className="px-4 py-4"><Badge variant={status.variant}>{status.label}</Badge></td><td className="px-4 py-4 text-slate-500">{fatura.emAberto ? '—' : fatura.nota_fiscal_numero || 'Aguardando emissão'}</td><td className="px-6 py-4 text-right">{acaoFatura(fatura)}</td></tr>
                 })}</tbody>
               </table>
             </div>
+            </>
           )}
         </CardContent>
       </Card>
