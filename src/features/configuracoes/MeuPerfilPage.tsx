@@ -24,6 +24,8 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useFaturasAssinatura, type StatusFatura } from './hooks/useFaturasAssinatura'
 import { useProfileMutations } from './hooks/useProfileMutations'
+import { useMinhaAssinatura } from '@/features/assinatura/useMinhaAssinatura'
+import { SITUACAO_LABEL, calcularSituacao, descreverPrazo, diasAte } from '@/features/assinatura/situacao'
 
 const STATUS_FATURA: Record<StatusFatura, { label: string; variant: 'success' | 'warning' | 'danger' | 'neutral' }> = {
   paga: { label: 'Paga', variant: 'success' },
@@ -45,6 +47,7 @@ export function MeuPerfilPage() {
   const { data: profile, isLoading: carregandoPerfil } = useProfile()
   const { data: empresa, isLoading: carregandoEmpresa } = useEmpresaConfig()
   const { data: faturas, isLoading: carregandoFaturas, isError: erroFaturas } = useFaturasAssinatura()
+  const { data: mensalidade } = useMinhaAssinatura(Boolean(empresa && !empresa.is_demo))
   const { salvarPerfil } = useProfileMutations()
   const [nome, setNome] = React.useState('')
   const [documentoFiscal, setDocumentoFiscal] = React.useState('')
@@ -74,6 +77,7 @@ export function MeuPerfilPage() {
 
   const assinatura = STATUS_ASSINATURA[empresa?.status_assinatura ?? 'ativa']
   const documentoPendente = !profile?.documento_fiscal
+  const situacaoMensalidade = calcularSituacao(mensalidade)
 
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-5">
@@ -126,7 +130,18 @@ export function MeuPerfilPage() {
           </div>
           <CardContent className="flex flex-col gap-3 pt-5">
             <div className="flex items-center gap-3 text-sm text-slate-600"><CheckCircle2 className="text-success-500" size={17} /><span>Status do serviço atualizado</span></div>
-            <div className="flex items-center gap-3 text-sm text-slate-600"><CalendarDays className="text-slate-400" size={17} /><span>Cobrança vinculada à empresa</span></div>
+            {mensalidade && situacaoMensalidade !== 'sem_cobranca' ? (
+              <>
+                <div className="flex items-center gap-3 text-sm text-slate-600"><ReceiptText className="text-slate-400" size={17} /><span>{formatarMoeda(mensalidade.valor_mensal)} por mês</span></div>
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-slate-600">
+                  <CalendarDays className="text-slate-400" size={17} />
+                  <span>Próximo vencimento: <span className="font-medium text-slate-800">{formatarData(mensalidade.proximo_vencimento)}</span></span>
+                  {situacaoMensalidade !== 'em_dia' && <Badge variant={SITUACAO_LABEL[situacaoMensalidade].variant}>{descreverPrazo(diasAte(mensalidade.proximo_vencimento))}</Badge>}
+                </div>
+              </>
+            ) : (
+              <div className="flex items-center gap-3 text-sm text-slate-600"><CalendarDays className="text-slate-400" size={17} /><span>Cobrança vinculada à empresa</span></div>
+            )}
           </CardContent>
         </Card>
       </div>

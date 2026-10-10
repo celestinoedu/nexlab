@@ -4,6 +4,8 @@ Sistema de gestão de demandas e financeiro para o **GRS Lab** (laboratório de 
 
 > Documentação completa do projeto: [`CLAUDE.md`](./CLAUDE.md) (índice/convenções), [`docs/architecture.md`](./docs/architecture.md), [`docs/database-schema.md`](./docs/database-schema.md), [`docs/business-rules.md`](./docs/business-rules.md), [`docs/design-system.md`](./docs/design-system.md), [`docs/ux-flows.md`](./docs/ux-flows.md), [`docs/roadmap.md`](./docs/roadmap.md) e [`docs/registro-inpi.md`](./docs/registro-inpi.md).
 
+Painel administrativo de assinaturas (exclusivo da Lotus): [`docs/painel-admin.md`](./docs/painel-admin.md).
+
 ## Stack
 
 Vite + React + TypeScript · Tailwind CSS v4 · componentes estilo shadcn/ui sobre Radix UI · react-router-dom (`HashRouter`) · Supabase (Postgres + Auth + Storage) · TanStack Query · react-hook-form + zod · @dnd-kit · @react-pdf/renderer.

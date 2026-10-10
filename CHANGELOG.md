@@ -4,6 +4,12 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), 
 
 ## [Não publicado]
 
+## [0.25.0] - 2026-10-10 — Painel administrativo de assinaturas
+
+### Adicionado
+- **Painel administrativo de assinaturas** (`/#/admin`), exclusivo da Lotus: lista as empresas clientes com mensalidade, próximo vencimento e situação; configura valor, vencimento e antecedência do aviso; registra pagamentos (avançando o vencimento para o mês seguinte) e desfaz o último pagamento. Acesso controlado pela tabela `platform_admins` e por funções protegidas no banco (migration `0025`). Ver `docs/painel-admin.md`.
+- **Avisos de mensalidade para o cliente**: pop-up uma vez por dia e tarja fixa no rodapé quando a mensalidade está perto do vencimento ou em atraso. Meu Perfil passa a mostrar o valor mensal e o próximo vencimento.
+
 ## [0.24.0] - 2026-09-24 — Clareza dos totais e formulário de OS
 
 ### Adicionado

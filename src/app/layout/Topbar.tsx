@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { Link } from 'react-router-dom'
-import { LogOut, User as UserIcon, Building2, Bell, AlertTriangle, ChevronDown } from 'lucide-react'
+import { LogOut, User as UserIcon, Building2, Bell, AlertTriangle, ChevronDown, ShieldCheck } from 'lucide-react'
 import { useAuth } from '@/features/auth/AuthProvider'
 import { useEmpresaConfig } from '@/hooks/useEmpresaConfig'
 import { useInsumos } from '@/features/estoque/hooks/useInsumos'
@@ -9,12 +9,14 @@ import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover
 import { Logo } from '@/components/shared/Logo'
 import { EmpresaConfigDialog } from '@/features/configuracoes/components/EmpresaConfigDialog'
 import { useProfile } from '@/hooks/useProfile'
+import { useIsPlatformAdmin } from '@/hooks/useIsPlatformAdmin'
 
 export function Topbar() {
   const { user, signOut } = useAuth()
   const { data: empresa } = useEmpresaConfig()
   const { data: profile } = useProfile()
   const { data: insumos } = useInsumos()
+  const { data: isPlatformAdmin } = useIsPlatformAdmin()
   const iniciais = getIniciais(profile?.nome ?? user?.email)
   const [configAberta, setConfigAberta] = React.useState(false)
   const [menuAberto, setMenuAberto] = React.useState(false)
@@ -138,6 +140,12 @@ export function Topbar() {
                   <span className="flex size-8 items-center justify-center rounded-lg bg-brand-50 text-brand-700"><UserIcon size={16} /></span>
                   <span className="flex-1">Meu Perfil</span>
                 </Link>
+                {isPlatformAdmin && (
+                  <Link to="/admin" onClick={() => setMenuAberto(false)} role="menuitem" className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-brand-50 hover:text-brand-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40">
+                    <span className="flex size-8 items-center justify-center rounded-lg bg-brand-50 text-brand-700"><ShieldCheck size={16} /></span>
+                    <span className="flex-1">Painel administrativo</span>
+                  </Link>
+                )}
                 <button type="button" role="menuitem" onClick={() => { setMenuAberto(false); void signOut() }} className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-medium text-danger-500 transition-colors hover:bg-danger-100/60 hover:text-danger-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger-500/30">
                   <span className="flex size-8 items-center justify-center rounded-lg bg-danger-100/70"><LogOut size={16} /></span>
                   <span className="flex-1">Sair</span>

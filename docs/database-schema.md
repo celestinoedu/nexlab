@@ -1,6 +1,6 @@
 # NexLab — Schema do banco de dados
 
-> Espelha `supabase/migrations/0001_init.sql` a `0019_reabertura_e_sincronia_financeira.sql`. Se o schema mudar, atualize a migration nova + este arquivo no mesmo commit — nunca deixe este documento desatualizado em relação às migrations reais.
+> Espelha `supabase/migrations/0001_init.sql` a `0025_painel_admin_assinaturas.sql`. Se o schema mudar, atualize a migration nova + este arquivo no mesmo commit — nunca deixe este documento desatualizado em relação às migrations reais.
 
 ## Multi-tenant
 
@@ -225,6 +225,14 @@ Snapshot do **resultado do laboratório inteiro** por mês (não por entidade): 
 
 `mes_referencia` (`unique`), `total_receitas`, `total_despesas`, `resultado`, `status` (`status_fechamento_periodo`), `data_fechamento`, `observacoes`, `created_by`. Antes de "fechar o mês", a tela calcula os totais ao vivo; depois de fechado, mostra o snapshot travado. Um administrador pode reabrir o período (`status = aberto`) para retomar o cálculo ao vivo e fechá-lo novamente.
 
+### `assinaturas` e `platform_admins` (novas na migration `0025`)
+
+`assinaturas`: uma linha por empresa com `valor_mensal`, `proximo_vencimento`, `dia_vencimento` (dia contratado, preserva 29/30/31 em meses curtos), `dias_aviso` (0–30, padrão 5) e `ativa`. Sem linha ou com `ativa = false`, a empresa não recebe avisos de cobrança. Os pagamentos registrados vão para `faturas_assinatura` (`status = 'paga'`), que já era exibida em Meu Perfil.
+
+`platform_admins`: contas da Lotus com acesso ao painel `/#/admin`. Começa vazia; o acesso é concedido por insert manual no SQL Editor (ver `docs/painel-admin.md`).
+
+Funções (todas `security definer`, todas começam por `exigir_platform_admin()`): `admin_listar_assinaturas()`, `admin_salvar_assinatura(...)`, `admin_registrar_pagamento(...)` (grava o pagamento e avança o vencimento um mês), `admin_desfazer_ultimo_pagamento(...)` e `admin_listar_pagamentos(...)`. `is_platform_admin()` só informa ao frontend se o menu deve aparecer.
+
 ## Views
 
 ### `vw_relatorio_fechamento_itens`
@@ -247,6 +255,7 @@ Cenário desde a migration `0010`: **vários** laboratórios (tenants) no mesmo 
 - `profiles`: cada usuário vê o próprio registro; `admin` vê e administra os perfis **da mesma empresa**. A edição pessoal de nome usa a RPC limitada `update_my_profile_name`, sem permitir mudar `role`, `ativo` ou `empresa_id`. A RPC `complete_my_onboarding` salva o responsável e os dados da empresa numa única transação e exige administrador ativo do próprio tenant.
 - **Storage `logos`**: leitura pública (não é dado sensível), escrita (`insert`/`update`/`delete`) só `admin`, restrita ao caminho `${empresaId}/...` da própria empresa (`storage.foldername(name)`).
 - Nenhuma policy libera acesso ao role `anon` a dado de negócio — só usuários autenticados chegam aos dados, e só aos da própria empresa.
+- `assinaturas`: cada usuário ativo lê só a linha da própria empresa; ninguém do app escreve nela — as alterações passam pelas funções `admin_*`, restritas a `platform_admins` (que não tem nenhuma permissão para `anon`/`authenticated`).
 - `instagram_publicacoes` é uma fila interna da marca, fora do escopo dos tenants: não tem policy para usuários do aplicativo e só é acessada pela `service_role` da automação.
 
 ## Convenções para novas migrations

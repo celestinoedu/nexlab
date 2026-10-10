@@ -4,6 +4,7 @@ import { Sidebar } from './Sidebar'
 import { Topbar } from './Topbar'
 import { MobileNav } from './MobileNav'
 import { useIsDemo } from '@/hooks/useEmpresaConfig'
+import { AvisoAssinatura } from '@/features/assinatura/AvisoAssinatura'
 
 export function AppShell() {
   const isDemo = useIsDemo()
@@ -24,6 +25,7 @@ export function AppShell() {
         <main className="flex-1 overflow-y-auto p-4 md:p-7">
           <Outlet />
         </main>
+        <AvisoAssinatura />
       </div>
     </div>
   )

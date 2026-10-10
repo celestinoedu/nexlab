@@ -23,6 +23,7 @@ import { UsuariosPage } from '@/features/configuracoes/UsuariosPage'
 import { TermosPage } from '@/features/configuracoes/TermosPage'
 import { MeuPerfilPage } from '@/features/configuracoes/MeuPerfilPage'
 import { OnboardingPage } from '@/features/onboarding/OnboardingPage'
+import { AdminPage } from '@/features/admin/AdminPage'
 
 /**
  * Tela inicial ("/") depende do tamanho de tela: no computador continua
@@ -48,6 +49,8 @@ export function AppRoutes() {
 
         <Route element={<ProtectedRoute />}>
           <Route path="/primeiros-passos" element={<OnboardingPage />} />
+          {/* Painel da Lotus — fora do OnboardingGate/AppShell; só abre para platform_admins. */}
+          <Route path="/admin" element={<AdminPage />} />
           <Route element={<OnboardingGate />}>
             <Route element={<AppShell />}>
               {/* Ordens de Serviço é a tela inicial no computador — módulo

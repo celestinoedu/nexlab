@@ -175,6 +175,14 @@ Motivado por relatos de tela em branco após login no Safari/iOS em alguns apare
 - [x] Tornar “Meu perfil” funcional, com edição segura do nome, consulta do acesso e atalho para alterar a senha.
 - [x] Evoluir “Meu Perfil” para uma página completa, exigir CPF/CNPJ por usuário e preparar plano, status da assinatura, faturas e notas fiscais.
 
+## Painel administrativo de assinaturas ✅ concluída em 2026-10-10 (v0.25.0)
+
+- [x] Substituir a primeira versão do painel (CRM, SMTP, MFA, cron — nunca aplicada em produção; arquivada fora do repositório) por uma versão enxuta só com SQL + RLS.
+- [x] Tabela `assinaturas`, lista `platform_admins` e funções `admin_*` (migration `0025`), testadas em Postgres local.
+- [x] Painel `/#/admin` com indicadores, filtros, registrar/desfazer pagamento e configuração por cliente.
+- [x] Pop-up diário e tarja fixa no rodapé para mensalidade perto do vencimento ou em atraso.
+- [x] Rodar a migration `0025` no Supabase, cadastrar a conta da Lotus em `platform_admins` e publicar o frontend (v0.25.0).
+
 ## Ideias para avaliar depois (fora do escopo atual, não implementar sem pedir)
 
 - App nativo em loja (Play Store/App Store) via Capacitor, caso o modelo de vendas mude e passe a depender de descoberta pela loja — custo recorrente de US$99/ano (Apple) + build iOS exige Mac/Xcode.
