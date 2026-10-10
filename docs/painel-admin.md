@@ -9,6 +9,12 @@ Painel exclusivo da Lotus para controlar a mensalidade de cada laboratório. End
 - **Registrar pagamento**: dá baixa no vencimento atual, grava o pagamento no histórico que o cliente vê em **Meu Perfil** e avança o vencimento para o mês seguinte, mantendo o dia contratado (um cliente "dia 31" vence em 28/02 e volta para 31/03).
 - **Desfazer último pagamento** (dentro de Editar): corrige uma baixa feita por engano e devolve o vencimento para a data anterior.
 
+## Tipo de assinatura e bloqueio
+
+- **Pagante**: tem valor, vencimento, avisos e bloqueio por atraso.
+- **Não pagante** (parceria, cortesia, piloto): sem cobrança, sem aviso e sem bloqueio. O campo **Motivo** (ex.: "Parceria 100% OFF") aparece só no painel; o cliente vê "Assinatura sem custo".
+- **Bloqueio**: passados os dias de tolerância (padrão **5**, campo "Bloquear o acesso após quantos dias de atraso"), o laboratório só vê a tela "Acesso suspenso" com o botão de pagamento. Os dados não são apagados. Assim que o pagamento é confirmado — pelo Mercado Pago ou por "Registrar pagamento" — o acesso volta na hora. Para dar mais prazo a alguém, aumente a tolerância daquele cliente.
+
 ## Mercado Pago
 
 Os clientes pagam pelo Mercado Pago (Pix, cartão, boleto ou débito automático) e a baixa é automática. O painel mostra o selo **Débito automático** e, no histórico, a forma de cada pagamento. "Registrar pagamento" continua disponível para pagamentos feitos por fora. Configuração em [`mercado-pago.md`](./mercado-pago.md).
@@ -19,10 +25,11 @@ Os clientes pagam pelo Mercado Pago (Pix, cartão, boleto ou débito automático
 |---|---|---|
 | Em dia | faltam mais dias que o prazo de aviso | nada |
 | Vence em breve | faltam de 0 até N dias (N configurável, padrão 5) | pop-up 1× por dia + tarja amarela no rodapé |
-| Em atraso | passou do vencimento sem pagamento registrado | pop-up 1× por dia + tarja vermelha no rodapé |
-| Sem cobrança | sem cobrança configurada ou pausada | nada |
+| Em atraso | passou do vencimento, dentro da tolerância | pop-up 1× por dia + tarja vermelha com contagem para o bloqueio |
+| Bloqueado | atraso maior que a tolerância (padrão 5 dias) | só a tela "Acesso suspenso" com o pagamento |
+| Não pagante / sem configuração | parceria, cortesia ou ainda não configurado | nada |
 
-Todos os usuários do laboratório veem os avisos. Eles somem sozinhos quando o pagamento é confirmado (o app consulta a assinatura a cada 15 minutos, ao recarregar e logo após voltar do Mercado Pago). Com débito automático ativo, só o atraso gera aviso. O acesso **não é bloqueado** automaticamente.
+Todos os usuários do laboratório veem os avisos. Eles somem sozinhos quando o pagamento é confirmado (o app consulta a assinatura a cada 15 minutos, ao recarregar e logo após voltar do Mercado Pago). Com débito automático ativo, só o atraso gera aviso.
 
 ## Ativação (uma vez)
 

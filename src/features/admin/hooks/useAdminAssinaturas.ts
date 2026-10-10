@@ -17,6 +17,10 @@ export interface AssinaturaAdmin {
   ultimo_pagamento: string | null
   /** Débito automático no Mercado Pago (pending, authorized, paused, cancelled) ou nulo. */
   debito_automatico: string | null
+  /** Dias de atraso tolerados antes do bloqueio (migration 0027). */
+  dias_tolerancia: number | null
+  /** Anotação interna para assinantes não pagantes (ex.: parceria). */
+  motivo_nao_pagante: string | null
 }
 
 export interface PagamentoAdmin {
@@ -34,7 +38,10 @@ export interface SalvarAssinaturaInput {
   valorMensal: number
   proximoVencimento: string
   diasAviso: number
+  /** true = pagante; false = não pagante (parceria/cortesia). */
   ativa: boolean
+  diasTolerancia: number
+  motivoNaoPagante: string | null
 }
 
 export interface RegistrarPagamentoInput {
@@ -97,6 +104,8 @@ export function useAdminAssinaturaMutations() {
         p_proximo_vencimento: input.proximoVencimento,
         p_dias_aviso: input.diasAviso,
         p_ativa: input.ativa,
+        p_dias_tolerancia: input.diasTolerancia,
+        p_motivo_nao_pagante: input.motivoNaoPagante,
       })
       if (error) throw erroAmigavel(error)
     },

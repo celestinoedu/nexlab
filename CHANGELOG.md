@@ -4,6 +4,16 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), 
 
 ## [Não publicado]
 
+## [0.27.0] - 2026-10-10 — Bloqueio por inadimplência e assinantes não pagantes
+
+### Adicionado
+- **Bloqueio por falta de pagamento**: passados os dias de tolerância (padrão 5, ajustável por cliente no painel), o laboratório perde o acesso operacional e vê só a tela "Acesso suspenso" com o pagamento. O bloqueio é aplicado no banco (`is_active_user`/`is_admin_user`), e o acesso volta sozinho assim que o pagamento é confirmado. Migration `0027`.
+- **Tipo de assinatura** no painel: pagante ou não pagante (parceria/cortesia), com motivo interno visível só para a Lotus. Não pagantes não recebem cobrança, aviso nem bloqueio.
+- Avisos de atraso com contagem regressiva para o bloqueio.
+
+### Alterado
+- O Mercado Pago abre em nova aba e o NexLab confirma o pagamento sozinho, sem depender da volta pela tela do QR Code.
+
 ## [0.26.0] - 2026-10-10 — Mensalidade pelo Mercado Pago
 
 ### Adicionado

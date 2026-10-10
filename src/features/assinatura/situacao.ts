@@ -52,6 +52,28 @@ export function proximoVencimentoApos(vencimento: string, diaVencimento: number)
   return new Date(Date.UTC(ano, mes, Math.min(diaVencimento, ultimoDia))).toISOString().slice(0, 10)
 }
 
+export interface Bloqueio {
+  bloqueada: boolean
+  /** Dias até o bloqueio quando já está em atraso mas ainda dentro da tolerância. */
+  diasParaBloquear: number | null
+  /** Primeiro dia sem acesso, se a mensalidade continuar em aberto. */
+  bloqueiaEm: string | null
+}
+
+/** Mesma regra de `public.empresa_bloqueada` (migration 0027): bloqueia quando hoje > vencimento + tolerância. */
+export function calcularBloqueio(
+  assinatura: (DadosVencimento & { dias_tolerancia: number | null }) | null | undefined,
+  hoje = hojeLocal(),
+): Bloqueio {
+  if (!assinatura?.ativa || !assinatura.proximo_vencimento) return { bloqueada: false, diasParaBloquear: null, bloqueiaEm: null }
+  const tolerancia = assinatura.dias_tolerancia ?? 5
+  const atraso = -diasAte(assinatura.proximo_vencimento, hoje)
+  const [ano, mes, dia] = assinatura.proximo_vencimento.split('-').map(Number)
+  const bloqueiaEm = new Date(Date.UTC(ano, mes - 1, dia + tolerancia + 1)).toISOString().slice(0, 10)
+  if (atraso > tolerancia) return { bloqueada: true, diasParaBloquear: null, bloqueiaEm }
+  return { bloqueada: false, diasParaBloquear: atraso > 0 ? tolerancia + 1 - atraso : null, bloqueiaEm }
+}
+
 export interface ParcelaEmAberto {
   vencimento: string
   competencia: string

@@ -139,7 +139,8 @@ export function MeuPerfilPage() {
         <p className="mt-1 text-sm text-slate-500">Gerencie seus dados pessoais, assinatura, pagamentos e notas fiscais.</p>
       </div>
 
-      {mensalidade && pagamentoUrgente && <PagarMensalidadeCard assinatura={mensalidade} podeGerenciarDebito={profile?.role === 'admin'} />}
+      {/* Um único card: no topo quando há algo a pagar, abaixo dos dados pessoais quando está em dia (via `order`). */}
+      {mensalidade && <PagarMensalidadeCard assinatura={mensalidade} podeGerenciarDebito={profile?.role === 'admin'} className={pagamentoUrgente ? undefined : 'order-1'} />}
 
       {documentoPendente && !empresa?.is_demo && (
         <div className="flex items-start gap-3 rounded-2xl border border-warning-500/30 bg-warning-100/70 p-4 text-warning-700">
@@ -193,6 +194,8 @@ export function MeuPerfilPage() {
                   {situacaoMensalidade !== 'em_dia' && <Badge variant={SITUACAO_LABEL[situacaoMensalidade].variant}>{descreverPrazo(diasAte(mensalidade.proximo_vencimento))}</Badge>}
                 </div>
               </>
+            ) : mensalidade && !mensalidade.ativa ? (
+              <div className="flex items-center gap-3 text-sm text-slate-600"><CalendarDays className="text-slate-400" size={17} /><span>Assinatura sem custo</span></div>
             ) : (
               <div className="flex items-center gap-3 text-sm text-slate-600"><CalendarDays className="text-slate-400" size={17} /><span>Cobrança vinculada à empresa</span></div>
             )}
@@ -200,9 +203,7 @@ export function MeuPerfilPage() {
         </Card>
       </div>
 
-      {mensalidade && !pagamentoUrgente && <PagarMensalidadeCard assinatura={mensalidade} podeGerenciarDebito={profile?.role === 'admin'} />}
-
-      <Card>
+      <Card className="order-2">
         <CardHeader className="flex-row items-center justify-between gap-4 border-b border-slate-100 pb-4">
           <div className="flex items-center gap-3">
             <div className="flex size-10 items-center justify-center rounded-xl bg-amber-50 text-amber-600"><ReceiptText size={19} /></div>

@@ -1,6 +1,6 @@
 # NexLab — Schema do banco de dados
 
-> Espelha `supabase/migrations/0001_init.sql` a `0026_mercado_pago.sql`. Se o schema mudar, atualize a migration nova + este arquivo no mesmo commit — nunca deixe este documento desatualizado em relação às migrations reais.
+> Espelha `supabase/migrations/0001_init.sql` a `0027_bloqueio_inadimplencia.sql`. Se o schema mudar, atualize a migration nova + este arquivo no mesmo commit — nunca deixe este documento desatualizado em relação às migrations reais.
 
 ## Multi-tenant
 
@@ -238,6 +238,12 @@ Funções (todas `security definer`, todas começam por `exigir_platform_admin()
 `faturas_assinatura` ganha `origem` (`manual` ou `mercadopago`), `forma_pagamento` e `mp_payment_id`. `assinaturas` ganha `mp_preapproval_id` e `mp_preapproval_status` (débito automático). `pagamentos_mercadopago` registra cada pagamento já processado pelo webhook (chave `mp_payment_id`), impedindo baixa em dobro; sem acesso para `anon`/`authenticated`.
 
 `quitar_mensalidade(...)` é o núcleo único da baixa, sem permissão para usuários do app. É chamado por `admin_registrar_pagamento` (painel) e por `registrar_pagamento_mercadopago` (somente `service_role`, usada pela Edge Function `mercadopago-webhook`), que pode quitar várias parcelas de uma vez.
+
+### Bloqueio e tipo de assinatura (migration `0027`)
+
+`assinaturas` ganha `dias_tolerancia` (0–60, padrão 5) e `motivo_nao_pagante`. `ativa = true` é assinante **pagante**; `false` é **não pagante** (parceria/cortesia), sem cobrança, aviso ou bloqueio. O cliente lê a própria assinatura por permissão de coluna — `motivo_nao_pagante` fica de fora.
+
+`empresa_bloqueada(empresa_id)`: verdadeiro quando a assinatura é pagante e `hoje > proximo_vencimento + dias_tolerancia`. `is_active_user()` e `is_admin_user()` passam a exigir empresa não bloqueada — com isso **todas** as policies de negócio deixam de responder durante o bloqueio, inclusive para chamadas diretas à API. `is_account_member()` (perfil ativo, mesmo bloqueado) libera só `empresas`, `assinaturas` e `faturas_assinatura`, que a tela de pagamento precisa ler. O desbloqueio é automático quando `quitar_mensalidade` avança o vencimento.
 
 ## Views
 

@@ -6,6 +6,8 @@ export interface MinhaAssinatura {
   proximo_vencimento: string
   dia_vencimento: number
   dias_aviso: number
+  /** Dias de atraso tolerados antes do bloqueio (migration 0027). */
+  dias_tolerancia: number
   ativa: boolean
   /** Débito automático no Mercado Pago: pending, authorized, paused, cancelled ou nulo. */
   mp_preapproval_status: string | null
@@ -22,7 +24,7 @@ export function useMinhaAssinatura(enabled = true) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('assinaturas')
-        .select('valor_mensal, proximo_vencimento, dia_vencimento, dias_aviso, ativa, mp_preapproval_status')
+        .select('valor_mensal, proximo_vencimento, dia_vencimento, dias_aviso, dias_tolerancia, ativa, mp_preapproval_status')
         .maybeSingle()
       if (error) throw error
       return data ? ({ ...data, valor_mensal: Number(data.valor_mensal) } as MinhaAssinatura) : null

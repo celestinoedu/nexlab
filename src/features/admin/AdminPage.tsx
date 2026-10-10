@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/utils'
 import {
   SITUACAO_LABEL,
+  calcularBloqueio,
   calcularSituacao,
   descreverPrazo,
   diasAte,
@@ -24,17 +25,26 @@ import { useAdminAssinaturas, type AssinaturaAdmin } from './hooks/useAdminAssin
 import { AssinaturaDialog } from './components/AssinaturaDialog'
 import { RegistrarPagamentoDialog } from './components/RegistrarPagamentoDialog'
 
-type Filtro = 'todos' | SituacaoAssinatura
+/** Situação do pagante + os dois casos sem cobrança: não pagante (parceria) e ainda não configurado. */
+type Categoria = 'atrasada' | 'vence_em_breve' | 'em_dia' | 'nao_pagante' | 'sem_configuracao'
+type Filtro = 'todos' | Categoria
 
 const FILTROS: { valor: Filtro; label: string }[] = [
   { valor: 'todos', label: 'Todos' },
   { valor: 'atrasada', label: 'Em atraso' },
   { valor: 'vence_em_breve', label: 'Vencem em breve' },
   { valor: 'em_dia', label: 'Em dia' },
-  { valor: 'sem_cobranca', label: 'Sem cobrança' },
+  { valor: 'nao_pagante', label: 'Não pagantes' },
+  { valor: 'sem_configuracao', label: 'Sem configuração' },
 ]
 
-const ORDEM: Record<SituacaoAssinatura, number> = { atrasada: 0, vence_em_breve: 1, em_dia: 2, sem_cobranca: 3 }
+const ORDEM: Record<Categoria, number> = { atrasada: 0, vence_em_breve: 1, em_dia: 2, sem_configuracao: 3, nao_pagante: 4 }
+
+function categorizar(item: AssinaturaAdmin, hoje: string): Categoria {
+  if (!item.proximo_vencimento) return 'sem_configuracao'
+  if (!item.ativa) return 'nao_pagante'
+  return calcularSituacao(item, hoje) as Categoria
+}
 
 /**
  * Painel central da Lotus (/#/admin): mensalidade de cada laboratório.
@@ -54,9 +64,14 @@ export function AdminPage() {
   const linhas = React.useMemo(
     () =>
       (itens ?? [])
-        .map((item) => ({ item, situacao: calcularSituacao(item, hoje) }))
+        .map((item) => ({
+          item,
+          situacao: calcularSituacao(item, hoje),
+          categoria: categorizar(item, hoje),
+          bloqueada: calcularBloqueio(item, hoje).bloqueada,
+        }))
         .sort((a, b) =>
-          ORDEM[a.situacao] - ORDEM[b.situacao]
+          ORDEM[a.categoria] - ORDEM[b.categoria]
           || (a.item.proximo_vencimento ?? '').localeCompare(b.item.proximo_vencimento ?? '')
           || a.item.nome_fantasia.localeCompare(b.item.nome_fantasia, 'pt-BR'),
         ),
@@ -88,9 +103,10 @@ export function AdminPage() {
     )
   }
 
-  const contagem = (situacao: SituacaoAssinatura) => linhas.filter((linha) => linha.situacao === situacao).length
-  const atrasadas = linhas.filter((linha) => linha.situacao === 'atrasada')
-  const cobradas = linhas.filter((linha) => linha.situacao !== 'sem_cobranca')
+  const contagem = (categoria: Categoria) => linhas.filter((linha) => linha.categoria === categoria).length
+  const atrasadas = linhas.filter((linha) => linha.categoria === 'atrasada')
+  const bloqueadas = atrasadas.filter((linha) => linha.bloqueada).length
+  const cobradas = linhas.filter((linha) => ['atrasada', 'vence_em_breve', 'em_dia'].includes(linha.categoria))
   const receitaMensal = cobradas.reduce((total, linha) => total + (linha.item.valor_mensal ?? 0), 0)
   const valorEmAtraso = atrasadas.reduce(
     (total, linha) => total + (linha.item.valor_mensal ?? 0) * parcelasEmAberto(linha.item, hoje).filter((parcela) => parcela.atrasada).length,
@@ -98,8 +114,8 @@ export function AdminPage() {
   )
 
   const termo = busca.trim().toLocaleLowerCase('pt-BR')
-  const visiveis = linhas.filter(({ item, situacao }) =>
-    (filtro === 'todos' || situacao === filtro)
+  const visiveis = linhas.filter(({ item, categoria }) =>
+    (filtro === 'todos' || categoria === filtro)
     && (!termo || item.nome_fantasia.toLocaleLowerCase('pt-BR').includes(termo) || (item.email ?? '').toLowerCase().includes(termo)),
   )
   const editando = itens?.find((item) => item.empresa_id === editandoId) ?? null
@@ -130,10 +146,10 @@ export function AdminPage() {
         </div>
 
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-          <Indicador icon={AlertTriangle} tom="danger" titulo="Em atraso" valor={String(atrasadas.length)} detalhe={atrasadas.length ? `${formatarMoeda(valorEmAtraso)} em aberto` : 'Nenhum cliente'} />
+          <Indicador icon={AlertTriangle} tom="danger" titulo="Em atraso" valor={String(atrasadas.length)} detalhe={atrasadas.length ? `${formatarMoeda(valorEmAtraso)} em aberto${bloqueadas ? ` · ${bloqueadas} bloqueado${bloqueadas > 1 ? 's' : ''}` : ''}` : 'Nenhum cliente'} />
           <Indicador icon={CalendarClock} tom="warning" titulo="Vencem em breve" valor={String(contagem('vence_em_breve'))} detalhe="Dentro do prazo de aviso" />
-          <Indicador icon={CheckCircle2} tom="success" titulo="Em dia" valor={String(contagem('em_dia'))} detalhe={`${cobradas.length} com cobrança ativa`} />
-          <Indicador icon={Wallet} tom="brand" titulo="Receita mensal" valor={formatarMoeda(receitaMensal)} detalhe="Soma das mensalidades ativas" />
+          <Indicador icon={CheckCircle2} tom="success" titulo="Em dia" valor={String(contagem('em_dia'))} detalhe={`${plural(cobradas.length, 'pagante')} · ${plural(contagem('nao_pagante'), 'não pagante')}`} />
+          <Indicador icon={Wallet} tom="brand" titulo="Receita mensal" valor={formatarMoeda(receitaMensal)} detalhe="Soma das mensalidades dos pagantes" />
         </div>
 
         <Card>
@@ -182,15 +198,16 @@ export function AdminPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {visiveis.map(({ item, situacao }) => (
+                  {visiveis.map(({ item, situacao, categoria, bloqueada }) => (
                     <tr key={item.empresa_id} className="border-b border-slate-100 last:border-0">
                       <td className="px-5 py-3.5">
                         <p className="flex flex-wrap items-center gap-x-2 gap-y-1 font-medium text-slate-800"><span>{item.nome_fantasia}</span>{item.debito_automatico === 'authorized' && <DebitoBadge />}</p>
                         <p className="text-xs text-slate-400">{[item.email, `${item.usuarios_ativos} usuário${item.usuarios_ativos === 1 ? '' : 's'}`].filter(Boolean).join(' · ')}</p>
+                        {categoria === 'nao_pagante' && item.motivo_nao_pagante && <p className="text-xs text-info-700">{item.motivo_nao_pagante}</p>}
                       </td>
-                      <td className="px-4 py-3.5 font-medium text-slate-700">{item.valor_mensal != null ? formatarMoeda(item.valor_mensal) : '—'}</td>
-                      <td className="px-4 py-3.5"><Vencimento item={item} situacao={situacao} hoje={hoje} /></td>
-                      <td className="px-4 py-3.5"><SituacaoBadge item={item} situacao={situacao} /></td>
+                      <td className="px-4 py-3.5 font-medium text-slate-700">{categoria === 'nao_pagante' ? 'Isento' : item.valor_mensal != null ? formatarMoeda(item.valor_mensal) : '—'}</td>
+                      <td className="px-4 py-3.5">{categoria === 'nao_pagante' ? <span className="text-slate-400">—</span> : <Vencimento item={item} situacao={situacao} hoje={hoje} />}</td>
+                      <td className="px-4 py-3.5"><SituacaoBadge categoria={categoria} bloqueada={bloqueada} /></td>
                       <td className="px-4 py-3.5 text-slate-500">{item.ultimo_pagamento ? formatarData(item.ultimo_pagamento) : '—'}</td>
                       <td className="px-5 py-3.5">
                         <Acoes item={item} situacao={situacao} onEditar={() => setEditandoId(item.empresa_id)} onPagar={() => setPagandoId(item.empresa_id)} />
@@ -201,16 +218,20 @@ export function AdminPage() {
               </table>
 
               <ul className="flex flex-col divide-y divide-slate-100 md:hidden">
-                {visiveis.map(({ item, situacao }) => (
+                {visiveis.map(({ item, situacao, categoria, bloqueada }) => (
                   <li key={item.empresa_id} className="flex flex-col gap-3 p-4">
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
                         <p className="flex items-center gap-2 font-medium text-slate-800"><span className="truncate">{item.nome_fantasia}</span>{item.debito_automatico === 'authorized' && <DebitoBadge />}</p>
-                        <p className="text-sm text-slate-500">{item.valor_mensal != null ? `${formatarMoeda(item.valor_mensal)} por mês` : 'Cobrança não configurada'}</p>
+                        <p className="text-sm text-slate-500">
+                          {categoria === 'nao_pagante'
+                            ? `Isento${item.motivo_nao_pagante ? ` · ${item.motivo_nao_pagante}` : ''}`
+                            : item.valor_mensal != null && categoria !== 'sem_configuracao' ? `${formatarMoeda(item.valor_mensal)} por mês` : 'Cobrança não configurada'}
+                        </p>
                       </div>
-                      <SituacaoBadge item={item} situacao={situacao} />
+                      <SituacaoBadge categoria={categoria} bloqueada={bloqueada} />
                     </div>
-                    {item.proximo_vencimento && <Vencimento item={item} situacao={situacao} hoje={hoje} />}
+                    {item.proximo_vencimento && categoria !== 'nao_pagante' && <Vencimento item={item} situacao={situacao} hoje={hoje} />}
                     <Acoes item={item} situacao={situacao} onEditar={() => setEditandoId(item.empresa_id)} onPagar={() => setPagandoId(item.empresa_id)} />
                   </li>
                 ))}
@@ -248,10 +269,13 @@ function Indicador({ icon: Icon, tom, titulo, valor, detalhe }: { icon: React.El
   )
 }
 
-function SituacaoBadge({ item, situacao }: { item: AssinaturaAdmin; situacao: SituacaoAssinatura }) {
-  const { label, variant } = SITUACAO_LABEL[situacao]
-  const pausada = situacao === 'sem_cobranca' && item.proximo_vencimento != null
-  return <Badge variant={variant} className="shrink-0 whitespace-nowrap">{pausada ? 'Pausada' : label}</Badge>
+function SituacaoBadge({ categoria, bloqueada }: { categoria: Categoria; bloqueada: boolean }) {
+  const { label, variant } =
+    categoria === 'atrasada' && bloqueada ? { label: 'Bloqueado', variant: 'danger' as const }
+    : categoria === 'nao_pagante' ? { label: 'Não pagante', variant: 'info' as const }
+    : categoria === 'sem_configuracao' ? { label: 'Sem configuração', variant: 'neutral' as const }
+    : SITUACAO_LABEL[categoria]
+  return <Badge variant={variant} className="shrink-0 whitespace-nowrap">{label}</Badge>
 }
 
 function Vencimento({ item, situacao, hoje }: { item: AssinaturaAdmin; situacao: SituacaoAssinatura; hoje: string }) {
@@ -272,7 +296,7 @@ function Acoes({ item, situacao, onEditar, onPagar }: { item: AssinaturaAdmin; s
   if (!item.proximo_vencimento) {
     return (
       <div className="flex md:justify-end">
-        <Button size="sm" variant="secondary" onClick={onEditar}><Settings2 />Configurar cobrança</Button>
+        <Button size="sm" variant="secondary" onClick={onEditar}><Settings2 />Configurar assinatura</Button>
       </div>
     )
   }
@@ -294,3 +318,5 @@ function Acoes({ item, situacao, onEditar, onPagar }: { item: AssinaturaAdmin; s
 function DebitoBadge() {
   return <Badge variant="info" className="shrink-0 whitespace-nowrap" title="Paga por débito automático no cartão (Mercado Pago)"><CreditCard size={12} />Débito automático</Badge>
 }
+
+const plural = (n: number, palavra: string) => `${n} ${palavra}${n === 1 ? '' : 's'}`

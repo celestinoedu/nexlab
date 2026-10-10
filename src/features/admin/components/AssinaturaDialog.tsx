@@ -5,7 +5,8 @@ import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { formatarCompetencia, formatarData, formatarMoeda } from '@/features/assinatura/situacao'
+import { formatarCompetencia, formatarData, formatarMoeda, hojeLocal } from '@/features/assinatura/situacao'
+import { cn } from '@/lib/utils'
 import { useAdminAssinaturaMutations, usePagamentosAdmin, type AssinaturaAdmin, type PagamentoAdmin } from '../hooks/useAdminAssinaturas'
 
 interface AssinaturaDialogProps {
@@ -21,15 +22,21 @@ export function AssinaturaDialog({ item, onOpenChange }: AssinaturaDialogProps) 
   const [valor, setValor] = React.useState('')
   const [vencimento, setVencimento] = React.useState('')
   const [diasAviso, setDiasAviso] = React.useState('5')
-  const [ativa, setAtiva] = React.useState(true)
+  // `ativa` no banco: true = pagante, false = não pagante (parceria/cortesia).
+  const [pagante, setPagante] = React.useState(true)
+  const [diasTolerancia, setDiasTolerancia] = React.useState('5')
+  const [motivo, setMotivo] = React.useState('')
   const [confirmandoDesfazer, setConfirmandoDesfazer] = React.useState(false)
 
   React.useEffect(() => {
     if (!item) return
-    setValor(item.valor_mensal != null ? item.valor_mensal.toFixed(2) : '')
-    setVencimento(item.proximo_vencimento ?? '')
+    const naoPagante = item.ativa === false
+    setValor(item.valor_mensal != null && !naoPagante ? item.valor_mensal.toFixed(2) : '')
+    setVencimento(item.proximo_vencimento && !naoPagante ? item.proximo_vencimento : '')
     setDiasAviso(String(item.dias_aviso ?? 5))
-    setAtiva(item.ativa ?? true)
+    setPagante(!naoPagante)
+    setDiasTolerancia(String(item.dias_tolerancia ?? 5))
+    setMotivo(item.motivo_nao_pagante ?? '')
     setConfirmandoDesfazer(false)
   }, [item])
 
@@ -38,18 +45,21 @@ export function AssinaturaDialog({ item, onOpenChange }: AssinaturaDialogProps) 
     if (!item) return
     const valorNumero = Number(valor)
     const diasNumero = Number(diasAviso)
-    if (valor === '' || !Number.isFinite(valorNumero) || valorNumero < 0) return toast.error('Informe o valor da mensalidade.')
-    if (!vencimento) return toast.error('Informe o próximo vencimento.')
-    if (!Number.isInteger(diasNumero) || diasNumero < 0 || diasNumero > 30) return toast.error('A antecedência do aviso deve ficar entre 0 e 30 dias.')
+    const toleranciaNumero = Number(diasTolerancia)
+    if (pagante) {
+      if (valor === '' || !Number.isFinite(valorNumero) || valorNumero < 0) return toast.error('Informe o valor da mensalidade.')
+      if (!vencimento) return toast.error('Informe o próximo vencimento.')
+      if (!Number.isInteger(diasNumero) || diasNumero < 0 || diasNumero > 30) return toast.error('A antecedência do aviso deve ficar entre 0 e 30 dias.')
+      if (!Number.isInteger(toleranciaNumero) || toleranciaNumero < 0 || toleranciaNumero > 60) return toast.error('A tolerância antes do bloqueio deve ficar entre 0 e 60 dias.')
+    }
 
     try {
-      await salvarAssinatura.mutateAsync({
-        empresaId: item.empresa_id,
-        valorMensal: valorNumero,
-        proximoVencimento: vencimento,
-        diasAviso: diasNumero,
-        ativa,
-      })
+      await salvarAssinatura.mutateAsync(
+        pagante
+          ? { empresaId: item.empresa_id, valorMensal: valorNumero, proximoVencimento: vencimento, diasAviso: diasNumero, ativa: true, diasTolerancia: toleranciaNumero, motivoNaoPagante: null }
+          // Não pagante não usa valor nem vencimento; o banco exige uma data, então mantém a anterior (ou hoje).
+          : { empresaId: item.empresa_id, valorMensal: 0, proximoVencimento: item.proximo_vencimento ?? hojeLocal(), diasAviso: item.dias_aviso ?? 5, ativa: false, diasTolerancia: item.dias_tolerancia ?? 5, motivoNaoPagante: motivo.trim() || null },
+      )
       toast.success('Assinatura salva.')
       onOpenChange(false)
     } catch (error) {
@@ -75,11 +85,38 @@ export function AssinaturaDialog({ item, onOpenChange }: AssinaturaDialogProps) 
     <Dialog open={Boolean(item)} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>{configurada ? 'Editar assinatura' : 'Configurar cobrança'}</DialogTitle>
+          <DialogTitle>{configurada ? 'Editar assinatura' : 'Configurar assinatura'}</DialogTitle>
           <DialogDescription>{item?.nome_fantasia}</DialogDescription>
         </DialogHeader>
 
         <form onSubmit={onSalvar} className="grid grid-cols-1 gap-4 sm:grid-cols-2" noValidate>
+          <fieldset className="flex flex-col gap-1.5 sm:col-span-2">
+            <legend className="mb-1.5 text-sm font-medium text-slate-700">Tipo de assinatura</legend>
+            <div className="grid grid-cols-2 gap-2">
+              {[
+                { valor: true, titulo: 'Pagante', detalhe: 'Mensalidade, avisos e bloqueio por atraso' },
+                { valor: false, titulo: 'Não pagante', detalhe: 'Parceria ou cortesia: sem cobrança' },
+              ].map((opcao) => (
+                <label key={opcao.titulo} className={cn('flex cursor-pointer items-start gap-2.5 rounded-xl border p-3 transition-colors', pagante === opcao.valor ? 'border-brand-500 bg-brand-50' : 'border-slate-200 hover:bg-slate-50')}>
+                  <input type="radio" name="tipo_assinatura" className="mt-0.5 size-4 accent-brand-600" checked={pagante === opcao.valor} onChange={() => setPagante(opcao.valor)} />
+                  <span>
+                    <span className="block text-sm font-medium text-slate-800">{opcao.titulo}</span>
+                    <span className="block text-xs text-slate-500">{opcao.detalhe}</span>
+                  </span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
+
+          {!pagante && (
+            <div className="flex flex-col gap-1.5 sm:col-span-2">
+              <Label htmlFor="assinatura_motivo">Motivo (opcional)</Label>
+              <Input id="assinatura_motivo" maxLength={120} value={motivo} onChange={(event) => setMotivo(event.target.value)} placeholder="Ex.: Parceria 100% OFF" />
+              <p className="text-xs text-slate-400">Anotação interna, visível só no painel da Lotus. O cliente vê apenas “Assinatura sem custo”.</p>
+            </div>
+          )}
+
+          {pagante && (<>
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="assinatura_valor">Valor da mensalidade (R$)</Label>
             <Input id="assinatura_valor" type="number" step="0.01" min="0" inputMode="decimal" value={valor} onChange={(event) => setValor(event.target.value)} placeholder="0,00" />
@@ -98,13 +135,12 @@ export function AssinaturaDialog({ item, onOpenChange }: AssinaturaDialogProps) 
               Este cliente paga por débito automático. O novo valor não muda a cobrança já cadastrada no cartão: peça para ele cancelar e ativar de novo o débito automático em Meu Perfil.
             </p>
           )}
-          <label className="flex items-start gap-2.5 rounded-xl border border-slate-200 p-3 sm:col-span-2">
-            <input type="checkbox" className="mt-0.5 size-4 rounded border-slate-300" checked={ativa} onChange={(event) => setAtiva(event.target.checked)} />
-            <span>
-              <span className="block text-sm font-medium text-slate-700">Cobrança ativa</span>
-              <span className="block text-xs text-slate-400">Desmarque para pausar os avisos (cortesia, piloto ou contrato encerrado).</span>
-            </span>
-          </label>
+          <div className="flex flex-col gap-1.5 sm:col-span-2">
+            <Label htmlFor="assinatura_tolerancia">Bloquear o acesso após quantos dias de atraso</Label>
+            <Input id="assinatura_tolerancia" type="number" min="0" max="60" step="1" inputMode="numeric" value={diasTolerancia} onChange={(event) => setDiasTolerancia(event.target.value)} className="sm:w-32" />
+            <p className="text-xs text-slate-400">Padrão 5. Passado esse prazo sem pagamento, o cliente só consegue acessar a tela de pagamento. O acesso volta assim que o pagamento é confirmado.</p>
+          </div>
+          </>)}
 
           {configurada && (
             <div className="sm:col-span-2">

@@ -5,7 +5,7 @@ type Acao = 'pagar' | 'ativar_debito' | 'cancelar_debito'
 
 /**
  * Chama a Edge Function `mercadopago-pagamento`. "pagar" e "ativar_debito"
- * devolvem a URL do Mercado Pago e levam o usuário para lá; a baixa só
+ * devolvem a URL do Mercado Pago (quem chama decide onde abrir); a baixa só
  * acontece quando o webhook confirma o pagamento.
  */
 export function useMercadoPago() {
@@ -22,8 +22,7 @@ export function useMercadoPago() {
       return data
     },
     onSuccess: (data) => {
-      if (data?.url) window.location.assign(data.url)
-      else void queryClient.invalidateQueries({ queryKey: ['minha_assinatura'] })
+      if (!data?.url) void queryClient.invalidateQueries({ queryKey: ['minha_assinatura'] })
     },
   })
 }

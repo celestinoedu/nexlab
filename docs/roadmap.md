@@ -189,7 +189,15 @@ Motivado por relatos de tela em branco após login no Safari/iOS em alguns apare
 - [x] Edge Functions `mercadopago-pagamento` e `mercadopago-webhook` (assinatura secreta + reconsulta na API, baixa idempotente) e migration `0026`.
 - [x] Histórico de faturas com parcelas em aberto, lista no celular e avisos com o total devido.
 - [x] Aplicação, webhook e secrets configurados; migration `0026` aplicada; funções e frontend publicados.
-- [ ] Teste real com um Pix de valor baixo e com a ativação do débito automático.
+- [x] Teste real com um Pix de R$ 1,00: checkout, webhook e baixa automática confirmados.
+- [ ] Teste real da ativação do débito automático.
+
+## Bloqueio por inadimplência e não pagantes ✅ concluída em 2026-10-10 (v0.27.0)
+
+- [x] Bloqueio no banco após a tolerância (padrão 5 dias, ajustável por cliente), com tela "Acesso suspenso" e desbloqueio automático ao pagar (migration `0027`).
+- [x] Tipo de assinatura pagante / não pagante, com motivo interno só no painel.
+- [x] Mercado Pago em nova aba, com confirmação automática no NexLab.
+- [ ] Rodar a migration `0027` no Supabase.
 
 ## Ideias para avaliar depois (fora do escopo atual, não implementar sem pedir)
 

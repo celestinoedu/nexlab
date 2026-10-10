@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { cn } from '@/lib/utils'
 import { LOTUS_EMAIL_SUPORTE } from '@/lib/appInfo'
 import { useMinhaAssinatura } from './useMinhaAssinatura'
-import { calcularSituacao, descreverPrazo, diasAte, formatarData, formatarMoeda, hojeLocal, parcelasEmAberto } from './situacao'
+import { calcularBloqueio, calcularSituacao, descreverPrazo, diasAte, formatarData, formatarMoeda, hojeLocal, parcelasEmAberto } from './situacao'
 
 /**
  * Aviso de mensalidade perto do vencimento ou em atraso: pop-up uma vez por
@@ -22,7 +22,8 @@ export function AvisoAssinatura() {
   const situacao = calcularSituacao(assinatura, hoje)
   // Com débito automático ativo, só o atraso (ex.: cartão recusado) merece aviso.
   const debitoAtivo = assinatura?.mp_preapproval_status === 'authorized'
-  const exibir = Boolean(assinatura) && (situacao === 'atrasada' || (situacao === 'vence_em_breve' && !debitoAtivo))
+  const bloqueio = calcularBloqueio(assinatura, hoje)
+  const exibir = Boolean(assinatura) && !bloqueio.bloqueada && (situacao === 'atrasada' || (situacao === 'vence_em_breve' && !debitoAtivo))
   const chave = empresa ? `nexlab:aviso-assinatura:${empresa.id}` : ''
   const marca = assinatura ? `${hoje}|${assinatura.proximo_vencimento}` : ''
   const [fechadoEm, setFechadoEm] = React.useState<string | null>(null)
@@ -36,6 +37,12 @@ export function AvisoAssinatura() {
   const vencimento = formatarData(assinatura.proximo_vencimento)
   const valor = formatarMoeda(assinatura.valor_mensal)
   const vencidas = parcelasEmAberto(assinatura, hoje).filter((parcela) => parcela.atrasada).length
+  const avisoBloqueio = bloqueio.diasParaBloquear === null || !bloqueio.bloqueiaEm
+    ? ''
+    : bloqueio.diasParaBloquear === 1
+      ? `O acesso ao NexLab será bloqueado amanhã (${formatarData(bloqueio.bloqueiaEm)}).`
+      : `O acesso ao NexLab será bloqueado em ${bloqueio.diasParaBloquear} dias (${formatarData(bloqueio.bloqueiaEm)}).`
+  const bloqueioCurto = bloqueio.diasParaBloquear === null ? '' : bloqueio.diasParaBloquear === 1 ? 'acesso bloqueado amanhã' : `acesso bloqueado em ${bloqueio.diasParaBloquear} dias`
 
   function fecharPopup() {
     gravarArmazenado(chave, marca)
@@ -55,8 +62,9 @@ export function AvisoAssinatura() {
         <p className="min-w-0 flex-1">
           <span className="font-semibold">{atrasada ? 'Mensalidade em atraso' : `Mensalidade ${descreverPrazo(dias)}`}</span>
           <span> · {atrasada ? `venceu em ${vencimento}` : `${valor} em ${vencimento}`}</span>
+          {atrasada && bloqueioCurto && <span className="font-semibold"> · {bloqueioCurto}</span>}
           <span className="hidden sm:inline">
-            {atrasada ? '. Regularize o pagamento para continuar usando o NexLab sem interrupções.' : '.'}
+            {atrasada ? '. Pague com Pix ou cartão para confirmar na hora.' : '.'}
           </span>
         </p>
         <Link to="/meu-perfil" className="shrink-0 font-semibold underline underline-offset-2">
@@ -78,9 +86,9 @@ export function AvisoAssinatura() {
             <DialogTitle>{atrasada ? 'Mensalidade em atraso' : `Sua mensalidade ${descreverPrazo(dias)}`}</DialogTitle>
             <DialogDescription>
               {atrasada && vencidas > 1
-                ? `Há ${vencidas} mensalidades do NexLab em aberto, somando ${formatarMoeda(vencidas * assinatura.valor_mensal)}. A mais antiga ${descreverPrazo(dias)} (${vencimento}). Regularize o pagamento para continuar usando o sistema sem interrupções.`
+                ? `Há ${vencidas} mensalidades do NexLab em aberto, somando ${formatarMoeda(vencidas * assinatura.valor_mensal)}. A mais antiga ${descreverPrazo(dias)} (${vencimento}). ${avisoBloqueio} Pague com Pix ou cartão para a confirmação ser imediata.`
                 : atrasada
-                ? `A mensalidade do NexLab de ${valor} ${descreverPrazo(dias)} (${vencimento}). Regularize o pagamento para continuar usando o sistema sem interrupções.`
+                ? `A mensalidade do NexLab de ${valor} ${descreverPrazo(dias)} (${vencimento}). ${avisoBloqueio} Pague com Pix ou cartão para a confirmação ser imediata.`
                 : `O pagamento de ${valor} do NexLab vence em ${vencimento}. Mantenha em dia para continuar usando o sistema sem interrupções.`}
             </DialogDescription>
           </DialogHeader>

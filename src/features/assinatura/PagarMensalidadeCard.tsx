@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import { CheckCircle2, CreditCard, ExternalLink, Loader2, RefreshCw, ShieldCheck } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
@@ -10,9 +11,27 @@ import { useMercadoPago } from './useMercadoPago'
 import { ID_PAGAR_MENSALIDADE, descreverPrazo, diasAte, formatarData, formatarMoeda, hojeLocal, parcelasEmAberto } from './situacao'
 
 /** Valor em aberto, botão de pagamento do Mercado Pago e débito automático, em Meu Perfil. */
-export function PagarMensalidadeCard({ assinatura, podeGerenciarDebito }: { assinatura: MinhaAssinatura; podeGerenciarDebito: boolean }) {
+export function PagarMensalidadeCard({ assinatura, podeGerenciarDebito, className }: { assinatura: MinhaAssinatura; podeGerenciarDebito: boolean; className?: string }) {
   const mercadoPago = useMercadoPago()
+  const queryClient = useQueryClient()
   const [confirmandoCancelamento, setConfirmandoCancelamento] = React.useState(false)
+  // Mercado Pago aberto em outra aba: guarda o estado de antes para perceber a confirmação.
+  const [aguardando, setAguardando] = React.useState<{ vencimento: string; debito: string | null } | null>(null)
+
+  React.useEffect(() => {
+    if (!aguardando) return
+    const pagou = assinatura.proximo_vencimento !== aguardando.vencimento
+    const ativouDebito = assinatura.mp_preapproval_status === 'authorized' && aguardando.debito !== 'authorized'
+    if (pagou || ativouDebito) {
+      toast.success(pagou ? 'Pagamento confirmado! Pode fechar a aba do Mercado Pago.' : 'Débito automático ativado! Pode fechar a aba do Mercado Pago.')
+      void queryClient.invalidateQueries({ queryKey: ['faturas_assinatura'] })
+      setAguardando(null)
+      return
+    }
+    const atualizar = window.setInterval(() => void queryClient.invalidateQueries({ queryKey: ['minha_assinatura'] }), 5_000)
+    const desistir = window.setTimeout(() => setAguardando(null), 15 * 60_000)
+    return () => { window.clearInterval(atualizar); window.clearTimeout(desistir) }
+  }, [aguardando, assinatura.proximo_vencimento, assinatura.mp_preapproval_status, queryClient])
   const hoje = hojeLocal()
   const parcelas = parcelasEmAberto(assinatura, hoje)
   if (!parcelas.length) return null
@@ -26,20 +45,32 @@ export function PagarMensalidadeCard({ assinatura, podeGerenciarDebito }: { assi
   const mostrarPagar = !debitoAtivo || vencidas.length > 0
 
   async function executar(acao: 'pagar' | 'ativar_debito' | 'cancelar_debito') {
+    // A aba é aberta já no clique, antes da chamada à função, para o navegador não bloquear como pop-up.
+    const aba = acao === 'cancelar_debito' ? null : window.open('', '_blank')
     try {
-      await mercadoPago.mutateAsync(acao)
+      const resposta = await mercadoPago.mutateAsync(acao)
+      if (resposta?.url) {
+        if (aba) {
+          aba.opener = null
+          aba.location.href = resposta.url
+          setAguardando({ vencimento: assinatura.proximo_vencimento, debito: assinatura.mp_preapproval_status })
+        } else {
+          window.location.assign(resposta.url)
+        }
+      }
       if (acao === 'cancelar_debito') {
         setConfirmandoCancelamento(false)
         toast.success('Débito automático cancelado.')
       }
     } catch (error) {
+      aba?.close()
       toast.error(error instanceof Error ? error.message : 'Não foi possível concluir agora.')
     }
   }
   const carregando = (acao: string) => mercadoPago.isPending && mercadoPago.variables === acao
 
   return (
-    <Card id={ID_PAGAR_MENSALIDADE} className="scroll-mt-4">
+    <Card id={ID_PAGAR_MENSALIDADE} className={cn('scroll-mt-4', className)}>
       <CardHeader className="border-b border-slate-100 pb-4">
         <div className="flex items-center gap-3">
           <div className="flex size-10 items-center justify-center rounded-xl bg-brand-50 text-brand-700"><ShieldCheck size={19} /></div>
@@ -60,13 +91,22 @@ export function PagarMensalidadeCard({ assinatura, podeGerenciarDebito }: { assi
         </div>
 
         <div className="flex flex-col justify-center gap-3">
-          {mostrarPagar ? (
+          {aguardando ? (
+            <div className="flex items-start gap-3 rounded-2xl bg-brand-50 p-4 text-sm text-brand-800">
+              <Loader2 size={18} className="mt-0.5 shrink-0 animate-spin" />
+              <div>
+                <p className="font-semibold">Aguardando a confirmação do Mercado Pago…</p>
+                <p className="mt-0.5">Conclua na aba que abriu. Pagou com Pix? Assim que o banco confirmar, esta tela atualiza sozinha e você pode fechar a aba do QR Code.</p>
+                <button type="button" className="mt-2 font-medium underline underline-offset-2" onClick={() => setAguardando(null)}>Voltar</button>
+              </div>
+            </div>
+          ) : mostrarPagar ? (
             <>
               <Button size="lg" className="w-full" onClick={() => void executar('pagar')} disabled={mercadoPago.isPending}>
                 {carregando('pagar') ? <Loader2 className="animate-spin" /> : <ExternalLink />}
                 Pagar {formatarMoeda(total)} agora
               </Button>
-              <p className="text-center text-sm text-slate-500">Pix, cartão de crédito ou boleto. A confirmação aparece aqui automaticamente.</p>
+              <p className="text-center text-sm text-slate-500">Pix, cartão de crédito ou boleto. O Mercado Pago abre numa nova aba e a confirmação aparece aqui automaticamente.</p>
             </>
           ) : (
             <div className="flex items-start gap-3 rounded-2xl bg-success-100/60 p-4 text-sm text-success-700">
