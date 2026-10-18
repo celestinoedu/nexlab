@@ -38,6 +38,14 @@ function sincronizarOrdemDemo(
 export function useContaReceberMutations() {
   const queryClient = useQueryClient()
 
+  // Uma baixa/reabertura/cancelamento também muda o status de pagamento da
+  // OS (trigger no banco): sem recarregar as OS, a lista mostrava a situação
+  // antiga até o próximo refetch (achado F14).
+  function invalidarDependentes() {
+    invalidarSeReal(queryClient, ['contas_receber'])
+    invalidarSeReal(queryClient, ['ordens_servico'])
+  }
+
   const marcarComoPago = useMutation({
     mutationFn: async ({
       id,
@@ -64,7 +72,7 @@ export function useContaReceberMutations() {
       if (error) throw new Error(traduzErro(error.message))
     },
     onSuccess: () => {
-      invalidarSeReal(queryClient, ['contas_receber'])
+      invalidarDependentes()
     },
   })
 
@@ -82,7 +90,7 @@ export function useContaReceberMutations() {
       if (error) throw new Error(traduzErro(error.message))
     },
     onSuccess: () => {
-      invalidarSeReal(queryClient, ['contas_receber'])
+      invalidarDependentes()
     },
   })
 
@@ -110,10 +118,13 @@ export function useContaReceberMutations() {
         .from('contas_receber')
         .update({ status: 'pago', data_pagamento: dataPagamento, forma_pagamento: formaPagamento })
         .in('id', ids)
+        // Só contas ainda abertas: uma conta paga ou cancelada por outra pessoa
+        // enquanto a tela estava aberta não é sobrescrita (achado F13).
+        .eq('status', 'aberto')
       if (error) throw new Error(traduzErro(error.message))
     },
     onSuccess: () => {
-      invalidarSeReal(queryClient, ['contas_receber'])
+      invalidarDependentes()
     },
   })
 
@@ -134,7 +145,7 @@ export function useContaReceberMutations() {
       if (error) throw new Error(traduzErro(error.message))
     },
     onSuccess: () => {
-      invalidarSeReal(queryClient, ['contas_receber'])
+      invalidarDependentes()
     },
   })
 

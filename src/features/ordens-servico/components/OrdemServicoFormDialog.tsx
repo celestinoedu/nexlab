@@ -186,7 +186,12 @@ export function OrdemServicoFormDialog({ open, onOpenChange, ordem, podeExcluir 
   const erroValidacao = primeiraMensagemErro(errors)
 
   const { data: precos } = useTabelaPrecos(entidadeId || null)
-  const entidadeSelecionada = entidades?.find((e) => e.id === entidadeId)
+  // Uma OS antiga pode estar ligada a um Cliente/Parceiro já inativado (a
+  // lista só traz ativos): usa os dados que vieram com a própria OS, senão o
+  // formulário trataria um Parceiro inativo como Cliente (achado F18).
+  const entidadeSelecionada =
+    entidades?.find((e) => e.id === entidadeId) ??
+    (ordem && ordem.entidade_id === entidadeId ? ordem.entidade : undefined)
   const skipNextAutoSuggestPrazo = React.useRef(false)
 
   // Reseta o formulário sempre que o modal abre — pré-preenche em modo edição
@@ -268,8 +273,24 @@ export function OrdemServicoFormDialog({ open, onOpenChange, ordem, podeExcluir 
       </Badge>
     ),
   }))
+  if (ordem?.entidade && !entidadeOptions.some((o) => o.value === ordem.entidade_id)) {
+    entidadeOptions.push({
+      value: ordem.entidade_id,
+      label: ordem.entidade.nome,
+      hint: <Badge variant="warning" className="ml-2 shrink-0">Inativo</Badge>,
+    })
+  }
 
   const servicoOptions: ComboboxOption[] = (servicos ?? []).map((s) => ({ value: s.id, label: s.nome }))
+  for (const item of ordem?.itens ?? []) {
+    if (item.servico && !servicoOptions.some((o) => o.value === item.servico_id)) {
+      servicoOptions.push({
+        value: item.servico_id,
+        label: item.servico.nome,
+        hint: <Badge variant="warning" className="ml-2 shrink-0">Inativo</Badge>,
+      })
+    }
+  }
 
   /** Sem entidade escolhida não há tabela a esperar; com entidade, só depois que ela carregar. */
   const tabelaCarregada = !entidadeId || Boolean(precos)

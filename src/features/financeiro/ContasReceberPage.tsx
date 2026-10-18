@@ -91,6 +91,10 @@ export function ContasReceberPage() {
     .reduce((acc, c) => acc + c.valor, 0)
 
   const abertasFiltradas = filtradas.filter((c) => c.status === 'aberto')
+  // Só entram no pagamento em lote as contas selecionadas que continuam
+  // visíveis e abertas — uma seleção escondida por um filtro não é paga (F13).
+  const selecionadasElegiveis = abertasFiltradas.filter((c) => selecionadas.has(c.id))
+  const totalSelecionado = selecionadasElegiveis.reduce((acc, c) => acc + c.valor, 0)
   const todasAbertasSelecionadas =
     abertasFiltradas.length > 0 && abertasFiltradas.every((c) => selecionadas.has(c.id))
 
@@ -131,8 +135,9 @@ export function ContasReceberPage() {
 
   async function confirmarPagamentoEmMassa(dataPagamento: string, formaPagamento: string | null) {
     try {
-      await marcarVariasComoPago.mutateAsync({ ids: Array.from(selecionadas), dataPagamento, formaPagamento })
-      toast.success(`${selecionadas.size} conta(s) marcada(s) como paga.`)
+      const ids = selecionadasElegiveis.map((c) => c.id)
+      await marcarVariasComoPago.mutateAsync({ ids, dataPagamento, formaPagamento })
+      toast.success(`${ids.length} conta(s) marcada(s) como paga.`)
       setSelecionadas(new Set())
       setPagarEmMassaAberto(false)
     } catch (err) {
@@ -253,11 +258,12 @@ export function ContasReceberPage() {
         )}
       </div>
 
-      {selecionadas.size > 0 && (
+      {selecionadasElegiveis.length > 0 && (
         <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-brand-50 px-4 py-2.5">
           <span className="text-sm text-brand-800">
-            {selecionadas.size} conta{selecionadas.size === 1 ? '' : 's'} selecionada
-            {selecionadas.size === 1 ? '' : 's'}
+            {selecionadasElegiveis.length} conta{selecionadasElegiveis.length === 1 ? '' : 's'} selecionada
+            {selecionadasElegiveis.length === 1 ? '' : 's'} ·{' '}
+            {totalSelecionado.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
           </span>
           <div className="flex items-center gap-2">
             <button
@@ -403,7 +409,8 @@ export function ContasReceberPage() {
       <MarcarVariasPagoDialog
         open={pagarEmMassaAberto}
         onOpenChange={setPagarEmMassaAberto}
-        quantidade={selecionadas.size}
+        quantidade={selecionadasElegiveis.length}
+        total={totalSelecionado}
         onConfirm={confirmarPagamentoEmMassa}
       />
     </div>

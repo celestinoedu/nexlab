@@ -16,6 +16,8 @@ interface MarcarVariasPagoDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   quantidade: number
+  /** Soma das contas que serão pagas — mostrada para conferência antes de confirmar. */
+  total?: number
   onConfirm: (dataPagamento: string, formaPagamento: string | null) => void
 }
 
@@ -28,6 +30,7 @@ export function MarcarVariasPagoDialog({
   open,
   onOpenChange,
   quantidade,
+  total,
   onConfirm,
 }: MarcarVariasPagoDialogProps) {
   const hoje = format(new Date(), 'yyyy-MM-dd')
@@ -47,8 +50,9 @@ export function MarcarVariasPagoDialog({
         <DialogHeader>
           <DialogTitle>Marcar como pago em massa</DialogTitle>
           <DialogDescription>
-            {quantidade} conta{quantidade === 1 ? '' : 's'} selecionada{quantidade === 1 ? '' : 's'} — mesma data e
-            forma de pagamento pra todas.
+            {quantidade} conta{quantidade === 1 ? '' : 's'} selecionada{quantidade === 1 ? '' : 's'}
+            {total !== undefined && <> no total de <strong>{total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</strong></>}{' '}
+            — mesma data e forma de pagamento pra todas.
           </DialogDescription>
         </DialogHeader>
 

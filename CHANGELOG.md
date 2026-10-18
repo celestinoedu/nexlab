@@ -4,6 +4,16 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), 
 
 ## [Não publicado]
 
+## [0.27.3] - 2026-10-18 — Pagamento em lote seguro e testes automatizados
+
+### Corrigido
+- **Pagamento em lote**: só são pagas as contas selecionadas que continuam visíveis e abertas. Antes, uma conta escondida por um filtro (ou paga por outra pessoa) entrava junto. A barra e a confirmação mostram a quantidade e o total.
+- **Lista de OS atualizada após baixa**: marcar como paga, reabrir ou cancelar uma conta recarrega também as Ordens de Serviço, que mostravam o status de pagamento antigo.
+- **OS de cadastro inativado**: ao editar uma OS ligada a um Cliente/Parceiro ou serviço inativado, os campos mostram o cadastro (marcado como Inativo) em vez de ficarem vazios, e um Parceiro inativo continua com a comissão.
+
+### Adicionado
+- Testes automatizados no repositório (`tests/`): `npm run test:e2e` (telas, na conta demonstração) e `npm run test:db` (RLS, triggers e regras num Postgres local). Ver `tests/README.md`.
+
 ## [0.27.2] - 2026-10-18 — Integridade financeira e desempenho
 
 ### Desempenho
