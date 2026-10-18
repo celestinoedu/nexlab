@@ -1,0 +1,4 @@
+# ai-memory (https://github.com/akitaonrails/ai-memory): roteia as sessões
+# de agentes neste repositório para a memória do projeto NexLab.
+workspace = "lotus"
+project = "nexlab"

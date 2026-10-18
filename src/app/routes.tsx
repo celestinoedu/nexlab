@@ -1,4 +1,6 @@
+import { lazy, Suspense } from 'react'
 import { HashRouter, Navigate, Routes, Route } from 'react-router-dom'
+import { Loader2 } from 'lucide-react'
 import { AppShell } from '@/app/layout/AppShell'
 import { ProtectedRoute } from '@/app/layout/ProtectedRoute'
 import { OnboardingGate } from '@/app/layout/OnboardingGate'
@@ -6,24 +8,26 @@ import { useIsMobile } from '@/hooks/useIsMobile'
 import { LoginPage } from '@/features/auth/components/LoginPage'
 import { ForgotPasswordPage } from '@/features/auth/components/ForgotPasswordPage'
 import { UpdatePasswordPage } from '@/features/auth/components/UpdatePasswordPage'
-import { OrdensServicoPage } from '@/features/ordens-servico/OrdensServicoPage'
-import { EntidadesPage } from '@/features/entidades/EntidadesPage'
-import { EntidadeExtratoPage } from '@/features/entidades/EntidadeExtratoPage'
-import { ServicosPage } from '@/features/servicos/ServicosPage'
-import { EstoquePage } from '@/features/estoque/EstoquePage'
-import { ContasReceberPage } from '@/features/financeiro/ContasReceberPage'
-import { DespesasPage } from '@/features/despesas/DespesasPage'
-import { FechamentoFinanceiroPage } from '@/features/fechamento/FechamentoFinanceiroPage'
-import { RelatoriosPage } from '@/features/relatorios/RelatoriosPage'
-import { CanhotosPage } from '@/features/relatorios/CanhotosPage'
-import { RelatoriosPersonalizadosPage } from '@/features/relatorios/RelatoriosPersonalizadosPage'
-import { DashboardPage } from '@/features/dashboard/DashboardPage'
-import { ConfiguracoesPage } from '@/features/configuracoes/ConfiguracoesPage'
-import { UsuariosPage } from '@/features/configuracoes/UsuariosPage'
-import { TermosPage } from '@/features/configuracoes/TermosPage'
-import { MeuPerfilPage } from '@/features/configuracoes/MeuPerfilPage'
-import { OnboardingPage } from '@/features/onboarding/OnboardingPage'
-import { AdminPage } from '@/features/admin/AdminPage'
+// Cada tela é baixada só quando aberta: o pacote inicial fica com o login e o
+// layout. O service worker do PWA continua guardando todas para uso offline.
+const OrdensServicoPage = lazy(() => import('@/features/ordens-servico/OrdensServicoPage').then((m) => ({ default: m.OrdensServicoPage })))
+const EntidadesPage = lazy(() => import('@/features/entidades/EntidadesPage').then((m) => ({ default: m.EntidadesPage })))
+const EntidadeExtratoPage = lazy(() => import('@/features/entidades/EntidadeExtratoPage').then((m) => ({ default: m.EntidadeExtratoPage })))
+const ServicosPage = lazy(() => import('@/features/servicos/ServicosPage').then((m) => ({ default: m.ServicosPage })))
+const EstoquePage = lazy(() => import('@/features/estoque/EstoquePage').then((m) => ({ default: m.EstoquePage })))
+const ContasReceberPage = lazy(() => import('@/features/financeiro/ContasReceberPage').then((m) => ({ default: m.ContasReceberPage })))
+const DespesasPage = lazy(() => import('@/features/despesas/DespesasPage').then((m) => ({ default: m.DespesasPage })))
+const FechamentoFinanceiroPage = lazy(() => import('@/features/fechamento/FechamentoFinanceiroPage').then((m) => ({ default: m.FechamentoFinanceiroPage })))
+const RelatoriosPage = lazy(() => import('@/features/relatorios/RelatoriosPage').then((m) => ({ default: m.RelatoriosPage })))
+const CanhotosPage = lazy(() => import('@/features/relatorios/CanhotosPage').then((m) => ({ default: m.CanhotosPage })))
+const RelatoriosPersonalizadosPage = lazy(() => import('@/features/relatorios/RelatoriosPersonalizadosPage').then((m) => ({ default: m.RelatoriosPersonalizadosPage })))
+const DashboardPage = lazy(() => import('@/features/dashboard/DashboardPage').then((m) => ({ default: m.DashboardPage })))
+const ConfiguracoesPage = lazy(() => import('@/features/configuracoes/ConfiguracoesPage').then((m) => ({ default: m.ConfiguracoesPage })))
+const UsuariosPage = lazy(() => import('@/features/configuracoes/UsuariosPage').then((m) => ({ default: m.UsuariosPage })))
+const TermosPage = lazy(() => import('@/features/configuracoes/TermosPage').then((m) => ({ default: m.TermosPage })))
+const MeuPerfilPage = lazy(() => import('@/features/configuracoes/MeuPerfilPage').then((m) => ({ default: m.MeuPerfilPage })))
+const OnboardingPage = lazy(() => import('@/features/onboarding/OnboardingPage').then((m) => ({ default: m.OnboardingPage })))
+const AdminPage = lazy(() => import('@/features/admin/AdminPage').then((m) => ({ default: m.AdminPage })))
 
 /**
  * Tela inicial ("/") depende do tamanho de tela: no computador continua
@@ -39,9 +43,18 @@ function HomeRoute() {
   return isMobile ? <DashboardPage /> : <OrdensServicoPage />
 }
 
+function CarregandoTela() {
+  return (
+    <div className="flex min-h-[50vh] items-center justify-center" role="status" aria-label="Carregando">
+      <Loader2 className="animate-spin text-brand-600" size={28} />
+    </div>
+  )
+}
+
 export function AppRoutes() {
   return (
     <HashRouter>
+      <Suspense fallback={<CarregandoTela />}>
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/esqueci-senha" element={<ForgotPasswordPage />} />
@@ -78,6 +91,7 @@ export function AppRoutes() {
         {/* Nunca deixa uma URL inválida ou antiga resultar em tela vazia. */}
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
+      </Suspense>
     </HashRouter>
   )
 }

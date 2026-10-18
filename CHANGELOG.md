@@ -4,6 +4,12 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), 
 
 ## [Não publicado]
 
+## [0.27.2] - 2026-10-18 — Integridade financeira e desempenho
+
+### Desempenho
+- **Abertura mais leve**: cada tela é baixada só quando aberta. O primeiro acesso baixa ~25% menos JavaScript (1.142 KB → 861 KB). Se o app estiver aberto durante uma publicação, ele se recarrega sozinho uma vez para buscar a tela nova.
+- **Consultas protegidas mais rápidas** (migration `0030`): as regras de acesso por laboratório passam a ser avaliadas uma vez por consulta, e não linha a linha. Em teste com 30 mil OS, a lista de OS de um laboratório caiu de ~740 ms para ~130 ms no banco.
+
 ### Corrigido
 - **Fechamento Financeiro de vários laboratórios no mesmo mês**: o banco aceitava um único fechamento por mês para todo o sistema — o primeiro laboratório a fechar um mês impedia os demais. Passa a ser um fechamento por empresa e mês (migration `0028`).
 - **Recebimento preservado**: editar uma OS cuja conta já foi paga não altera mais o valor recebido. Cobrança aberta de uma OS que volta para produção ou é cancelada fica suspensa e é reaberta se a OS for entregue de novo (migration `0028`).

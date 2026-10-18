@@ -16,6 +16,16 @@ z.config(z.locales.pt())
 // eventual falha futura, na mesma aba, poder tentar se recuperar de novo.
 sessionStorage.removeItem('nexlab-recarregou-apos-falha')
 
+// Telas são carregadas sob demanda. Se o app ficou aberto durante uma
+// publicação, o arquivo de uma tela antiga pode não existir mais: recarrega
+// uma única vez para buscar a versão nova, em vez de mostrar erro.
+window.addEventListener('vite:preloadError', (evento) => {
+  if (sessionStorage.getItem('nexlab-recarregou-tela-nova')) return
+  sessionStorage.setItem('nexlab-recarregou-tela-nova', '1')
+  evento.preventDefault()
+  window.location.reload()
+})
+
 async function iniciarApp() {
   await prepararCallbackAuth()
   registrarAtualizacaoPwa()
