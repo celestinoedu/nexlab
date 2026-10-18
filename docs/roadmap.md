@@ -208,7 +208,7 @@ Motivado por relatos de tela em branco após login no Safari/iOS em alguns apare
 - [x] Bloqueio no banco após a tolerância (padrão 5 dias, ajustável por cliente), com tela "Acesso suspenso" e desbloqueio automático ao pagar (migration `0027`).
 - [x] Tipo de assinatura pagante / não pagante, com motivo interno só no painel.
 - [x] Mercado Pago em nova aba, com confirmação automática no NexLab.
-- [ ] Rodar a migration `0027` no Supabase.
+- [x] Rodar a migration `0027` no Supabase (confirmado em 2026-10-18: já estava aplicada; rodar de novo dá "column dias_tolerancia already exists").
 
 ## Cadastro de serviços na OS ✅ concluída em 2026-10-18 (v0.27.1)
 
