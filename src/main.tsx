@@ -5,6 +5,11 @@ import App from './App.tsx'
 import { ErrorBoundary } from '@/components/shared/ErrorBoundary'
 import { registrarAtualizacaoPwa } from '@/lib/pwa'
 import { prepararCallbackAuth } from '@/features/auth/authCallback'
+import { z } from 'zod'
+
+// Mensagens padrão de validação em português — nenhuma tela deve exibir
+// "Invalid input" quando um campo não tem mensagem própria.
+z.config(z.locales.pt())
 
 // O app carregou e montou com sucesso — libera o guard de recarregamento
 // automático do index.html (ver script inline em index.html) pra uma

@@ -6,6 +6,7 @@ import {
   useWatch,
   type Control,
   type FieldErrors,
+  type Resolver,
   type UseFormRegister,
 } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -37,16 +38,20 @@ import {
 } from '@/features/ordens-servico/hooks/useOrdemServicoMutations'
 import { STATUS_OS_LABEL, referenciaOrdemExibicao, type OrdemServicoComRelacoes, type StatusOS } from '@/types/domain'
 import { cn } from '@/lib/utils'
+import { focarCampoVizinho } from '@/lib/foco'
 import { InfoFinanceiraDialog } from './InfoFinanceiraDialog'
 import { ExcluirOrdemDialog } from './ExcluirOrdemDialog'
 
 const itemSchema = z.object({
-  servico_id: z.string().min(1, 'Escolha um serviço'),
+  // Linha sem serviço só é aceita em branco (ignorada ao salvar) — ver superRefine abaixo.
+  servico_id: z.string(),
   cor: z.string().optional(),
   arco: z.union([z.enum(['superior', 'inferior']), z.literal('')]).optional(),
   quantidade: z.number({ message: 'Informe a quantidade' }).int().min(1, 'Mínimo 1'),
   valor_unitario: z.number({ message: 'Informe o valor' }).min(0, 'O valor não pode ser negativo'),
   valor_comissao: z.number().min(0).nullable().optional(),
+  /** Controle interno (não é gravado): entidade/serviço para os quais o preço já foi sugerido. */
+  preco_chave: z.string().optional(),
 })
 
 const schema = z
@@ -70,8 +75,25 @@ const schema = z
     message: 'Informe a data de entrega para marcar a OS como entregue',
     path: ['data_entrega'],
   })
+  .superRefine((data, ctx) => {
+    if (!data.itens.some((item) => item.servico_id)) {
+      ctx.addIssue({ code: 'custom', path: ['itens', 0, 'servico_id'], message: 'Escolha um serviço' })
+      return
+    }
+    data.itens.forEach((item, index) => {
+      if (!item.servico_id && !linhaEmBranco(item)) {
+        ctx.addIssue({ code: 'custom', path: ['itens', index, 'servico_id'], message: 'Escolha um serviço' })
+      }
+    })
+  })
 
 type FormValues = z.infer<typeof schema>
+type ItemValues = FormValues['itens'][number]
+
+/** Linha sem serviço e sem cor/arco preenchidos — descartada ao salvar. */
+function linhaEmBranco(item: Pick<ItemValues, 'servico_id' | 'cor' | 'arco'>) {
+  return !item.servico_id && !item.cor?.trim() && !item.arco
+}
 
 function primeiraMensagemErro(value: unknown): string | null {
   if (!value || typeof value !== 'object') return null
@@ -92,6 +114,32 @@ const ITEM_VAZIO = {
   quantidade: 1,
   valor_unitario: 0,
   valor_comissao: null,
+  preco_chave: '',
+}
+
+const validarComZod = zodResolver(schema)
+
+/**
+ * Completa campos ausentes de cada linha antes de validar: uma linha
+ * incompleta (ex.: criada por um setValue fora do useFieldArray) passa a ser
+ * tratada como linha em branco e descartada ao salvar, em vez de bloquear o
+ * salvamento com um erro técnico ("Invalid input").
+ */
+const resolver: Resolver<FormValues> = (values, context, options) =>
+  validarComZod(
+    {
+      ...values,
+      itens: (values.itens ?? []).map((item) => ({
+        ...ITEM_VAZIO,
+        ...Object.fromEntries(Object.entries(item ?? {}).filter(([, valor]) => valor !== undefined)),
+      })),
+    },
+    context,
+    options,
+  )
+
+function chavePreco(entidadeId: string | undefined, servicoId: string, comTabela: boolean) {
+  return `${entidadeId || ''}|${servicoId}|${comTabela ? 'tabela' : 'catalogo'}`
 }
 
 interface OrdemServicoFormDialogProps {
@@ -113,10 +161,12 @@ export function OrdemServicoFormDialog({ open, onOpenChange, ordem, podeExcluir 
     register,
     handleSubmit,
     setValue,
+    getValues,
+    setFocus,
     reset,
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({
-    resolver: zodResolver(schema),
+    resolver,
     defaultValues: { status: 'recebido', status_pagamento: 'pendente', itens: [ITEM_VAZIO] },
   })
 
@@ -168,6 +218,8 @@ export function OrdemServicoFormDialog({ open, onOpenChange, ordem, podeExcluir 
           quantidade: item.quantidade,
           valor_unitario: item.valor_unitario,
           valor_comissao: item.valor_comissao,
+          // Valores gravados são históricos: só são recalculados se a entidade ou o serviço mudar.
+          preco_chave: chavePreco(ordem.entidade_id, item.servico_id, true),
         })),
       })
     } else {
@@ -219,32 +271,56 @@ export function OrdemServicoFormDialog({ open, onOpenChange, ordem, podeExcluir 
 
   const servicoOptions: ComboboxOption[] = (servicos ?? []).map((s) => ({ value: s.id, label: s.nome }))
 
+  /** Sem entidade escolhida não há tabela a esperar; com entidade, só depois que ela carregar. */
+  const tabelaCarregada = !entidadeId || Boolean(precos)
+
   function aplicarPrecoSugerido(index: number, servicoId: string) {
     const servico = servicos?.find((s) => s.id === servicoId)
     if (!servico) return
-    const precoEspecifico = precos?.get(servicoId)?.preco
-    const precoAplicado = precoEspecifico ?? servico.preco_padrao
+    const daTabela = precos?.get(servicoId)
     if (entidadeSelecionada?.tipo === 'parceiro') {
-      setValue(`itens.${index}.valor_unitario`, servico.preco_padrao)
-      setValue(`itens.${index}.valor_comissao`, precoAplicado)
+      // Valor de referência = preço que o próprio Parceiro cobra (tabela dele); comissão = o que o laboratório recebe.
+      setValue(`itens.${index}.valor_unitario`, daTabela?.precoParceiro ?? servico.preco_padrao)
+      setValue(`itens.${index}.valor_comissao`, daTabela?.preco ?? servico.preco_padrao)
     } else {
-      setValue(`itens.${index}.valor_unitario`, precoAplicado)
+      setValue(`itens.${index}.valor_unitario`, daTabela?.preco ?? servico.preco_padrao)
       setValue(`itens.${index}.valor_comissao`, null)
     }
+    setValue(`itens.${index}.preco_chave`, chavePreco(entidadeId, servicoId, tabelaCarregada))
   }
 
-  // Na criação, o usuário pode escolher os serviços antes da entidade. Assim
-  // que a tabela do Cliente/Parceiro carregar, reaplica a mesma prioridade de
-  // preço a todos os itens: tabela específica e, se não houver, catálogo.
-  // Em edição preserva os valores históricos já gravados na OS.
+  // O usuário pode escolher os serviços antes da entidade, ou trocar a
+  // entidade depois. Cada linha guarda com qual entidade/serviço o preço foi
+  // sugerido (`preco_chave`) e só é recalculada quando um dos dois muda ou
+  // quando a tabela da entidade termina de carregar — assim um valor ajustado
+  // à mão não é sobrescrito ao adicionar outra linha. Lê do estado atual do
+  // formulário (getValues) para nunca aplicar preço em cima de um reset recente.
   React.useEffect(() => {
-    if (!open || isEditing || !entidadeId || !servicos || !precos || !itensAtuais?.length) return
-    itensAtuais.forEach((item, index) => {
-      if (item.servico_id) aplicarPrecoSugerido(index, item.servico_id)
+    if (!open || !servicos) return
+    const entidadeAtual = getValues('entidade_id') || ''
+    if (entidadeAtual !== (entidadeId || '')) return
+    getValues('itens')?.forEach((item, index) => {
+      if (!item.servico_id) return
+      const chave = item.preco_chave ?? ''
+      if (chave === chavePreco(entidadeAtual, item.servico_id, true)) return
+      if (!tabelaCarregada && chave === chavePreco(entidadeAtual, item.servico_id, false)) return
+      aplicarPrecoSugerido(index, item.servico_id)
     })
     // Os IDs bastam: a aplicação de preço não deve reagir à edição manual dos valores.
     // oxlint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, isEditing, entidadeId, entidadeSelecionada?.tipo, servicos, precos, JSON.stringify(itensAtuais?.map((i) => i.servico_id))])
+  }, [open, entidadeId, entidadeSelecionada?.tipo, servicos, precos, JSON.stringify(itensAtuais?.map((i) => i.servico_id))])
+
+  // Uma única linha em branco por vez: duplo clique, Enter segurado ou cliques
+  // repetidos levam o foco à linha vazia existente em vez de criar várias.
+  function adicionarServico() {
+    const itens = getValues('itens') ?? []
+    const vazia = itens.findIndex((item) => !item.servico_id)
+    if (vazia >= 0) {
+      setFocus(`itens.${vazia}.servico_id`)
+      return
+    }
+    append({ ...ITEM_VAZIO }, { focusName: `itens.${itens.length}.servico_id` })
+  }
 
   const total = React.useMemo(() => {
     if (!itensAtuais) return 0
@@ -272,7 +348,7 @@ export function OrdemServicoFormDialog({ open, onOpenChange, ordem, podeExcluir 
       status_pagamento: values.status_pagamento,
       forma_pagamento: values.forma_pagamento?.trim() || null,
       data_pagamento: values.status_pagamento === 'pago' ? values.data_pagamento || null : null,
-      itens: values.itens.map((item) => ({
+      itens: values.itens.filter((item) => item.servico_id).map((item) => ({
         servico_id: item.servico_id,
         cor: item.cor?.trim() || null,
         arco: item.arco || null,
@@ -296,6 +372,24 @@ export function OrdemServicoFormDialog({ open, onOpenChange, ordem, podeExcluir 
     }
   }
 
+  // Enter num campo não salva a OS pela metade: avança para o próximo campo,
+  // como o Tab. Salvar é sempre pelo botão. Ignora listas suspensas (portal)
+  // e campos de texto longo, onde Enter quebra a linha.
+  function avancarComEnter(event: React.KeyboardEvent<HTMLFormElement>) {
+    const alvo = event.target
+    if (
+      event.key !== 'Enter' ||
+      event.defaultPrevented ||
+      event.nativeEvent.isComposing ||
+      !(alvo instanceof HTMLInputElement || alvo instanceof HTMLSelectElement) ||
+      !event.currentTarget.contains(alvo)
+    ) {
+      return
+    }
+    event.preventDefault()
+    focarCampoVizinho(alvo, event.shiftKey ? -1 : 1)
+  }
+
   const onInvalid = (_errors: FieldErrors<FormValues>) => {
     setErroAoSalvar(null)
   }
@@ -316,7 +410,12 @@ export function OrdemServicoFormDialog({ open, onOpenChange, ordem, podeExcluir 
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit, onInvalid)} className="flex min-h-0 flex-1 flex-col" noValidate>
+        <form
+          onSubmit={handleSubmit(onSubmit, onInvalid)}
+          onKeyDown={avancarComEnter}
+          className="flex min-h-0 flex-1 flex-col"
+          noValidate
+        >
           <div className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto overscroll-contain p-5 sm:p-6">
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]">
               {/* Coluna esquerda: dados gerais da OS */}
@@ -339,6 +438,7 @@ export function OrdemServicoFormDialog({ open, onOpenChange, ordem, podeExcluir 
                       name="entidade_id"
                       render={({ field }) => (
                         <Combobox
+                          ref={field.ref}
                           id="entidade_id"
                           options={entidadeOptions}
                           value={field.value || null}
@@ -468,7 +568,7 @@ export function OrdemServicoFormDialog({ open, onOpenChange, ordem, podeExcluir 
                   variant="secondary"
                   size="sm"
                   className="self-start"
-                  onClick={() => append(ITEM_VAZIO)}
+                  onClick={adicionarServico}
                 >
                   <PlusCircle size={16} />
                   Adicionar serviço
@@ -592,6 +692,7 @@ function ItemRow({
             name={`itens.${index}.servico_id`}
             render={({ field }) => (
               <Combobox
+                ref={field.ref}
                 options={servicoOptions}
                 value={field.value || null}
                 onChange={(v) => {
@@ -653,7 +754,7 @@ function ItemRow({
 
         <div className="flex w-full flex-col gap-1 sm:w-28">
           <Label className="text-xs text-slate-500">
-            {ehParceiro ? 'Valor ref.' : 'Valor'}
+            {ehParceiro ? 'Preço parceiro' : 'Valor'}
           </Label>
           <Input
             type="number"

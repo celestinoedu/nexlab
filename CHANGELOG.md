@@ -4,6 +4,18 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), 
 
 ## [Não publicado]
 
+## [0.27.1] - 2026-10-18 — Cadastro de serviços na OS
+
+### Corrigido
+- **Linhas de serviço duplicadas e erro ao salvar a OS**: ao abrir uma Nova OS logo depois de criar ou editar outra com vários serviços, o formulário reaproveitava dados da OS anterior e criava linhas ocultas sem serviço. Elas apareciam todas de uma vez no próximo "Adicionar serviço" e impediam o salvamento com uma mensagem técnica ("Invalid input"). O preço sugerido agora é aplicado só sobre o formulário atual, e linhas incompletas são descartadas ao salvar.
+- **"Adicionar serviço" cria uma única linha**: duplo clique, Enter segurado ou cliques repetidos levam o foco à linha em branco existente, em vez de criar várias. Uma linha em branco sobrando não bloqueia mais o salvamento.
+- **Navegação com Tab nos serviços**: ao adicionar um serviço, o foco vai para a lista de serviços da nova linha (antes pulava direto para "Cor"). Com a lista focada, basta digitar para buscar; Tab escolhe a opção destacada e segue para o próximo campo, e Shift+Tab volta. Vale também para a escolha do Cliente/Parceiro.
+- **Preço da tabela do Parceiro**: o item da OS passa a trazer o Preço do Parceiro cadastrado na tabela de preços (antes vinha o preço padrão do catálogo), junto da comissão. O campo foi renomeado para "Preço parceiro".
+- **Valor ajustado à mão é mantido**: incluir outro serviço não recalcula mais os valores já editados nas outras linhas. Trocar o Cliente/Parceiro continua recalculando pela tabela da nova entidade, inclusive na edição de uma OS.
+- **Enter não salva a OS sem querer**: num campo do formulário, Enter avança para o próximo campo, como o Tab. Para salvar, use o botão Salvar.
+- Notebooks com tela sensível ao toque passam a usar a lista suspensa com teclado, em vez da janela de seleção feita para celular.
+- Mensagens padrão de validação em português.
+
 ## [0.27.0] - 2026-10-10 — Bloqueio por inadimplência e assinantes não pagantes
 
 ### Adicionado

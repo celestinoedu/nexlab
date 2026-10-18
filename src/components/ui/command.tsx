@@ -18,7 +18,7 @@ Command.displayName = CommandPrimitive.displayName
 function CommandInputWrapper({
   className,
   ...props
-}: React.ComponentPropsWithoutRef<typeof CommandPrimitive.Input>) {
+}: React.ComponentPropsWithRef<typeof CommandPrimitive.Input>) {
   return (
     <div className="flex items-center gap-2 border-b border-slate-100 px-3">
       <Search size={16} className="shrink-0 text-slate-400" />
