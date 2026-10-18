@@ -119,12 +119,24 @@ export interface ContaReceberComRelacoes extends ContaReceber {
   ordem: Pick<OrdemServico, 'id' | 'numero_os' | 'numero_os_cliente' | 'cliente_final' | 'nome_paciente' | 'data_entrega'>
 }
 
+export type TipoDespesa = 'fixa' | 'variavel'
+export type StatusDespesa = 'pago' | 'pendente'
+
+export const TIPO_DESPESA_LABEL: Record<TipoDespesa, string> = { fixa: 'Fixa', variavel: 'Variável' }
+export const STATUS_DESPESA_LABEL: Record<StatusDespesa, string> = { pago: 'Pago', pendente: 'Pendente' }
+
 export interface Despesa {
   id: string
+  /** Subcategoria livre (Material, Aluguel...). A categoria Fixa/Variável fica em `tipo`. */
   categoria: string | null
   descricao: string
   valor: number
+  /** Data de referência/vencimento — define o mês em que a despesa é controlada. */
   data_despesa: string
+  tipo: TipoDespesa
+  status: StatusDespesa
+  /** Dia do pagamento; vazio quando pendente e nas despesas anteriores à migration 0029. */
+  data_pagamento: string | null
   observacoes: string | null
   created_by: string | null
   created_at: string

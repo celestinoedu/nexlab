@@ -9,6 +9,7 @@ import { TotalInfo } from '@/components/shared/TotalInfo'
 import { useProfile } from '@/hooks/useProfile'
 import { useContasReceber } from '@/features/financeiro/hooks/useContasReceber'
 import { useDespesas } from '@/features/despesas/hooks/useDespesas'
+import { totalDespesasPagasNoMes } from '@/features/despesas/regras'
 import {
   useFechamentosFinanceiros,
   useFecharMesFinanceiro,
@@ -43,10 +44,7 @@ export function FechamentoFinanceiroPage() {
   )
 
   const totalDespesas = React.useMemo(
-    () =>
-      (despesas ?? [])
-        .filter((d) => d.data_despesa.startsWith(mesSelecionado))
-        .reduce((acc, d) => acc + d.valor, 0),
+    () => totalDespesasPagasNoMes(despesas ?? [], mesSelecionado),
     [despesas, mesSelecionado],
   )
 
@@ -99,7 +97,7 @@ export function FechamentoFinanceiroPage() {
       <p className="text-sm text-slate-500">
         Resultado do laboratório em{' '}
         <strong>{format(parseISO(`${mesSelecionado}-01`), "MMMM 'de' yyyy", { locale: ptBR })}</strong>: soma do
-        que foi efetivamente recebido (Contas a Receber pagas) menos as despesas lançadas no mês.
+        que foi efetivamente recebido (Contas a Receber pagas) menos as despesas pagas no mês.
       </p>
 
       {carregando ? (
@@ -123,8 +121,8 @@ export function FechamentoFinanceiroPage() {
             </div>
             <div className="rounded-xl border border-slate-200 bg-white p-4">
               <div className="flex items-center gap-1 text-xs font-medium text-slate-400">
-                <span>Despesas no mês</span>
-                <TotalInfo titulo="Despesas no mês">Soma as despesas pela data da despesa no mês selecionado. Quando o mês está fechado, mostra o valor gravado no fechamento até que seja reaberto.</TotalInfo>
+                <span>Despesas pagas no mês</span>
+                <TotalInfo titulo="Despesas pagas no mês">Soma as despesas com status Pago cuja data de pagamento pertence ao mês selecionado (despesas antigas, sem data de pagamento, usam a data da despesa). Despesas pendentes não entram. Quando o mês está fechado, mostra o valor gravado no fechamento até que seja reaberto.</TotalInfo>
               </div>
               <p className="text-2xl font-semibold text-danger-500">{formatarMoeda(despesasExibidas)}</p>
             </div>

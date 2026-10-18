@@ -4,6 +4,19 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), 
 
 ## [Não publicado]
 
+## [0.28.0] - Despesas por mês, categoria e status
+
+> Publicar somente depois de aplicar a migration `0029` no Supabase.
+
+### Adicionado
+- **Despesas controladas por mês**: a tela abre no mês atual, com navegação entre meses e totais do mês (Total, Pago e A pagar).
+- **Categoria Fixa ou Variável** em cada despesa. O campo livre anterior continua como "Subcategoria" (Material, Aluguel...).
+- **Status Pago ou Pendente**, com a data do pagamento e o botão "Pagar" direto na lista. Despesas já lançadas ficam como pagas (migration `0029`).
+- **Lançar despesas fixas do mês anterior** no mês atual, como pendentes, em um clique e sem duplicar.
+
+### Alterado
+- Fechamento Financeiro e Dashboard passam a considerar só as despesas **pagas**, pelo mês do pagamento. Despesas pendentes não contam como dinheiro que saiu.
+
 ## [0.27.3] - 2026-10-18 — Pagamento em lote seguro e testes automatizados
 
 ### Corrigido
