@@ -4,9 +4,7 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), 
 
 ## [Não publicado]
 
-## [0.28.0] - Despesas por mês, categoria e status
-
-> Publicar somente depois de aplicar a migration `0029` no Supabase.
+## [0.28.0] - 2026-10-18 — Despesas por mês, categoria e status
 
 ### Adicionado
 - **Despesas controladas por mês**: a tela abre no mês atual, com navegação entre meses e totais do mês (Total, Pago e A pagar).

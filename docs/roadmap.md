@@ -217,7 +217,14 @@ Motivado por relatos de tela em branco após login no Safari/iOS em alguns apare
 - [x] Preço do Parceiro vindo da tabela de preços; valores manuais preservados; Enter não salva a OS sem querer.
 - [x] Suíte E2E (Playwright) na conta demonstração cobrindo teclado, preços, salvamentos seguidos, edição e celular.
 - [x] Versionar a migration `0024` (cópia de preços restrita ao tenant).
-- [ ] Confirmar no Supabase que a `0024` está aplicada (rodar o arquivo no SQL Editor é seguro: só recria a função).
+- [x] Aplicar no Supabase as migrations `0024`, `0028`, `0029` e `0030` (2026-10-18; conferência com `supabase/diagnostico_migrations.sql`).
+
+## Despesas por mês ✅ concluída em 2026-10-18 (v0.28.0)
+
+- [x] Categoria Fixa/Variável, status Pago/Pendente e data de pagamento (migration `0029`).
+- [x] Tela por mês com totais Total/Pago/A pagar, filtros, botão Pagar e lançamento das fixas do mês anterior.
+- [x] Fechamento Financeiro e Dashboard somando só despesas pagas, pelo mês do pagamento.
+- [ ] Vencimento separado da data de competência (achado F08 completo).
 
 ## Ideias para avaliar depois (fora do escopo atual, não implementar sem pedir)
 

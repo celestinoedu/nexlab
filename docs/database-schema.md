@@ -1,6 +1,6 @@
 # NexLab — Schema do banco de dados
 
-> Espelha `supabase/migrations/0001_init.sql` a `0027_bloqueio_inadimplencia.sql`. Se o schema mudar, atualize a migration nova + este arquivo no mesmo commit — nunca deixe este documento desatualizado em relação às migrations reais.
+> Espelha `supabase/migrations/0001_init.sql` a `0030_rls_desempenho.sql`. Se o schema mudar, atualize a migration nova + este arquivo no mesmo commit — nunca deixe este documento desatualizado em relação às migrations reais.
 
 ## Multi-tenant
 
@@ -171,7 +171,7 @@ Snapshot de Contas a Receber **por entidade × mês** — **trava o valor** do p
 ### `notas_servico`
 "Nota de Serviço" estilo cupom, **sem valor fiscal**, emitida a partir de uma OS entregue.
 
-`numero` (único, formato `prefixo + sequencial` a partir de `empresa_config`), `ordem_id` FK (era `demanda_id`), `entidade_id` FK, `valor_total`, `data_emissao`, `created_by`.
+`numero` (único **por empresa** desde a migration `0028`, formato `prefixo + sequencial` a partir de `empresa_config`), `ordem_id` FK (era `demanda_id`), `entidade_id` FK, `valor_total`, `data_emissao`, `created_by`.
 
 ### `contas_receber` (nova na migration `0003`)
 **Uma linha por OS entregue** — substitui a antiga `vw_contas_receber` (agregado por entidade×mês): virou tabela real porque precisa suportar marcar como paga e "excluir" (soft-delete com justificativa). Desde a migration `0017`, triggers no cabeçalho e nos itens da OS mantêm valor, entidade e mês sincronizados, inclusive para OS criada diretamente como entregue; o estado de baixa e os dados de pagamento existentes são preservados. A tela abre filtrada por contas `aberto`; esse saldo também aparece no Dashboard. O card de total da Lista de OS é uma soma operacional separada das OS filtradas.
@@ -188,12 +188,16 @@ Snapshot de Contas a Receber **por entidade × mês** — **trava o valor** do p
 | `justificativa_cancelamento` | text | **obrigatória** quando `status = cancelado` (validada na aplicação) — "exclusão" nunca é silenciosa |
 | `created_at`, `updated_at` | timestamptz | |
 
-**Criada automaticamente**: trigger `trg_os_criar_conta_receber` (função `security definer`) dispara quando `ordens_servico.status` vira `entregue` e insere a linha (`on conflict (ordem_id) do nothing` — não duplica se a OS sair e voltar para "entregue"). O valor **não** é recalculado automaticamente se a OS for editada depois — mesma filosofia de "trava o valor" já usada em `fechamentos`.
+**Sincronização desde a migration `0028`** (`sincronizar_conta_receber_ordem`, só chamável pelos triggers, sem `EXECUTE` para `anon`/`authenticated`): só contas `aberto` acompanham a OS; conta `pago` preserva o valor recebido e conta cancelada pelo usuário não é reaberta. Se a OS sai de `entregue` (volta à produção ou é cancelada), a conta aberta vira `cancelado` com a justificativa automática *"Suspensa automaticamente: a OS saiu do status Entregue."* e é reaberta, com valor atualizado, se a OS for entregue de novo.
+
+**Histórico**: trigger `trg_os_criar_conta_receber` (função `security definer`) dispara quando `ordens_servico.status` vira `entregue` e insere a linha (`on conflict (ordem_id) do nothing` — não duplica se a OS sair e voltar para "entregue"). O valor **não** é recalculado automaticamente se a OS for editada depois — mesma filosofia de "trava o valor" já usada em `fechamentos`.
 
 ### `despesas` (nova na migration `0003`)
 Cadastro simples de saídas de caixa do laboratório.
 
-`categoria` (text, livre — mesmo padrão de `servicos.categoria`), `descricao` (obrigatória), `valor`, `data_despesa` (default hoje), `observacoes`, `created_by`.
+`categoria` (text, livre — exibida como **Subcategoria**), `descricao` (obrigatória), `valor`, `data_despesa` (default hoje; data/vencimento, define o mês em que a despesa é controlada), `observacoes`, `created_by`.
+
+Desde a migration `0029`: `tipo` (`'fixa'` | `'variavel'`, default `'variavel'` — exibido como **Categoria**), `status` (`'pago'` | `'pendente'`, default `'pago'`) e `data_pagamento` (vazia quando pendente; check `status = 'pago' or data_pagamento is null`). Despesas anteriores à 0029 ficaram pagas, sem data de pagamento (usam `data_despesa`). Índice `(empresa_id, data_despesa)`.
 
 ### `insumos` (nova na migration `0012`)
 Cadastro simples de Estoque do laboratório — sem controle de movimentação (entrada/saída), só a foto atual.
@@ -221,9 +225,9 @@ Estados: `draft` → `scheduled` → `publishing` → `published`; após três e
 RLS fica habilitada e não existe policy para `anon` ou `authenticated`. Somente a `service_role` da Edge Function pode ler ou alterar esta tabela. O token do Instagram nunca é gravado no banco.
 
 ### `fechamentos_financeiros` (nova na migration `0003`)
-Snapshot do **resultado do laboratório inteiro** por mês (não por entidade): `total_receitas` (soma de `contas_receber.valor` com `status = pago` no mês, por `data_pagamento`) menos `total_despesas` (soma de `despesas.valor` no mês, por `data_despesa`).
+Snapshot do **resultado do laboratório inteiro** por mês (não por entidade): `total_receitas` (soma de `contas_receber.valor` com `status = pago` no mês, por `data_pagamento`) menos `total_despesas` (soma das despesas **pagas** no mês, por `coalesce(data_pagamento, data_despesa)` — regra em `src/features/despesas/regras.ts`, desde a v0.28.0).
 
-`mes_referencia` (`unique`), `total_receitas`, `total_despesas`, `resultado`, `status` (`status_fechamento_periodo`), `data_fechamento`, `observacoes`, `created_by`. Antes de "fechar o mês", a tela calcula os totais ao vivo; depois de fechado, mostra o snapshot travado. Um administrador pode reabrir o período (`status = aberto`) para retomar o cálculo ao vivo e fechá-lo novamente.
+`mes_referencia` (único **por empresa** — `unique (empresa_id, mes_referencia)` desde a migration `0028`; antes era global e impedia dois laboratórios de fechar o mesmo mês), `total_receitas`, `total_despesas`, `resultado`, `status` (`status_fechamento_periodo`), `data_fechamento`, `observacoes`, `created_by`. Antes de "fechar o mês", a tela calcula os totais ao vivo; depois de fechado, mostra o snapshot travado. Um administrador pode reabrir o período (`status = aberto`) para retomar o cálculo ao vivo e fechá-lo novamente.
 
 ### `assinaturas` e `platform_admins` (novas na migration `0025`)
 
@@ -256,6 +260,7 @@ Uma linha por item de OS entregue, com todas as colunas necessárias para reprod
 
 Cenário desde a migration `0010`: **vários** laboratórios (tenants) no mesmo banco, cada um com poucos usuários internos, sem acesso público/anônimo a dado de negócio, e **sem acesso de um tenant ao dado de outro em nenhuma hipótese**.
 
+- Desde a migration `0030`, as policies chamam essas funções envolvidas em `(select ...)` — avaliadas uma vez por consulta, não por linha. **Policy nova deve seguir o mesmo padrão**: `(select is_active_user())`, `(select current_empresa_id())`, `(select auth.uid())`.
 - Três funções `security definer`: `is_active_user()` (existe em `profiles`, `ativo = true`), `is_admin_user()` (idem + `role = 'admin'`) e `current_empresa_id()` (devolve o `empresa_id` de `profiles` do usuário logado). Usadas em todas as policies — evita repetir a subquery e evita recursão de RLS (a função roda com privilégio do dono, ignorando RLS de `profiles` na sua própria checagem).
 - **Toda policy de toda tabela de negócio** (além da checagem de papel que já existia) agora também exige `empresa_id = current_empresa_id()` — um usuário nunca enxerga nem altera linha de outra empresa, mesmo sendo `admin`.
 - **Leitura**: todo usuário ativo lê tudo da própria empresa (`entidades`, `servicos`, `ordens_servico`, `ordem_servico_itens`, `tabela_precos`, `fechamentos`, `notas_servico`, `contas_receber`, `despesas`, `insumos`, `fechamentos_financeiros`, `empresas`).
