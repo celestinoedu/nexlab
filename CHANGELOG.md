@@ -4,6 +4,9 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), 
 
 ## [Não publicado]
 
+### Segurança
+- **Cópia de preços restrita à empresa** (migration `0024`): ao cadastrar um Cliente, a tabela de preços passa a copiar só os serviços do catálogo da própria empresa. Antes, a função do trigger (`security definer`) ignorava a RLS e inseria linhas apontando para serviços de outros laboratórios.
+
 ## [0.27.1] - 2026-10-18 — Cadastro de serviços na OS
 
 ### Corrigido

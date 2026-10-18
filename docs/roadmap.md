@@ -175,6 +175,17 @@ Motivado por relatos de tela em branco após login no Safari/iOS em alguns apare
 - [x] Tornar “Meu perfil” funcional, com edição segura do nome, consulta do acesso e atalho para alterar a senha.
 - [x] Evoluir “Meu Perfil” para uma página completa, exigir CPF/CNPJ por usuário e preparar plano, status da assinatura, faturas e notas fiscais.
 
+## Revisão de coerência financeira e estoque — diagnóstico em 2026-09-18
+
+- [x] Conferir a versão publicada v0.23.0 (commit `99c928f`) pelo deploy e pelo aplicativo em demonstração.
+- [x] Registrar [20 achados, regras propostas e critérios de aceite](./auditoria-logica-v0.23.0.md), preservando o formato dos cadastros atuais.
+- [x] Reproduzir na demonstração a cobrança que permanece após a OS voltar para produção e o erro ao limpar o mês do fechamento.
+- [x] Reprecificar os itens ao trocar o Cliente/Parceiro e preservar valores ajustados à mão (F17, v0.27.1).
+- [ ] Corrigir transações, sincronização, preservação de recebimentos e fechamento por empresa/mês.
+- [ ] Adicionar competência, vencimento e pagamento às despesas com tratamento explícito do histórico incompleto.
+- [ ] Implementar período e mini extrato no Dashboard e fechamento gerencial por competência.
+- [ ] Integrar baixa opcional de estoque por item de OS, com movimentos, concorrência e devolução/perda.
+
 ## Painel administrativo de assinaturas ✅ concluída em 2026-10-10 (v0.25.0)
 
 - [x] Substituir a primeira versão do painel (CRM, SMTP, MFA, cron — nunca aplicada em produção; arquivada fora do repositório) por uma versão enxuta só com SQL + RLS.
@@ -198,6 +209,15 @@ Motivado por relatos de tela em branco após login no Safari/iOS em alguns apare
 - [x] Tipo de assinatura pagante / não pagante, com motivo interno só no painel.
 - [x] Mercado Pago em nova aba, com confirmação automática no NexLab.
 - [ ] Rodar a migration `0027` no Supabase.
+
+## Cadastro de serviços na OS ✅ concluída em 2026-10-18 (v0.27.1)
+
+- [x] Eliminar linhas ocultas sem serviço ao abrir uma Nova OS depois de outra (causa das linhas duplicadas e do erro "Invalid input" ao salvar).
+- [x] "Adicionar serviço" cria uma única linha e foca a lista de serviços; Tab e digitação funcionam nas listas pesquisáveis.
+- [x] Preço do Parceiro vindo da tabela de preços; valores manuais preservados; Enter não salva a OS sem querer.
+- [x] Suíte E2E (Playwright) na conta demonstração cobrindo teclado, preços, salvamentos seguidos, edição e celular.
+- [x] Versionar a migration `0024` (cópia de preços restrita ao tenant).
+- [ ] Confirmar no Supabase que a `0024` está aplicada (rodar o arquivo no SQL Editor é seguro: só recria a função).
 
 ## Ideias para avaliar depois (fora do escopo atual, não implementar sem pedir)
 
