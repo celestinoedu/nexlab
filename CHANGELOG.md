@@ -4,7 +4,15 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), 
 
 ## [Não publicado]
 
+### Corrigido
+- **Fechamento Financeiro de vários laboratórios no mesmo mês**: o banco aceitava um único fechamento por mês para todo o sistema — o primeiro laboratório a fechar um mês impedia os demais. Passa a ser um fechamento por empresa e mês (migration `0028`).
+- **Recebimento preservado**: editar uma OS cuja conta já foi paga não altera mais o valor recebido. Cobrança aberta de uma OS que volta para produção ou é cancelada fica suspensa e é reaberta se a OS for entregue de novo (migration `0028`).
+- **Fechamento com falha de leitura**: se contas, despesas ou fechamentos não carregarem, a tela avisa e não permite fechar o mês com valores zerados.
+- **Limpar o mês no Fechamento** não derruba mais a tela.
+
 ### Segurança
+- A função interna de sincronização de Contas a Receber deixa de ser chamável pela API (migration `0028`): antes, quem tivesse o identificador de uma OS podia recalcular a cobrança de outro laboratório.
+- Número da Nota de Serviço passa a ser único por empresa, não no sistema inteiro (migration `0028`).
 - **Cópia de preços restrita à empresa** (migration `0024`): ao cadastrar um Cliente, a tabela de preços passa a copiar só os serviços do catálogo da própria empresa. Antes, a função do trigger (`security definer`) ignorava a RLS e inseria linhas apontando para serviços de outros laboratórios.
 
 ## [0.27.1] - 2026-10-18 — Cadastro de serviços na OS

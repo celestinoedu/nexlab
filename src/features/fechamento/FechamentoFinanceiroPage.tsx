@@ -21,9 +21,11 @@ function formatarMoeda(valor: number) {
 
 export function FechamentoFinanceiroPage() {
   const [mesSelecionado, setMesSelecionado] = React.useState(format(new Date(), 'yyyy-MM'))
-  const { data: contas, isLoading: carregandoContas } = useContasReceber()
-  const { data: despesas, isLoading: carregandoDespesas } = useDespesas()
-  const { data: fechamentos, isLoading: carregandoFechamentos } = useFechamentosFinanceiros()
+  const { data: contas, isLoading: carregandoContas, isError: erroContas } = useContasReceber()
+  const { data: despesas, isLoading: carregandoDespesas, isError: erroDespesas } = useDespesas()
+  const { data: fechamentos, isLoading: carregandoFechamentos, isError: erroFechamentos } = useFechamentosFinanceiros()
+  // Uma leitura com falha não pode virar "zero" nem ser gravada como fechamento.
+  const erroLeitura = erroContas || erroDespesas || erroFechamentos
   const { data: profile } = useProfile()
   const fecharMes = useFecharMesFinanceiro()
   const reabrirMes = useReabrirMesFinanceiro()
@@ -85,7 +87,9 @@ export function FechamentoFinanceiroPage() {
           <input
             type="month"
             value={mesSelecionado}
-            onChange={(e) => setMesSelecionado(e.target.value)}
+            // Limpar o campo deixava o mês vazio e derrubava a tela com data inválida.
+            onChange={(e) => e.target.value && setMesSelecionado(e.target.value)}
+            aria-label="Mês do fechamento"
             className="h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40"
           />
           {jaFechado && <Badge variant="neutral">Fechado</Badge>}
@@ -101,6 +105,11 @@ export function FechamentoFinanceiroPage() {
       {carregando ? (
         <div className="flex justify-center py-16">
           <Loader2 className="animate-spin text-brand-600" size={28} />
+        </div>
+      ) : erroLeitura ? (
+        <div role="alert" className="rounded-xl border border-danger-100 bg-danger-100 p-6 text-sm text-danger-700">
+          Não foi possível carregar todos os dados financeiros deste mês. Para evitar um fechamento com valores
+          incompletos, tente novamente em alguns instantes.
         </div>
       ) : (
         <>

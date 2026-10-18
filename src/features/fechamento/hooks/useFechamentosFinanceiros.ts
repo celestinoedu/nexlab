@@ -55,8 +55,26 @@ export function useFecharMesFinanceiro() {
         return
       }
 
-      const { error } = await supabase.from('fechamentos_financeiros').upsert(fechamento, { onConflict: 'mes_referencia' })
-      if (error) throw new Error('Não foi possível fechar o mês agora. Tente novamente.')
+      // Atualiza o fechamento do mês da própria empresa (a RLS só devolve os
+      // dela) ou cria um novo. Não depende de qual restrição de unicidade o
+      // banco tem — antes da migration 0028 ela era global por mês.
+      const { data: existente, error: erroBusca } = await supabase
+        .from('fechamentos_financeiros')
+        .select('id')
+        .eq('mes_referencia', mesReferencia)
+        .maybeSingle()
+      if (erroBusca) throw new Error('Não foi possível fechar o mês agora. Tente novamente.')
+
+      const { error } = existente
+        ? await supabase.from('fechamentos_financeiros').update(fechamento).eq('id', existente.id)
+        : await supabase.from('fechamentos_financeiros').insert(fechamento)
+      if (error) {
+        throw new Error(
+          error.code === '23505'
+            ? 'Este mês não pôde ser fechado por uma restrição do banco. Peça à Lotus para aplicar a atualização 0028.'
+            : 'Não foi possível fechar o mês agora. Tente novamente.',
+        )
+      }
     },
     onSuccess: () => {
       invalidarSeReal(queryClient, ['fechamentos_financeiros'])
