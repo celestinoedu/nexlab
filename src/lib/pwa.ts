@@ -19,6 +19,19 @@ export function registrarAtualizacaoPwa() {
         },
       })
     },
+    // O navegador só procura um service worker novo ao carregar a página.
+    // Quem deixa o NexLab aberto (ou instalado) o dia todo nunca veria o aviso
+    // de versão nova; por isso verifica a cada 30 min e ao voltar para a aba.
+    onRegisteredSW(_url, registro) {
+      if (!registro) return
+      const verificar = () => {
+        if (navigator.onLine) registro.update().catch(() => {})
+      }
+      setInterval(verificar, 30 * 60 * 1000)
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') verificar()
+      })
+    },
     onRegisterError(erro) {
       console.error('[PWA] falha ao registrar o service worker:', erro)
     },
