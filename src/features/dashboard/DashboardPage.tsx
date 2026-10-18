@@ -17,6 +17,7 @@ import { useContasReceber } from '@/features/financeiro/hooks/useContasReceber'
 import { useDespesas } from '@/features/despesas/hooks/useDespesas'
 import { useEntidades } from '@/hooks/useEntidades'
 import { useInsumos } from '@/features/estoque/hooks/useInsumos'
+import { totalDespesasPagasNoMes } from '@/features/despesas/regras'
 import { STATUS_OS_LABEL, valorTotalFaturavelOrdens, type OrdemServicoComRelacoes } from '@/types/domain'
 import { TotalInfo, REGRA_VALOR_OS, REGRA_MES_OS } from '@/components/shared/TotalInfo'
 
@@ -80,9 +81,7 @@ export function DashboardPage() {
     const recebidoMes = listaContas
       .filter((c) => c.status === 'pago' && c.data_pagamento && c.data_pagamento.startsWith(mesAtual.slice(0, 7)))
       .reduce((acc, c) => acc + c.valor, 0)
-    const despesasMes = (despesas ?? [])
-      .filter((d) => d.data_despesa.startsWith(mesAtual.slice(0, 7)))
-      .reduce((acc, d) => acc + d.valor, 0)
+    const despesasMes = totalDespesasPagasNoMes(despesas ?? [], mesAtual.slice(0, 7))
 
     const listaInsumos = insumos ?? []
     const sinalizados = listaInsumos.filter((i) => i.sinalizar_compra)
@@ -211,7 +210,7 @@ export function DashboardPage() {
               <ValorFinanceiro label="Receita bruta no mês" valor={dados.receitaBrutaMes} tom="success" info={`Total operacional das OS do mês corrente, incluindo não entregues, pagas e pendentes. Apesar do nome “bruta”, já desconta os descontos das OS. ${REGRA_VALOR_OS} ${REGRA_MES_OS}`} />
               <ValorFinanceiro label="A receber" valor={dados.aReceber} tom="brand" info="Soma as contas em aberto de todos os meses, geradas pelas OS entregues. Exclui contas pagas e canceladas. Corresponde a Contas a Receber em Aberto, sem outros filtros." />
               <ValorFinanceiro label="Recebido no mês" valor={dados.recebidoMes} tom="success" info="Soma as contas pagas pela data de pagamento no mês corrente, independentemente do mês da OS. Exclui abertas e canceladas. Usa os valores atuais, mesmo se houver fechamento gravado." />
-              <ValorFinanceiro label="Despesas no mês" valor={dados.despesasMes} tom="danger" info="Soma todas as despesas cuja data da despesa pertence ao mês corrente. Usa os valores atuais, mesmo se houver fechamento gravado." />
+              <ValorFinanceiro label="Despesas pagas no mês" valor={dados.despesasMes} tom="danger" info="Soma as despesas pagas cuja data de pagamento pertence ao mês corrente (mesma regra do Fechamento Financeiro). Despesas pendentes não entram. Usa os valores atuais, mesmo se houver fechamento gravado." />
             </div>
           </CardContent>
         </Card>
